@@ -1,0 +1,8 @@
+.vscode
+.DS_Store
+yarn-error.log
+*lock*
+
+*/node_modules
+# /node_modules
+# *node_modules*
