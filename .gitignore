@@ -1,7 +1,9 @@
 .vscode
 .DS_Store
 yarn-error.log
-*lock*
+# *lock*
+
+package-lock.json
 
 *spec.ts
 
