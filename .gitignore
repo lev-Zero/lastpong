@@ -3,6 +3,10 @@
 yarn-error.log
 *lock*
 
+*spec.ts
+
 */node_modules
 # /node_modules
 # *node_modules*
+
+*test
