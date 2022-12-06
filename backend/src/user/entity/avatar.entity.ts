@@ -1,18 +1,19 @@
-// import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-// import { User } from "./user.entity";
+import {
+	Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from './user.entity';
 
-// @Entity()
-// export class Avatar{
-//     @PrimaryGeneratedColumn()
-//     id:number;
-    
-//     @Column({nullable:true})
-//     filename:string;
+@Entity()
+export class Avatar {
+	@PrimaryGeneratedColumn()
+	id: number;
 
-//     @Column({type: 'bytea', nullable:true})
-//     photoData:Buffer;
+	@Column({nullable:true})
+	filename: string;
 
-//     @OneToOne(()=>User, (user)=>user.avatar)
-//     user:User
-    
-// }
+	@Column({ type: 'bytea', nullable:true })
+	photoData: Buffer;
+
+	@OneToOne(() => User,(user)=>user.avatar, { onDelete: 'CASCADE' })
+	user: User;
+}

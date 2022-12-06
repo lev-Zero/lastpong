@@ -1,45 +1,77 @@
-// import { JoinUser } from "src/chat/entity/joinUser.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { userStatus } from "../enum/user.enum";
-// import { Avatar } from "./avatar.entity";
-// import { Block } from "./block.entity";
-// import { Friend } from "./friend.entity";
+import {
+	Column,
+	Entity,
+	OneToOne,
+	OneToMany,
+	PrimaryGeneratedColumn,
+	JoinColumn,
+} from 'typeorm';
+import { Avatar } from './avatar.entity';
+import { userStatus } from '../enum/status.enum';
+import { Match } from './match.entity';
+import { Auth42 } from '../../auth/entity/auth42.entity';
+import { Friend } from './friend.entity';
+import { Block } from './block.entity';
+// import { AdminUser } from 'src/chat/entity/AdminUser.entity';
+// import { JoinedUser } from 'src/chat/entity/JoinedUser.entity';
+// import { MutedUser } from 'src/chat/entity/MutedUser.entity';
+// import { BannedUser } from 'src/chat/entity/BannedUser.entity';
+// import { ChatLog } from 'src/chat/entity/chatLog.entity';
 
 @Entity()
-export class User{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class User {
+	@PrimaryGeneratedColumn()
+	id: number;
 
-    @Column({unique:true, nullable:true})
-    username: string;
+	@OneToOne(() => Auth42, (auth42) => auth42.user)
+	@JoinColumn()
+	auth42: Auth42;
 
-    @Column({default:100})
-    rank: number;
+	@OneToOne(() => Avatar, (avatar) => avatar.user)
+	@JoinColumn()
+	avatar: Avatar;
 
-    @Column({default:userStatus.OFFLINE})
-    status:userStatus;
+	@Column({ unique: true, nullable: true })
+	username: string;
 
-    @Column({default:null})
-    token: string;
+	@Column({ default: 100 })
+	rank: number;
 
-    // @OneToOne(()=>Avatar, (avatar)=> avatar.user)
-    // @JoinColumn()
-    // avatar:Avatar;
+	@OneToMany(() => Friend, (friend) => friend.friendOfferUser)
+	friendOfferUser: Friend;
+	@OneToMany(() => Friend, (friend) => friend.friend)
+	friend: Friend;
 
-    // @OneToMany(()=>Block, (block)=>block.blockOfferUser)
-    // blockOfferUser:Block;
-    // @OneToMany(()=>Block, (block)=>block.blockedUser)
-    // blockedUser:Block;
+	@OneToMany(() => Block, (block) => block.blockOfferUser)
+	blockOfferUser: Block;
+	@OneToMany(() => Block, (block) => block.blockedUser)
+	block: Block;
 
-    // @OneToMany(()=>Friend, (friend)=>friend.friendOfferUser)
-    // friendOfferUser:Friend;
-    // @OneToMany(()=>Friend, (friend)=>friend.friend)
-    // friend:Friend;
+	@Column({ default: userStatus.OFFLINE })
+	status: userStatus;
 
-    
-    // @ManyToOne(()=>JoinUser, (joinUser)=>joinUser.user)   
-    // joinUser:JoinUser;
+	@OneToMany(() => Match, (match) => match.winner)
+	winner: Match;
 
+	@OneToMany(() => Match, (match) => match.loser)
+	loser: Match;
+
+	@Column({ default: null })
+	token: string;
+
+	// @OneToMany(() => AdminUser, (adminuser) => adminuser.user)
+	// adminUser: AdminUser;
+
+	// @OneToMany(() => JoinedUser, (joinedUser) => joinedUser.user)
+	// joinedUser: JoinedUser;
+
+	// @OneToMany(() => MutedUser, (mutedUser) => mutedUser.user)
+	// mutedUser: MutedUser;
+
+	// @OneToMany(() => BannedUser, (bannedUser) => bannedUser.user)
+	// bannedUser: AdminUser;
+
+	// @OneToMany(() => ChatLog, (chatLog) => chatLog.user)
+	// chatLog: AdminUser;
 
 }
-
