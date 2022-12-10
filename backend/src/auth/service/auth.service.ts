@@ -7,6 +7,7 @@ import { UserService } from 'src/user/service/user.service';
 import { JwtService } from '@nestjs/jwt';
 // import { Socket } from 'socket.io';
 import { Auth42 } from '../entity/auth42.entity';
+import { Socket } from 'socket.io';
 
 
 
@@ -47,26 +48,33 @@ export class AuthService {
 
 
 
-// // /*----------------------------------
-// // |								socket						|
-// // ----------------------------------*/
+	// /*----------------------------------
+	// |								socket						|
+	// ----------------------------------*/
 
-// 	// postman socket요청시 Header에 authorization:'token' 담아서 보내면됌. {{token}}
-// 	async findUserByRequestToken(socket: Socket): Promise<User> {
-// 		console.log("[auth service] getuserfromsocket")
-// 		const authorization = socket.handshake.headers.authorization;
+	// postman socket요청시 Header에 authorization:'token' 담아서 보내면됌. {{token}}
+	async findUserByRequestToken(socket: Socket): Promise<User> {
 
-// 		const token = authorization && authorization.split(' ')[0];
+		try { 
+			const authorization = socket.handshake.headers.authorization;
+			// console.log({authorization})
 
-// 		if (!token) return null;
-// 		const payload = this.verifyJWT(token);
-// 		if (!payload) return null;
-// 		if (payload.auth42Status == false || payload.otpStatus == false) return null;
+			const token = authorization && authorization.split(' ')[0];
 
-// 		const user = await this.userService.findUserById(payload.id).catch(() => null);
-// 		if (!user) return null;
-// 		return user;
-// 	}
+			if (!token) throw new HttpException("TOKEN X", HttpStatus.BAD_REQUEST);
+			const payload = this.verifyJWT(token);
+			if (!payload) return null;
+			if (payload.auth42Status == false || payload.otpStatus == false) return null;
+
+			const user = await this.userService.findUserById(payload.id).catch(() => null);
+			if (!user) return null;
+			return user;
+
+		}	catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+
+		}
+	}
 
 
 

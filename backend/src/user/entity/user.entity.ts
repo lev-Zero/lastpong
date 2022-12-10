@@ -12,11 +12,10 @@ import { Match } from './match.entity';
 import { Auth42 } from '../../auth/entity/auth42.entity';
 import { Friend } from './friend.entity';
 import { Block } from './block.entity';
-// import { AdminUser } from 'src/chat/entity/AdminUser.entity';
-// import { JoinedUser } from 'src/chat/entity/JoinedUser.entity';
-// import { MutedUser } from 'src/chat/entity/MutedUser.entity';
-// import { BannedUser } from 'src/chat/entity/BannedUser.entity';
-// import { ChatLog } from 'src/chat/entity/chatLog.entity';
+import { AdminUser } from 'src/chat/entity/AdminUser.entity';
+import { JoinedUser } from 'src/chat/entity/JoinedUser.entity';
+import { MutedUser } from 'src/chat/entity/MutedUser.entity';
+import { BannedUser } from 'src/chat/entity/BannedUser.entity';
 
 @Entity()
 export class User {
@@ -43,7 +42,7 @@ export class User {
 	friend: Friend;
 
 	@OneToMany(() => Block, (block) => block.blockOfferUser)
-	blockOfferUser: Block;
+	blockOfferUser: Block[];
 	@OneToMany(() => Block, (block) => block.blockedUser)
 	block: Block;
 
@@ -59,19 +58,17 @@ export class User {
 	@Column({ default: null })
 	token: string;
 
-	// @OneToMany(() => AdminUser, (adminuser) => adminuser.user)
-	// adminUser: AdminUser;
+	@OneToMany(() => AdminUser, (adminuser) => adminuser.user)
+	adminUser: AdminUser;
 
-	// @OneToMany(() => JoinedUser, (joinedUser) => joinedUser.user)
-	// joinedUser: JoinedUser;
+	@OneToMany(() => JoinedUser, (joinedUser) => joinedUser.user)
+	joinedUser: JoinedUser;
 
-	// @OneToMany(() => MutedUser, (mutedUser) => mutedUser.user)
-	// mutedUser: MutedUser;
+	@OneToMany(() => MutedUser, (mutedUser) => mutedUser.user)
+	mutedUser: MutedUser;
 
-	// @OneToMany(() => BannedUser, (bannedUser) => bannedUser.user)
-	// bannedUser: AdminUser;
+	@OneToMany(() => BannedUser, (bannedUser) => bannedUser.user)
+	bannedUser: AdminUser;
 
-	// @OneToMany(() => ChatLog, (chatLog) => chatLog.user)
-	// chatLog: AdminUser;
 
 }
