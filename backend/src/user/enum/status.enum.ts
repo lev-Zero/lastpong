@@ -8,6 +8,6 @@ export enum userStatus {
 
 export enum chatRoomStatus{
 	PUBLIC,
-	PROTECT,
+	PROTECTED,
 	PRIVATE
 }
