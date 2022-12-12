@@ -58,6 +58,7 @@ export class AuthService {
 		try { 
 			const authorization = socket.handshake.headers.authorization;
 			// console.log({authorization})
+			
 
 			const token = authorization && authorization.split(' ')[0];
 

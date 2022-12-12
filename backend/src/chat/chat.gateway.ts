@@ -10,7 +10,7 @@ import { ChatRoomDmDto, ChatRoomDmMessageDto, ChatRoomDmUserIdDto, ChatRoomDto, 
 let socket_username = {};
 
 // ws://localhost:3000/chat
-@WebSocketGateway({ namespace: 'chat' })
+@WebSocketGateway({ namespace: 'chat', cors:true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly authService: AuthService,
