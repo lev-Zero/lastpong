@@ -5,6 +5,7 @@ import { User } from '../entity/user.entity';
 
 import { userStatus } from '../enum/status.enum';
 import { user42Dto } from 'src/auth/dto/auth.dto';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
@@ -12,8 +13,50 @@ export class UserService {
 	constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
+		private jwtService: JwtService
 
 	) { }
+
+
+	/*----------------------------------
+	|								TEST 							 |
+	----------------------------------*/
+
+	async testCreateFakeUser(username: string): Promise<User> {
+
+		const user = await this.userRepository.create({ username })
+		await this.userRepository.save(user);
+
+		const auth42Status = true;
+		const otpStatus = true;
+		const payload = { id: user.id, username: user.username, auth42Status, otpStatus };
+
+		const token = await this.jwtService.sign(payload);
+		this.updateUserToken(user.id, token);
+		return user;
+	}
+
+	async testFindUser(username: string): Promise<User> {
+		const user = this.userRepository.findOne({ where: { username } })
+
+		return user;
+	}
+
+	async testDeleteFakeUser(username: string) {
+
+		try {
+			this.userRepository
+				.createQueryBuilder('user')
+				.delete()
+				.from(User)
+				.where("username = :username", { username: username })
+				.execute()
+		} catch (error) {
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+
+		}
+
+	}
 
 	/*----------------------------------
 	|								user 							 |
