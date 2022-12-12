@@ -28,6 +28,31 @@ export class UserController {
 		private matchService: MatchService,
 	) { }
 
+	/*----------------------------------
+	|								TEST 							 |
+	----------------------------------*/
+
+	//http://localhost:3000/user/test/create/fakeuser
+	@Get('/test/create/fakeuser')
+	testCreateUser() {
+		console.log("[userController] testCreateUser")
+		this.testDeleteUser();
+		this.userService.testCreateFakeUser("fake_U1")
+		this.userService.testCreateFakeUser("fake_U2")
+		this.userService.testCreateFakeUser("fake_U3")
+		this.userService.testCreateFakeUser("fake_U4")
+	}
+
+	//http://localhost:3000/user/test/delete/fakeuser
+	@Get('/test/delete/fakeuser')
+	testDeleteUser() {
+		console.log("[userController] testDeleteUser")
+		this.userService.testDeleteFakeUser("fake_U1")
+		this.userService.testDeleteFakeUser("fake_U2")
+		this.userService.testDeleteFakeUser("fake_U3")
+		this.userService.testDeleteFakeUser("fake_U4")
+		this.userService.testDeleteFakeUser("fake_U5")
+	}
 
 	/*----------------------------------
 	|								user 							 |
