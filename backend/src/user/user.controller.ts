@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, Res
 import { Response } from 'express';
 import { Match } from './entity/match.entity';
 import { User } from './entity/user.entity';
-import { AvatarService } from './service/avatar.service';
+import { ProfileService } from './service/profile.service';
 import { UserService } from './service/user.service';
 
 import { Request } from './interface/user.interface';
@@ -16,13 +16,13 @@ import { MatchService } from './service/match.service';
 import { Friend } from './entity/friend.entity';
 import { Block } from './entity/block.entity';
 import { UserMatchDto, UserNameDto } from './dto/user.dto';
-import { Avatar } from './entity/avatar.entity';
+import { Profile } from './entity/profile.entity';
 
 @Controller('user')
 export class UserController {
 	constructor(
 		private userService: UserService,
-		private avatarService: AvatarService,
+		private profileService: ProfileService,
 		private blockService: BlockService,
 		private friendService: FriendService,
 		private matchService: MatchService,
@@ -93,54 +93,54 @@ export class UserController {
 
 
 	/*----------------------------------
-	|								avatar							 |
+	|								profile							 |
 	----------------------------------*/
 
-	@Get('/avatar/id/:userId')
-	async findAvatarById(
+	@Get('/profile/id/:userId')
+	async findProfileById(
 		@Param('userId', ParseIntPipe) userId: number,
 		@Res({ passthrough: true }) res: Response,
 	) {
-		const avatar = await this.avatarService.findAvatarById(userId);
-		const data = avatar.photoData.toString('base64');
+		const profile = await this.profileService.findProfileById(userId);
+		const data = profile.photoData.toString('base64');
 		const mimeType = 'image/*';
 		return `<img src="data:${mimeType};base64,${data}" />`
 	}
 
-	@Get('/avatar/name/:name')
-	async findAvatarByName(
+	@Get('/profile/name/:name')
+	async findProfileByName(
 		@Param('name') name: string,
 		@Res({ passthrough: true }) res: Response,
 	) {
-		const avatar = await this.avatarService.findAvatarByName(name);
-		const data = avatar.photoData.toString('base64');
+		const profile = await this.profileService.findProfileByName(name);
+		const data = profile.photoData.toString('base64');
 		const mimeType = 'image/*';
 		return `<img src="data:${mimeType};base64,${data}" />`
 	}
 
-	@Get('/avatar/me')
+	@Get('/profile/me')
 	@UseGuards(JwtAuthGuard)
-	async findAvatarMe(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-		const avatar = await this.avatarService.findAvatarById(req.user.userId);
-		const data = avatar.photoData.toString('base64');
+	async findProfileMe(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+		const profile = await this.profileService.findProfileById(req.user.userId);
+		const data = profile.photoData.toString('base64');
 		const mimeType = 'image/*';
 		return `<img src="data:${mimeType};base64,${data}" />`
 	}
 	
-	@Put('/avatar/me')
+	@Put('/profile/me')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(FileInterceptor('file'))
-	updateAvatar(
+	updateProfile(
 		@Req() req: Request,
 		@UploadedFile() file: Express.Multer.File,
-	): Promise<Avatar> {
-		return this.avatarService.updateOrCreateAvatar(req.user.userId, file);
+	): Promise<Profile> {
+		return this.profileService.updateOrCreateProfile(req.user.userId, file);
 	}
 
-	@Delete('/avatar/me')
+	@Delete('/profile/me')
 	@UseGuards(JwtAuthGuard)
-	deleteAvatar(@Req() req: Request):Promise<void> {
-		return this.avatarService.deleteAvatar(req.user.userId)
+	deleteProfile(@Req() req: Request):Promise<void> {
+		return this.profileService.deleteProfile(req.user.userId)
 	}
 
 	/*----------------------------------
