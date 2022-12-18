@@ -110,8 +110,12 @@ export class UserService {
 	}
 
 	async createUser(data: user42Dto): Promise<User> {
+		console.log("[userService] createUser")
+		console.log({data})
 		const user = await this.userRepository.create({ username: data.username });
+		console.log("2")
 		try {
+			console.log("22")
 			await this.userRepository.save(user);
 		} catch (error) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

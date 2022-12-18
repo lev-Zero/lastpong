@@ -33,7 +33,7 @@ export class AuthController {
 	async redirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {		
 
 		if (req.user) {
-			const token = await this.auth42Service.login(req.user);
+		const token = await this.auth42Service.login(req.user);
 			res.cookie('access_token', token, {
 				httpOnly: false,
 			});
