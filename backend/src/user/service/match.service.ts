@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserMatchDto } from '../dto/user.dto';
 import { Match } from '../entity/match.entity';
+import { User } from '../entity/user.entity';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -10,7 +11,9 @@ export class MatchService {
 	constructor(
 		@InjectRepository(Match)
 		private matchRepository: Repository<Match>,
-		private userService:UserService
+		@InjectRepository(User)
+		private userRepository: Repository<User>,
+		private userService: UserService
 	) { }
 
 	async findMatcheById(userId: number): Promise<Match[]> {
@@ -64,6 +67,28 @@ export class MatchService {
 		try { 
 			await this.matchRepository.save(match)
 		} catch (error) { 
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+
+		}
+	}
+
+	async updateRank(winner: User, loser: User): Promise<void> {
+		try {
+			await this.userRepository.update(winner.id, { rank: winner.rank + 1 });
+			if (loser.rank > 0)
+				await this.userRepository.update(loser.id, { rank: loser.rank - 1 });
+		} catch (error) {
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async addMatch(matchResult: UserMatchDto): Promise<void> {
+		try {
+			const winner = await this.userService.findUserById(matchResult.winnerId);
+			const loser = await this.userService.findUserById(matchResult.loserId);
+			const match = await this.matchRepository.create({ winner, loser, winnerScore: matchResult.winnerScore, loserScore: matchResult.loserScore })
+			await this.matchRepository.save(match)
+		} catch (error) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
 
 		}

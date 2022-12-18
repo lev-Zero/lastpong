@@ -4,6 +4,7 @@ export enum userStatus {
 	ONLINE,
 	GAME,
 	CHAT,
+	INGAMEROOM
 }
 
 export enum chatRoomStatus{
