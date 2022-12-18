@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Auth42 } from '../entity/auth42.entity';
 import { Payload } from '../interface/payload.interface';
 import { generateSecret, verify } from '2fa-util';
-import { AvatarService } from 'src/user/service/avatar.service';
+import { ProfileService } from 'src/user/service/profile.service';
 import { AuthService } from './auth.service';
 import * as https from 'https';
 
@@ -30,7 +30,7 @@ export class Auth42Service {
 		private readonly auth42Repository: Repository<Auth42>,
 		private userService: UserService,
 		private authService:AuthService,
-		private avatarService: AvatarService,
+		private profileService: ProfileService,
 
 	) { }
 
@@ -54,7 +54,7 @@ export class Auth42Service {
 
 			if (data.photos) {
 				const photo = await download(data.profileUrl);
-				await this.avatarService.updateOrCreateAvatar(user.id, {
+				await this.profileService.updateOrCreateProfile(user.id, {
 					originalname: 'profilePhoto',
 					buffer: photo,
 				} as Express.Multer.File);

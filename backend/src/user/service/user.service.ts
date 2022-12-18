@@ -68,7 +68,7 @@ export class UserService {
 		const users = await this.userRepository
 			.createQueryBuilder('users')
 			.select(['users.id', 'users.username', 'users.rank', 'users.status'])
-			.leftJoinAndSelect('users.avatar','avatar')
+			.leftJoinAndSelect('users.profile','profile')
 			.getMany()
 
 		return users;

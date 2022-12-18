@@ -6,7 +6,7 @@ import {
 	PrimaryGeneratedColumn,
 	JoinColumn,
 } from 'typeorm';
-import { Avatar } from './avatar.entity';
+import { Profile } from './profile.entity';
 import { userStatus } from '../enum/status.enum';
 import { Match } from './match.entity';
 import { Auth42 } from '../../auth/entity/auth42.entity';
@@ -26,9 +26,9 @@ export class User {
 	@JoinColumn()
 	auth42: Auth42;
 
-	@OneToOne(() => Avatar, (avatar) => avatar.user)
+	@OneToOne(() => Profile, (profile) => profile.user)
 	@JoinColumn()
-	avatar: Avatar;
+	profile: Profile;
 
 	@Column({ unique: true, nullable: true })
 	username: string;

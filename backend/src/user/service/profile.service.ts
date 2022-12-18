@@ -5,35 +5,35 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Avatar } from '../entity/avatar.entity';
+import { Profile } from '../entity/profile.entity';
 import { User } from '../entity/user.entity';
 import { UserService } from './user.service';
 
 @Injectable()
-export class AvatarService {
+export class ProfileService {
 	constructor(
-		@InjectRepository(Avatar)
-		private avatarRepository: Repository<Avatar>,
+		@InjectRepository(Profile)
+		private profileRepository: Repository<Profile>,
 		private userService:UserService
 	) { }
 
 
 	/*----------------------------------
-	|								avatar							 |
+	|								profile							 |
 	----------------------------------*/
 
-	async findAvatarById(userId: number): Promise<Avatar> {
-		const user: User = await this.userService.findUserById(userId, ['avatar']);
-		if (!user.avatar)
+	async findProfileById(userId: number): Promise<Profile> {
+		const user: User = await this.userService.findUserById(userId, ['profile']);
+		if (!user.profile)
 			throw new HttpException('USER X', HttpStatus.NOT_FOUND);
-		return user.avatar;
+		return user.profile;
 	}
 
-	async findAvatarByName(username: string): Promise<Avatar> {
-		const user: User = await this.userService.findUserByName(username, ['avatar']);
-		if (!user.avatar)
+	async findProfileByName(username: string): Promise<Profile> {
+		const user: User = await this.userService.findUserByName(username, ['profile']);
+		if (!user.profile)
 			throw new HttpException('USER X', HttpStatus.NOT_FOUND);
-		return user.avatar;
+		return user.profile;
 	}
 
 
@@ -48,7 +48,7 @@ export class AvatarService {
   }
 */
 
-	async updateOrCreateAvatar(userId: number, file?: Express.Multer.File): Promise<Avatar> {
+	async updateOrCreateProfile(userId: number, file?: Express.Multer.File): Promise<Profile> {
 		let filename = "default.png"
 		let photoData = Buffer.from("");//input photo path
 		
@@ -58,32 +58,32 @@ export class AvatarService {
 		} 
 		const user: User = await this.userService.findUserById(userId);
 
-		let avatar = await this.avatarRepository.findOne({
+		let profile = await this.profileRepository.findOne({
 			where:{user}
 		})
 
-		if (!avatar) { 
-				avatar = await this.avatarRepository.create({ filename, photoData, user });
+		if (!profile) { 
+				profile = await this.profileRepository.create({ filename, photoData, user });
 		} else {
 			if (file) { 
-				avatar.filename = file.originalname;
-				avatar.photoData = file.buffer;
+				profile.filename = file.originalname;
+				profile.photoData = file.buffer;
 			} else {
-				avatar.filename = filename;
-				avatar.photoData = photoData;				
+				profile.filename = filename;
+				profile.photoData = photoData;				
 			}
 		}		
 		try {
-			await this.avatarRepository.save(avatar);
+			await this.profileRepository.save(profile);
 		} catch (error) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
 		}
-		return avatar;
+		return profile;
 	}
 
-	async deleteAvatar(userId: number): Promise<void> {
+	async deleteProfile(userId: number): Promise<void> {
 		try {
-			await this.updateOrCreateAvatar(userId);
+			await this.updateOrCreateProfile(userId);
 		} catch (error) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
 		}

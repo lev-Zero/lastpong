@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Avatar } from './entity/avatar.entity';
+import { Profile } from './entity/profile.entity';
 import { Block } from './entity/block.entity';
 import { Auth42 } from '../auth/entity/auth42.entity';
 import { Friend } from './entity/friend.entity';
@@ -8,7 +8,7 @@ import { Match } from './entity/match.entity';
 import { User } from './entity/user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './service/user.service';
-import { AvatarService } from './service/avatar.service';
+import { ProfileService } from './service/profile.service';
 import { BlockService } from './service/block.service';
 
 import { FriendService } from './service/friend.service';
@@ -19,7 +19,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 	imports:[
 		TypeOrmModule.forFeature([
 			User,
-			Avatar,
+			Profile,
 			Match,
 			Block,
 			Friend
@@ -32,10 +32,10 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 	],
   controllers: [UserController],
 	providers: [
-		UserService, AvatarService, BlockService,  FriendService, MatchService
+		UserService, ProfileService, BlockService,  FriendService, MatchService
 	],
 	exports: [
-		UserService, AvatarService, BlockService, FriendService, MatchService
+		UserService, ProfileService, BlockService, FriendService, MatchService
 	]
 	})
 export class UserModule {}
