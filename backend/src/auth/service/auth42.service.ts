@@ -45,7 +45,6 @@ export class Auth42Service {
 	Auth42AuthGuard -> Auth42Strategy -> FtauthGuard -> authController.redirect -> authService.login
 	*/
 	async login(data): Promise<string> {
-		
 		const findUser = await this.userService.findUserByName(data.username).catch(() => null)
 
 		if (!findUser) {
