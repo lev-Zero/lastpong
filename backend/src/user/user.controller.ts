@@ -53,6 +53,13 @@ export class UserController {
 		this.userService.testDeleteFakeUser("fake_U4")
 		this.userService.testDeleteFakeUser("fake_U5")
 	}
+	@Get('/test/read/fakeuser/:name')
+	testFindUser(@Param('name') name: string) {
+		console.log("[userController] testReadUser")
+		let fakeuser = this.userService.testFindUser(name)
+		const user = fakeuser
+		return user
+	}
 
 	/*----------------------------------
 	|								user 							 |

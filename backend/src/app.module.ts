@@ -19,10 +19,12 @@ import { AdminUser } from './chat/entity/AdminUser.entity';
 import { JoinedUser } from './chat/entity/JoinedUser.entity';
 import { MutedUser } from './chat/entity/MutedUser.entity';
 import { JoinedDmUser } from './chat/entity/JoinedDmUser.entity';
+import { GameModule } from './game/game.module';
 
 @Module({
 	imports: [
 		ChatModule,
+		GameModule,
     ConfigModule.forRoot({isGlobal:true}),
     TypeOrmModule.forRoot({
     type: 'postgres',
@@ -50,7 +52,8 @@ import { JoinedDmUser } from './chat/entity/JoinedDmUser.entity';
     logging:true, //query확인가능 (default:false)
     synchronize: true, //프로그램 시작때마다 DB스키마 자동생성 및 테이블 수정사항 반영(default:false)
     } ),
-    ChatModule	],
+    ChatModule,
+    GameModule	],
   controllers: [AppController],
   providers: [AppService],
 })
