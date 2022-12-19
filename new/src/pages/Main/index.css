@@ -1,0 +1,24 @@
+.Main {
+  text-align: center;
+  background-color: #4267b2;
+  width: 100%;
+  height: 100vh;
+}
+
+.TitleText {
+  text-align: center;
+  font-size: 100px;
+  color: white;
+  font-family: "Knewave";
+  padding: 30px;
+}
+
+.CenterFlex {
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  text-align: "center";
+  height: 100vh;
+}
