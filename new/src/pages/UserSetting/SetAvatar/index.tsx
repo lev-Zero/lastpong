@@ -4,13 +4,13 @@ import { Avatar, Text, Flex, Input, Box } from "@chakra-ui/react";
 import { ThemaButton } from "../../../UI/atoms/ThemaButton";
 import "./index.css";
 import { fork } from "child_process";
-import create from "zustand/react";
+// import create from "zustand/react";
 
-const useStore = create((state) => ({
-  count: 0,
-  // imgUrl: ArrayBuffer;
-  // setUrl: (by : ArrayBuffer) => set((state))
-}));
+// const useStore = create((state) => ({
+//   count: 0,
+//   // imgUrl: ArrayBuffer;
+//   // setUrl: (by : ArrayBuffer) => set((state))
+// }));
 
 export function SetAvatar() {
   const selectFile = useRef<HTMLInputElement>(null);

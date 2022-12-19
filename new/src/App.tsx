@@ -6,12 +6,12 @@ import { ThemaButton } from "./UI/atoms/ThemaButton";
 import { Main } from "./pages/Main";
 import { SetUserID } from "./pages/UserSetting/SetUserID";
 import { SetAvatar } from "./pages/UserSetting/SetAvatar";
-import create from "zustand/react";
+// import create from "zustand/react";
 
-const useStore = create(() => ({
-  count: 0,
-  imgUrl: 0,
-}));
+// const useStore = create(() => ({
+//   count: 0,
+//   imgUrl: 0,
+// }));
 
 function App() {
   return (
