@@ -6,8 +6,11 @@ import { Link } from "react-router-dom";
 import useLoginStore from "../../../store/useLoginStore";
 
 export function SetUserID() {
-  const { setName } = useLoginStore();
+  const { name, setName } = useLoginStore();
   const inputRef = useRef<HTMLInputElement>(null);
+  // if (inputRef.current !== null) {
+  //   inputRef.current.innerText = name;
+  // }
   const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
     setName(inputRef.current?.value);
   };

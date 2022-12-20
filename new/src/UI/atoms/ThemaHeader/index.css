@@ -49,3 +49,12 @@
   padding: 20px 0;
   text-align: center;
 }
+
+.HeaderOtpBox {
+  width: 10px;
+  background-color: Lime;
+  height: 10px;
+  border-radius: 100%;
+  margin-top: 30px;
+  margin-left: 15px;
+}
