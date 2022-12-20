@@ -5,11 +5,13 @@ import "./index.css";
 interface IThemaButton {
   label: string;
   onClick: React.MouseEventHandler;
+  disabled: boolean;
 }
 
 export function ThemaButton(props: IThemaButton) {
   return (
     <Button
+      disabled={props.disabled}
       fontFamily={"Knewave"}
       fontSize={40}
       textColor="white"

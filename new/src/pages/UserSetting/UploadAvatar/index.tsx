@@ -1,33 +1,35 @@
 import React from "react";
 import { useRef, useState } from "react";
 import { Avatar, Text, Flex, Input, Box } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { ThemaButton } from "../../../UI/atoms/ThemaButton";
 import "./index.css";
-import { fork } from "child_process";
-// import create from "zustand/react";
-
-// const useStore = create((state) => ({
-//   count: 0,
-//   // imgUrl: ArrayBuffer;
-//   // setUrl: (by : ArrayBuffer) => set((state))
-// }));
+import useLoginStore from "../../../store/useLoginStore";
 
 export function SetAvatar() {
+  const { avatarImg, setAvatarImg } = useLoginStore();
   const selectFile = useRef<HTMLInputElement>(null);
   const selectAvatar = useRef<HTMLSpanElement>(null);
   const [ImageFile, setImageFile] = useState<any>(null);
+
+  const reader = new FileReader();
 
   const onChangeInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files !== null) {
       if (event.currentTarget.files.length === 0) return;
       const file = event.currentTarget.files[0];
-      const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         setImageFile(reader.result);
+        setAvatarImg(reader.result);
       };
     }
   };
+
+  const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
+    // if (reader.result !== null)
+  };
+
   return (
     <div className="SetAvatar">
       <Flex className="CenterFlex">
@@ -41,13 +43,16 @@ export function SetAvatar() {
           id={"realPath"}
         />
         <Box width={"300px"} height={"300px"}>
-          <Avatar size={"full"} src={ImageFile} ref={selectAvatar} />
+          <Avatar size={"full"} src={avatarImg} ref={selectAvatar} />
         </Box>
         <ThemaButton
           label="UPLOAD"
           onClick={() => selectFile.current?.click()}
+          disabled={false}
         />
-        <ThemaButton label="NEXT" onClick={() => console.log(1)} />
+        <Link to="/Test">
+          <ThemaButton label="NEXT" onClick={onClickNext} disabled={false} />
+        </Link>
       </Flex>
     </div>
   );
