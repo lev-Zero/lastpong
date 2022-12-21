@@ -15,7 +15,7 @@ interface LoginState {
 }
 
 const useLoginStore = create<LoginState>((set) => ({
-  name: "",
+  name: "TEMP",
   setName: (name) =>
     set((state) => ({
       ...state,
@@ -43,7 +43,7 @@ const useLoginStore = create<LoginState>((set) => ({
       ladderRank,
     })),
 
-  avatarImg: null,
+  avatarImg: "/pngegg.png",
   setAvatarImg: (avatarImg) =>
     set((state) => ({
       ...state,
