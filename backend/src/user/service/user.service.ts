@@ -90,7 +90,8 @@ export class UserService {
 				relations
 			}).catch(() => null);
 
-			if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+			if (!user)
+				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			return user;
 		} catch (e) {
@@ -112,7 +113,8 @@ export class UserService {
 				relations
 			}).catch(() => null);
 
-			if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+			if (!user)
+				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			return user;
 		} catch (e) {

@@ -1226,9 +1226,20 @@
   "resolved" "https://registry.npmjs.org/@next/font/-/font-13.0.7.tgz"
   "version" "13.0.7"
 
+<<<<<<< HEAD
 "@next/swc-darwin-x64@13.0.7":
   "integrity" "sha512-636AuRQynCPnIPRVzcCk5B7OMq9XjaYam2T0HeWUCE6y7EqEO3kxiuZ4QmN81T7A6Ydb+JnivYrLelHXmgdj6A=="
   "resolved" "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-13.0.7.tgz"
+=======
+"@next/swc-linux-x64-gnu@13.0.7":
+  "integrity" "sha512-/ygUIiMMTYnbKlFs5Ba9J5k/tNxFWy8eI1bBF8UuMTvV8QJHl/aLDiA5dwsei2kk99/cu3eay62JnJXkSk3RSQ=="
+  "resolved" "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-13.0.7.tgz"
+  "version" "13.0.7"
+
+"@next/swc-linux-x64-musl@13.0.7":
+  "integrity" "sha512-dLzr6AL77USJN0ejgx5AS8O8SbFlbYTzs0XwAWag4oQpUG2p3ARvxwQgYQ0Z+6EP0zIRZ/XfLkN/mhsyi3m4PA=="
+  "resolved" "https://registry.npmjs.org/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-13.0.7.tgz"
+>>>>>>> f7c9816bcbdc1bf0ff0da33e1b863ab14b2bda54
   "version" "13.0.7"
 
 "@nodelib/fs.scandir@2.1.5":
@@ -1335,6 +1346,7 @@
   "version" "0.16.2"
 
 "@typescript-eslint/parser@^5.42.0":
+<<<<<<< HEAD
   "integrity" "sha512-udPU4ckK+R1JWCGdQC4Qa27NtBg7w020ffHqGyAK8pAgOVuNw7YaKXGChk+udh+iiGIJf6/E/0xhVXyPAbsczw=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-5.47.0.tgz"
   "version" "5.47.0"
@@ -1364,18 +1376,58 @@
   dependencies:
     "@typescript-eslint/types" "5.47.0"
     "@typescript-eslint/visitor-keys" "5.47.0"
+=======
+  "integrity" "sha512-RelQ5cGypPh4ySAtfIMBzBGyrNerQcmfA1oJvPj5f+H4jI59rl9xxpn4bonC0tQvUKOEN7eGBFWxFLK3Xepneg=="
+  "resolved" "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-5.46.1.tgz"
+  "version" "5.46.1"
+  dependencies:
+    "@typescript-eslint/scope-manager" "5.46.1"
+    "@typescript-eslint/types" "5.46.1"
+    "@typescript-eslint/typescript-estree" "5.46.1"
+    "debug" "^4.3.4"
+
+"@typescript-eslint/scope-manager@5.46.1":
+  "integrity" "sha512-iOChVivo4jpwUdrJZyXSMrEIM/PvsbbDOX1y3UCKjSgWn+W89skxWaYXACQfxmIGhPVpRWK/VWPYc+bad6smIA=="
+  "resolved" "https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-5.46.1.tgz"
+  "version" "5.46.1"
+  dependencies:
+    "@typescript-eslint/types" "5.46.1"
+    "@typescript-eslint/visitor-keys" "5.46.1"
+
+"@typescript-eslint/types@5.46.1":
+  "integrity" "sha512-Z5pvlCaZgU+93ryiYUwGwLl9AQVB/PQ1TsJ9NZ/gHzZjN7g9IAn6RSDkpCV8hqTwAiaj6fmCcKSQeBPlIpW28w=="
+  "resolved" "https://registry.npmjs.org/@typescript-eslint/types/-/types-5.46.1.tgz"
+  "version" "5.46.1"
+
+"@typescript-eslint/typescript-estree@5.46.1":
+  "integrity" "sha512-j9W4t67QiNp90kh5Nbr1w92wzt+toiIsaVPnEblB2Ih2U9fqBTyqV9T3pYWZBRt6QoMh/zVWP59EpuCjc4VRBg=="
+  "resolved" "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-5.46.1.tgz"
+  "version" "5.46.1"
+  dependencies:
+    "@typescript-eslint/types" "5.46.1"
+    "@typescript-eslint/visitor-keys" "5.46.1"
+>>>>>>> f7c9816bcbdc1bf0ff0da33e1b863ab14b2bda54
     "debug" "^4.3.4"
     "globby" "^11.1.0"
     "is-glob" "^4.0.3"
     "semver" "^7.3.7"
     "tsutils" "^3.21.0"
 
+<<<<<<< HEAD
 "@typescript-eslint/visitor-keys@5.47.0":
   "integrity" "sha512-ByPi5iMa6QqDXe/GmT/hR6MZtVPi0SqMQPDx15FczCBXJo/7M8T88xReOALAfpBLm+zxpPfmhuEvPb577JRAEg=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-5.47.0.tgz"
   "version" "5.47.0"
   dependencies:
     "@typescript-eslint/types" "5.47.0"
+=======
+"@typescript-eslint/visitor-keys@5.46.1":
+  "integrity" "sha512-jczZ9noovXwy59KjRTk1OftT78pwygdcmCuBf8yMoWt/8O8l+6x2LSEze0E4TeepXK4MezW3zGSyoDRZK7Y9cg=="
+  "resolved" "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-5.46.1.tgz"
+  "version" "5.46.1"
+  dependencies:
+    "@typescript-eslint/types" "5.46.1"
+>>>>>>> f7c9816bcbdc1bf0ff0da33e1b863ab14b2bda54
     "eslint-visitor-keys" "^3.3.0"
 
 "@zag-js/element-size@0.1.0":
@@ -2350,9 +2402,15 @@
     "react-is" "^16.7.0"
 
 "ignore@^5.2.0":
+<<<<<<< HEAD
   "integrity" "sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ=="
   "resolved" "https://registry.npmjs.org/ignore/-/ignore-5.2.4.tgz"
   "version" "5.2.4"
+=======
+  "integrity" "sha512-d2qQLzTJ9WxQftPAuEQpSPmKqzxePjzVbpAVv62AQ64NTL+wR4JkrVqR/LqFsFEUsHDAiId52mJteHDFuDkElA=="
+  "resolved" "https://registry.npmjs.org/ignore/-/ignore-5.2.1.tgz"
+  "version" "5.2.1"
+>>>>>>> f7c9816bcbdc1bf0ff0da33e1b863ab14b2bda54
 
 "import-fresh@^3.0.0", "import-fresh@^3.2.1":
   "integrity" "sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw=="

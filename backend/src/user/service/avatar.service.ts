@@ -26,7 +26,7 @@ export class AvatarService {
 		try {
 			const user: User = await this.userService.findUserById(userId, ['avatar']);
 			if (!user.avatar)
-				throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 			return user.avatar;
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -37,7 +37,7 @@ export class AvatarService {
 		try {
 			const user: User = await this.userService.findUserByName(username, ['avatar']);
 			if (!user.avatar)
-				throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 			return user.avatar;
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -86,13 +86,5 @@ export class AvatarService {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	// async deleteAvatar(userId: number): Promise<void> {
-	// 	try {
-	// 		await this.updateOrCreateAvatar(userId, );
-	// 	} catch (e) {
-	// 		throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-	// 	}
-	// }
 
 }

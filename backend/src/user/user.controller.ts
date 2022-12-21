@@ -196,12 +196,6 @@ export class UserController {
 		}
 	}
 
-	// @Delete('/avatar/me')
-	// @UseGuards(JwtAuthGuard)
-	// deleteAvatar(@Req() req: Request):Promise<void> {
-	// 	return this.avatarService.deleteAvatar(req.user.userId)
-	// }
-
 	/*----------------------------------
 	|								match							 |
 	----------------------------------*/

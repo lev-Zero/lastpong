@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { Body, HttpException, HttpStatus } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
@@ -43,14 +43,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
-	async handleDisconnect(socket: any) {
+	async handleDisconnect(socket: Socket) {
 		try {
 			const user = socket.data.user;
 			if (!user) 
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let data = { gameRoomName: "게임룸" }
-			await this.exitGameRoom(socket, data);
+			const gameRoomName = this.gameService.findGameRoomOfUser(user.id)
+			if (gameRoomName)
+				await this.exitGameRoom(socket, { gameRoomName });
 
 			await this.userService.updateStatus(user.id, userStatus.ONLINE)
 
@@ -118,13 +119,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 	@SubscribeMessage('joinGameRoom')
-	async joinGameRoom(socket: Socket, data: GameRoomNameDto): Promise<void> {
+	async joinGameRoom(socket: Socket, @Body() body: GameRoomNameDto): Promise<void> {
 		try {
 			const user: User = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let gameRoom = this.gameService.findGameRoom(data.gameRoomName)
+			let gameRoom = this.gameService.findGameRoom(body.gameRoomName)
 			if (!gameRoom)
 				throw new HttpException('존재하지 않는 게임룸 입니다', HttpStatus.BAD_REQUEST);
 
@@ -137,9 +138,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			socket.join(result.gameRoom.gameRoomName)
 
 			if (result.user == PlayerType.PLAYER) {
-				this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', { message: `${data.gameRoomName} 게임룸에 ${user.username} 플레이어가 들어왔습니다.`, gameRoom })
+				this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', { message: `${body.gameRoomName} 게임룸에 ${user.username} 플레이어가 들어왔습니다.`, gameRoom })
 			} else if (result.user == PlayerType.SPECTATOR) {
-				this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', { message: `${data.gameRoomName} 게임룸에 ${user.username} 관찰자가 들어왔습니다.`, gameRoom })
+				this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', { message: `${body.gameRoomName} 게임룸에 ${user.username} 관찰자가 들어왔습니다.`, gameRoom })
 			} else {
 				throw new HttpException('PlayerType이 정의되지 않은 유저 입니다.', HttpStatus.BAD_REQUEST);
 			}
@@ -152,19 +153,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('readyGame')
-	async readyGame(socket: Socket, data: ReadyGameOptionDto): Promise<void> {
+	readyGame(socket: Socket, @Body() body: ReadyGameOptionDto): void {
 		try {
 			const user = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
-			const player = this.gameService.findPlayerInGameRoom(user.id, data.gameRoomName)
+			const player = this.gameService.findPlayerInGameRoom(user.id, body.gameRoomName)
 			if (!player)
-				throw new HttpException(`${data.gameRoomName}에 해당 플레이어가 없습니다.`, HttpStatus.BAD_REQUEST);
+				throw new HttpException(`${body.gameRoomName}에 해당 플레이어가 없습니다.`, HttpStatus.BAD_REQUEST);
 
-			const gameRoom = this.gameService.readyGame(data.gameRoomName, player, data.gameOption);
+			const gameRoom = this.gameService.readyGame(body.gameRoomName, player, body.gameOption);
 
 			if (!gameRoom) {
-				this.server.to(data.gameRoomName).emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
+				this.server.to(body.gameRoomName).emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
 			} else {
 				this.server.to(gameRoom.gameRoomName).emit('readyGame', {
 					message: `양 쪽 유저 게임 준비 완료`,
@@ -180,15 +181,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('startGame')
-	async startGame(socket: Socket, data: GameRoomNameDto): Promise<void> {
+	async startGame(socket: Socket, @Body() body: GameRoomNameDto): Promise<void> {
 		try {
 			const user = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			const player = this.gameService.findPlayerInGameRoom(user.id, data.gameRoomName)
+			const player = this.gameService.findPlayerInGameRoom(user.id, body.gameRoomName)
 			if (!player)
-				throw new HttpException(`${data.gameRoomName}에 해당 플레이어는 없습니다.`, HttpStatus.BAD_REQUEST);
+				throw new HttpException(`${body.gameRoomName}에 해당 플레이어는 없습니다.`, HttpStatus.BAD_REQUEST);
 
 			let gameRoom = this.gameService.findGameRoom(player.gameRoomName)
 			if (!gameRoom)
@@ -255,21 +256,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 	@SubscribeMessage('exitGameRoom')
-	async exitGameRoom(socket: Socket, data: GameRoomNameDto) {
+	async exitGameRoom(socket: Socket, @Body() body: GameRoomNameDto) {
 
 		try {
 			const user: User = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let gameRoom = this.gameService.findGameRoom(data.gameRoomName)
+			let gameRoom = this.gameService.findGameRoom(body.gameRoomName)
 			if (!gameRoom)
 				throw new HttpException('존재하지 않는 게임룸 입니다', HttpStatus.BAD_REQUEST);
 
 
-			const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(user.id, data.gameRoomName);
+			const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(user.id, body.gameRoomName);
 
-			const spectator: GamePlayerDto = this.gameService.findSpectatorInGameRoom(user.id, data.gameRoomName);
+			const spectator: GamePlayerDto = this.gameService.findSpectatorInGameRoom(user.id, body.gameRoomName);
 
 			if (player || spectator) {
 
@@ -298,13 +299,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
 	@SubscribeMessage('randomGameMatch')
-	async randomGameMatching(socket: Socket): Promise<void> {
+	randomGameMatching(socket: Socket): void {
 		try {
 			const user: User = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			const gameRoomName = await this.gameService.randomGameMatching(socket);
+			const gameRoomName = this.gameService.randomGameMatching(socket);
 
 			if (gameRoomName) {
 				this.server.to(gameRoomName).emit('randomGameMatch', { message: "랜덤 매칭 된 룸 이름입니다.", gameRoomName })
@@ -324,22 +325,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 	@SubscribeMessage('touchBar')
-	updatetouchBar(socket: Socket, value: TouchBarDto, data: GameRoomNameDto): void {
+	updatetouchBar(socket: Socket, @Body() body: TouchBarDto): void {
 		try {
 			const user: User = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let gameRoom = this.gameService.findGameRoom(data.gameRoomName)
+			let gameRoom = this.gameService.findGameRoom(body.gameRoomName)
 			if (!gameRoom)
 				throw new HttpException('존재하지 않는 게임룸 입니다', HttpStatus.BAD_REQUEST);
 
-			const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(socket.data.user.id, data.gameRoomName);
+			const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(socket.data.user.id, body.gameRoomName);
 			if (!player)
 				throw new HttpException('해당룸에 플레이어는 존재하지 않습니다.', HttpStatus.BAD_REQUEST);
 
-			player.touchBar = value.touchBar * gameRoom.facts.display.height;
-			this.server.to(gameRoom.gameRoomName).emit('touchBar', { message: "touchBar", player: player.user.id, touchBar: value.touchBar })
+			player.touchBar = body.touchBar * gameRoom.facts.display.height;
+			this.server.to(gameRoom.gameRoomName).emit('touchBar', { message: "touchBar", player: player.user.id, touchBar: body.touchBar })
 
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

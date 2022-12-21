@@ -24,7 +24,7 @@ export class AuthController {
 	----------------------------------*/
 
 	@Get('/')
-	viaPath(@Res() res: Response) {
+	viaPath(@Res({ passthrough: true }) res: Response) {
 		try {
 			res.status(301).redirect("http://localhost:3000/auth/42/callback")
 		} catch (e) {
@@ -37,7 +37,7 @@ export class AuthController {
 	*/
 	@Get('/42/callback')
 	@UseGuards(Auth42AuthGuard)
-	async redirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+	async redirect(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
 		try {
 
 			if (req.user) {
@@ -82,14 +82,14 @@ export class AuthController {
 			if (req.headers.authorization)
 				token = req.headers.authorization.split(' ')[1]
 			else
-				throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
+				throw new HttpException('토큰을 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			const payload = await this.authService.verifyJWT(token);
 
 			if (payload.auth42Status) {
 				const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(() => null)
 				if (!auth42)
-					throw new HttpException('AUTH42 X', HttpStatus.FORBIDDEN);
+					throw new HttpException('AUTH42를 찾을 수 없습니다', HttpStatus.BAD_REQUEST);
 
 				// if (!auth42.otp) {
 					const qrcodeImg = await this.auth42Service.create42QRCode(payload.id);
@@ -99,7 +99,7 @@ export class AuthController {
 				// 	return 'Write OTP Code'
 				// }
 			} else {
-				throw new HttpException('AUTH42 VALIDATION X', HttpStatus.FORBIDDEN);
+				throw new HttpException('AUTH42가 유효하지 않습니다.', HttpStatus.BAD_REQUEST);
 			}
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -109,7 +109,7 @@ export class AuthController {
 	@Post('/login/otp')
 	async loginOTP(
 		@Req() req: Request,
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 		@Body('code') code: string,
 	): Promise<void> {
 		try {
@@ -118,13 +118,13 @@ export class AuthController {
 			if (req.headers.authorization)
 				token = req.headers.authorization.split(' ')[1]
 			else
-				throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
+				throw new HttpException('토큰을 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			const payload = await this.authService.verifyJWT(token);
 
 			const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(() => null)
 			if(!auth42)
-				throw new HttpException('Auth42 X', HttpStatus.FORBIDDEN);
+				throw new HttpException('Auth42을 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			if (payload.auth42Status) {
 				const newToken = await this.auth42Service.loginOTP(payload, code);
@@ -134,7 +134,7 @@ export class AuthController {
 				this.userService.updateStatus(payload.id, userStatus.ONLINE);
 				res.send(newToken)
 			} else {
-				throw new HttpException('AUTH42 VALIDATION', HttpStatus.FORBIDDEN);
+				throw new HttpException('AUTH42가 유효하지 않습니다.', HttpStatus.BAD_REQUEST);
 			}
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

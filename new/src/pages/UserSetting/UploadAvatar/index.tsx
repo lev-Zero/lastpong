@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import { Avatar, Text, Flex, Input, Box } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { ThemaButton } from "../../../UI/atoms/ThemaButton";
-import "./index.css";
 import useLoginStore from "../../../store/useLoginStore";
+import "./index.css";
 
 export function SetAvatar() {
   const { avatarImg, setAvatarImg } = useLoginStore();

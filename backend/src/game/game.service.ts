@@ -24,6 +24,7 @@ export class GameService {
 	|				findGameRooms			|
 	|				findPlayerInGameRoom			|
 	|				findSpectorInGameRoom			|
+	|	findGameRoomOfUser|
 	---------------------------*/
 
 	findGameRoom(gameRoomName: string): GameRoomDto {
@@ -70,6 +71,29 @@ export class GameService {
 		return null;
 	}
 
+	findGameRoomOfUser(userId: number) {
+		try {
+
+			for (const gameRoom of this.gameRooms) {
+				for (const player of gameRoom[1].players) {
+					if (player.user.id == userId)
+						return gameRoom[0]
+				}
+			}
+			for (const gameRoom of this.gameRooms) {
+				for (const spectators of gameRoom[1].spectators) {
+					if (spectators.user.id == userId)
+						return gameRoom[0]
+				}
+			}
+			return null
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+
 
 	/* --------------------------
 	|				createGameRoom			|
@@ -105,7 +129,9 @@ export class GameService {
 
 			this.gameRooms.set(gameRoomName, gameRoom);
 			return gameRoom;
-		} catch (e) { throw new HttpException(e.message, HttpStatus.BAD_REQUEST); }
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	joinGameRoom(socket: Socket, gameRoom: GameRoomDto): { gameRoom: GameRoomDto, user: PlayerType } {
@@ -321,27 +347,27 @@ export class GameService {
 			if (!(nextBallPosition.x - ballRadius < 0 ||
 				nextBallPosition.x + ballRadius > widthOnDisplay)) {
 
-				if (gameRoom.players.length == 2) { 
+				if (gameRoom.players.length == 2) {
 					if (
-					nextBallPosition.y >= gameRoom.players[0].touchBar - touchBarHeight / 2 &&
-					nextBallPosition.y <= gameRoom.players[0].touchBar + touchBarHeight / 2
-				) {
-					if (nextBallPosition.x - ballRadius < gameRoom.facts.touchBar.x) {
-						gameRoom.playing.ball.velocity.x *= -1;
-						return this.updateBallPositionAndVelocity(gameRoom.playing.ball.position.x, gameRoom.playing.ball.position.y, gameRoom)
+						nextBallPosition.y >= gameRoom.players[0].touchBar - touchBarHeight / 2 &&
+						nextBallPosition.y <= gameRoom.players[0].touchBar + touchBarHeight / 2
+					) {
+						if (nextBallPosition.x - ballRadius < gameRoom.facts.touchBar.x) {
+							gameRoom.playing.ball.velocity.x *= -1;
+							return this.updateBallPositionAndVelocity(gameRoom.playing.ball.position.x, gameRoom.playing.ball.position.y, gameRoom)
+						}
 					}
-				}
 
-				if (
-					nextBallPosition.y >= gameRoom.players[1].touchBar - touchBarHeight / 2 &&
-					nextBallPosition.y <= gameRoom.players[1].touchBar + touchBarHeight / 2
-				) {
-					if (nextBallPosition.x + ballRadius > widthOnDisplay - gameRoom.facts.touchBar.x) {
-						gameRoom.playing.ball.velocity.x *= -1;
-						return this.updateBallPositionAndVelocity(gameRoom.playing.ball.position.x, gameRoom.playing.ball.position.y, gameRoom)
+					if (
+						nextBallPosition.y >= gameRoom.players[1].touchBar - touchBarHeight / 2 &&
+						nextBallPosition.y <= gameRoom.players[1].touchBar + touchBarHeight / 2
+					) {
+						if (nextBallPosition.x + ballRadius > widthOnDisplay - gameRoom.facts.touchBar.x) {
+							gameRoom.playing.ball.velocity.x *= -1;
+							return this.updateBallPositionAndVelocity(gameRoom.playing.ball.position.x, gameRoom.playing.ball.position.y, gameRoom)
+						}
 					}
 				}
-			}
 			}
 			return null;
 
@@ -388,7 +414,7 @@ export class GameService {
 		try {
 			for (const player of gameRoom.players) {
 				if (player.score == gameRoom.facts.score.max) {
-					if(socket.data.user.id == player.user.id)
+					if (socket.data.user.id == player.user.id)
 						this.gameOver(gameRoom, player, server, socket);
 				}
 			}
@@ -471,8 +497,9 @@ export class GameService {
 				if (!gameRoom.players.length)
 					return this.gameRooms.delete(gameRoom.gameRoomName);
 			}
-		} catch (e) { 
-			throw new HttpException(e.message, HttpStatus.BAD_REQUEST); }
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 
 	}
 
