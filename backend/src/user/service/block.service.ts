@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Block } from '../entity/block.entity';
+import { FriendService } from './friend.service';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -9,7 +10,8 @@ export class BlockService {
 	constructor(
 		@InjectRepository(Block)
 		private blockRepository: Repository<Block>,
-		private userService: UserService
+		private userService: UserService,
+		private friendService: FriendService
 	) { }
 
 	async addBlockByName(blockOfferUserId: number, blockedName: string): Promise<Block> {
@@ -17,7 +19,24 @@ export class BlockService {
 			const blockOfferUser = await this.userService.findUserById(blockOfferUserId);
 			const blockedUser = await this.userService.findUserByName(blockedName);
 
+
+			const friends = await this.friendService.findFriend(blockOfferUser.id).catch(() => null)
+
+			for (const friendInArray of friends) {
+				if (blockedUser.id == friendInArray.friend.id)
+					throw new HttpException("친구는 블락할 수 없습니다.", HttpStatus.BAD_REQUEST)
+			}
+
+
+			const blocks = await this.findBlock(blockOfferUser.id).catch(() => null)
+
+			for (const blockInArray of blocks) {
+				if (blockedUser.id == blockInArray.block.id)
+					throw new HttpException("이미 블락된 유저입니다.", HttpStatus.BAD_REQUEST)
+			}
+
 			const newBlock = await this.blockRepository.create({ blockOfferUser, blockedUser })
+
 			try {
 				await this.blockRepository.save(newBlock);
 			} catch (e) {
@@ -34,6 +53,21 @@ export class BlockService {
 		try {
 			const blockOfferUser = await this.userService.findUserById(blockOfferUserId);
 			const blockedUser = await this.userService.findUserById(blockedUserId);
+
+
+			const friends = await this.friendService.findFriend(blockOfferUser.id).catch(() => null)
+
+			for (const friendInArray of friends) {
+				if (blockedUser.id == friendInArray.friend.id)
+					throw new HttpException("친구는 블락할 수 없습니다.", HttpStatus.BAD_REQUEST)
+			}
+
+			const blocks = await this.findBlock(blockOfferUser.id).catch(() => null)
+
+			for (const blockInArray of blocks) {
+				if (blockedUser.id == blockInArray.block.id)
+					throw new HttpException("이미 블락된 유저입니다.", HttpStatus.BAD_REQUEST)
+			}
 
 			const newBlock = await this.blockRepository.create({ blockOfferUser, blockedUser })
 			try {
