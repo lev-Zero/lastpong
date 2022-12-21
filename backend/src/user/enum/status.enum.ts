@@ -2,9 +2,10 @@
 export enum userStatus {
 	OFFLINE,
 	ONLINE,
-	GAME,
-	CHAT,
-	INGAMEROOM
+	CHATCHANNEL,
+	CHATROOM,
+	GAMECHANNEL,
+	GAMEROOM
 }
 
 export enum chatRoomStatus{

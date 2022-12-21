@@ -30,10 +30,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		try {
 
 			const user = await this.authService.findUserByRequestToken(socket);
-			if (!user)
-				return socket.disconnect();
-
-			await this.userService.updateStatus(user.id, userStatus.CHAT)
+			if (!user) { 
+				socket.disconnect();
+				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
+			}
+	
+			await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL)
 
 			const initChatRooms = await this.chatService.findChatRoomByUserId(user.id).catch(() => null);
 
@@ -77,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		try {
 			const user = socket.data.user;
 			if (!user)
-				return;
+				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 			else
 				await this.userService.updateStatus(user.id, userStatus.ONLINE)
 
@@ -243,6 +245,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			chatRoom = await this.chatService.findChatRoomById(chatRoom.id, ['joinedUser'])
 
+			this.userService.updateStatus(user.id, userStatus.CHATROOM)
+
 			socket.join(chatRoom.name)
 
 			this.server.to(chatRoom.name).emit('join', `${chatRoom.name}방에 ${user.username}이/가 들어왔습니다`)
@@ -272,6 +276,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			socket.to(chatRoom.name).emit('leave', { message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`, chatRoom, targetUser })
 
 			const targetUserSocket = socket_username[targetUser.username];
+			this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL)
 			targetUserSocket.leave(chatRoom.name)
 
 		} catch (e) {
@@ -469,6 +474,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			const targetUserSocket = socket_username[targetUser.username];
 			targetUserSocket.leave(chatRoom.name)
+			this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL)
 
 			chatRoom = await this.chatService.findChatRoomById(data.chatRoomId, [
 				'joinedUser',

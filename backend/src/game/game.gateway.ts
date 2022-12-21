@@ -28,10 +28,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleConnection(socket: Socket) {
 		try {
 			const user = await this.authService.findUserByRequestToken(socket);
-			if (!user)
-				return socket.disconnect();
-
-			await this.userService.updateStatus(user.id, userStatus.INGAMEROOM)
+			if (!user) { 
+				socket.disconnect();
+				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
+			}
+	
+			await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL)
 
 			socket.data.user = user;
 
@@ -44,7 +46,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleDisconnect(socket: any) {
 		try {
 			const user = socket.data.user;
-			if (!user)
+			if (!user) 
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
 			let data = { gameRoomName: "게임룸" }
@@ -114,7 +116,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 	@SubscribeMessage('joinGameRoom')
-	joinGameRoom(socket: Socket, data: GameRoomNameDto): void {
+	async joinGameRoom(socket: Socket, data: GameRoomNameDto): Promise<void> {
 		try {
 			const user: User = socket.data.user;
 			if (!user)
@@ -140,6 +142,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				throw new HttpException('PlayerType이 정의되지 않은 유저 입니다.', HttpStatus.BAD_REQUEST);
 			}
 
+			await this.userService.updateStatus(user.id, userStatus.GAMEROOM)
 
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -275,6 +278,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (spectator)
 					this.server.to(gameRoom.gameRoomName).emit('exitGameRoom', { message: `관찰자가 게임룸에서 나갑니다.` })
 				socket.emit('exitGameRoom', { message: `게임룸에서 나왔습니다.` })
+				await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL)
 			} else {
 				throw new HttpException('해당룸에 당신은 존재하지 않습니다.', HttpStatus.BAD_REQUEST);
 			}
