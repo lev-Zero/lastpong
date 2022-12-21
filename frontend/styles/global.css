@@ -1,0 +1,23 @@
+@font-face {
+  font-family: 'Knewave';
+  src: url('fonts/KnewaveRegular.ttf');
+}
+
+html,
+body,
+body > div:first-child,
+div#__next,
+div#__next > div {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+* {
+  font-family: 'Knewave';
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}

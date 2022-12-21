@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import { Flex } from "@chakra-ui/react";
+import { ReactNode } from 'react';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
+import { Box, Flex } from '@chakra-ui/react';
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -9,18 +9,14 @@ type MainLayoutProps = {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   return (
-    <>
-      <Flex flexDir={"column"} bg={"gold"}>
-        <Header />
-        <Flex width={"100%"} height={"92vh"} bg={"pink"}>
-          <Flex width={"77%"} height={"100%"} bg={"teal"}>
-            <main>{children}</main>
-          </Flex>
-          <Flex width={"23%"} height={"100%"} bg={"red"}>
-            <Sidebar />
-          </Flex>
-        </Flex>
+    <Box h="100%">
+      <Header />
+      <Flex bg="gray" h="90%">
+        <Box flexGrow={4}>{children}</Box>
+        <Box flexGrow={1}>
+          <Sidebar />
+        </Box>
       </Flex>
-    </>
+    </Box>
   );
 }

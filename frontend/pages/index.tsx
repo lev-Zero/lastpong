@@ -1,11 +1,17 @@
 import MainLayout from "@/layouts/MainLayout";
 import Head from "next/head";
-import { ReactElement, useEffect } from "react";
+import { ReactElement, useState } from "react";
+import { Image } from "@chakra-ui/react";
+import Modal from "@/components/modal/Modal";
+import { CustomButton } from "@/components/CustomButton";
 
-import WinLoseSum from "@/components/match-history/WinLoseSum";
-import MatchHistory from "@/components/match-history/MatchHistory";
-import { MatchHistoryProps } from "@/interfaces/MatchProps";
 export default function LandingPage() {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const toggleModalOpen = () => {
+    setIsModalOpen((cur) => !cur);
+  };
+
   return (
     <>
       <Head>
@@ -17,7 +23,11 @@ export default function LandingPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>Index 페이지</main>
+      <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
+      <CustomButton size="lg" onClick={toggleModalOpen}>
+        MATCH
+      </CustomButton>
+      {isModalOpen ? <Modal closed={toggleModalOpen} /> : null}
     </>
   );
 }
@@ -25,5 +35,3 @@ export default function LandingPage() {
 LandingPage.getLayout = function (page: ReactElement) {
   return <MainLayout>{page}</MainLayout>;
 };
-
-// LandingPage.getLayout = MainLayout;
