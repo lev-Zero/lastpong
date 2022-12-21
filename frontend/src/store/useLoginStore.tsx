@@ -11,6 +11,8 @@ interface LoginState {
   setLadderRank: (ladderRank: number) => void;
   avatarImg: any;
   setAvatarImg: (avatarImg: any) => void;
+  otpCheck: number;
+  setOtpCheck: (otpCheck: number) => void;
   // AUTH
 }
 
@@ -48,6 +50,13 @@ const useLoginStore = create<LoginState>((set) => ({
     set((state) => ({
       ...state,
       avatarImg,
+    })),
+
+  otpCheck: 0,
+  setOtpCheck: (otpCheck) =>
+    set((state) => ({
+      ...state,
+      otpCheck,
     })),
 }));
 

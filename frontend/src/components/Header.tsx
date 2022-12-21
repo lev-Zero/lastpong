@@ -6,8 +6,10 @@ import {
   Text,
   Avatar,
   Image,
+  Button,
   textDecoration,
 } from "@chakra-ui/react";
+import { useState, useRef } from "react";
 import useLoginStore from "@/store/useLoginStore";
 
 export default function Header() {
@@ -32,6 +34,8 @@ export default function Header() {
       height: "100%",
       float: "left",
       flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
     } as React.CSSProperties,
 
     HeaderTitleBox: {
@@ -63,7 +67,7 @@ export default function Header() {
 
     HeaderOtpBox: {
       width: "10px",
-      backgroundColor: "lime",
+      backgroundColor: "Black",
       height: "10px",
       borderRadius: "100",
       marginTop: "30px",
@@ -71,8 +75,23 @@ export default function Header() {
     } as React.CSSProperties,
   };
 
-  const { name, avatarImg } = useLoginStore();
+  const { otpCheck, name, avatarImg, setOtpCheck } = useLoginStore();
+  const otpBoxRef = useRef<HTMLDivElement>(null);
 
+  if (otpBoxRef.current !== null) {
+    if (otpCheck) {
+      otpBoxRef.current.style.backgroundColor = "red";
+    } else otpBoxRef.current.style.backgroundColor = "lime";
+  } // function setOtpValue() {}
+
+  const otpOnclick = () => {
+    if (otpCheck) {
+      setOtpCheck(0);
+    } else {
+      setOtpCheck(1);
+    }
+  };
+  // <header>
   return (
     <header>
       <Flex style={styles.MainHeader}>
@@ -94,7 +113,24 @@ export default function Header() {
           </Box>
         </Flex>
         <Flex style={styles.HeaderRight}>
-          <Avatar src={avatarImg} size={"lg"} />
+          <Flex
+            bg={"yellow"}
+            height="85px"
+            width={"85px"}
+            borderRadius={"100px"}
+            bg={"white"}
+            alignItems={"center"}
+            justifyContent={"center"}
+            marginRight={"30px"}
+          >
+            <Avatar
+              src={avatarImg}
+              maxHeight={"100%"}
+              maxWidth={"100%"}
+              borderRadius={"100px"}
+              bg={"white"}
+            />
+          </Flex>
           <Flex width={"40%"}>
             <Link
               href={`/user/${myUsername}`}
@@ -103,18 +139,18 @@ export default function Header() {
               <h1 style={styles.HeaderMiniText}>{name}</h1>
             </Link>
           </Flex>
-          <Flex width={"30%"} justifyContent={"center"}>
+          <Flex width={"25%"} justifyContent={"center"}>
             <Text style={styles.HeaderMiniText}>OTP</Text>
-            <Box style={styles.HeaderOtpBox} />
+            <Box style={styles.HeaderOtpBox} ref={otpBoxRef} />
+            <Button onClick={otpOnclick}>OTP</Button>
           </Flex>
-          <Image
-            src={"/Logout.png"}
-            boxSize={"25px"}
-            marginLeft={"20px"}
-            marginTop={"35px"}
-          />
+          <Image src={"/Logout.png"} boxSize={"25px"} marginTop={"10px"} />
         </Flex>
       </Flex>
     </header>
   );
+}
+
+{
+  /* </header> */
 }

@@ -7,3 +7,13 @@
   font-family: "Roboto";
   src: url("./../fonts/Roboto/Roboto-Medium.ttf");
 }
+
+* {
+  font-family: "Knewave";
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
