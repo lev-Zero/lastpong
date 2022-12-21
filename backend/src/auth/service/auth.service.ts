@@ -44,7 +44,7 @@ export class AuthService {
 		try {
 			return this.jwtService.verify(token);
 		} catch {
-			throw new HttpException('INVALID TOKEN', HttpStatus.FORBIDDEN);
+			throw new HttpException('토큰이 유효하지 않습니다.', HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -64,7 +64,7 @@ export class AuthService {
 
 			const token = authorization && authorization.split(' ')[0];
 
-			if (!token) throw new HttpException("TOKEN X", HttpStatus.BAD_REQUEST);
+			if (!token) throw new HttpException("토큰을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
 			const payload = this.verifyJWT(token);
 			if (!payload) return null;
 			if (payload.auth42Status == false || payload.otpStatus == false) return null;

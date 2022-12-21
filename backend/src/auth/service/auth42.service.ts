@@ -78,17 +78,14 @@ export class Auth42Service {
 			let auth42 = await this.findAuth42ById(userId).catch(() => null)
 
 			if (auth42)
-				throw new HttpException(
-					'ALREADLY EXIST AUTH42 USER',
-					HttpStatus.CONFLICT,
-				);
+				throw new HttpException('42AUTH 유저 이미 존재합니다.',HttpStatus.BAD_REQUEST);
 
 			auth42 = this.auth42Repository.create({ user: { id: userId }, userIdIn42 });
 
 			await this.auth42Repository.save(auth42);
 			return auth42;
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -105,7 +102,7 @@ export class Auth42Service {
 				relations,
 			});
 			if (!auth42)
-				throw new HttpException('AUTH42 X', HttpStatus.NOT_FOUND);
+				throw new HttpException('AUTH42를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
 
 			return auth42;
 		} catch (e) {
@@ -119,7 +116,7 @@ export class Auth42Service {
 			const auth42 = await this.findAuth42ById(userId, ['user'])
 
 			if (auth42.otp)
-				throw new HttpException('ALREADLY EXIST OTP', HttpStatus.FORBIDDEN);
+				throw new HttpException('이미 유저는 OTP 인증을 마쳤습니다.', HttpStatus.BAD_REQUEST);
 
 			const output = await generateSecret(auth42.user.username, 'jeonghwl')
 
@@ -139,7 +136,7 @@ export class Auth42Service {
 		try {
 
 			if (payload.otpStatus)
-				throw new HttpException('ALREADLY CONNECTED', HttpStatus.CONFLICT);
+				throw new HttpException('이미 로그인한 유저 입니다.', HttpStatus.BAD_REQUEST);
 
 			await this.verifyCode(payload.id, code);
 
@@ -162,10 +159,10 @@ export class Auth42Service {
 			}
 
 			if (!secret)
-				throw new HttpException('SECRET X', HttpStatus.NOT_FOUND);
+				throw new HttpException('QRcode secret이 없습니다.', HttpStatus.BAD_REQUEST);
 
 			const check = await verify(code, secret);
-			if (!check) throw new HttpException('INVALID CODE', HttpStatus.FORBIDDEN);
+			if (!check) throw new HttpException('잘못된 6자리 숫자 입력하셨습니다.', HttpStatus.BAD_REQUEST);
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
