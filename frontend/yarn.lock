@@ -581,7 +581,7 @@
 
 "@chakra-ui/react@^2.4.4":
   version "2.4.4"
-  resolved "https://registry.npmjs.org/@chakra-ui/react/-/react-2.4.4.tgz"
+  resolved "https://registry.yarnpkg.com/@chakra-ui/react/-/react-2.4.4.tgz#c90680eee405e67f2232e8949115ff937329c5ee"
   integrity sha512-mA0Js3qpRBTmhPuBlBw85OG9ot7uh7+4IjsASmkzbpJVB1Kz9Z+7RBOpjHfK/03zEsRp+XYrb1ps0DYl8ih5bQ==
   dependencies:
     "@chakra-ui/accordion" "2.1.4"
