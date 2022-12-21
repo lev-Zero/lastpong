@@ -15,8 +15,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	validate(payload: Payload): any {
-		if (!payload.otpStatus || !payload.auth42Status)
-			throw new HttpException('OTP VALIDATION X', HttpStatus.FORBIDDEN);
-		return { userId: payload.id, username:payload.username }; //-> req.user
+		try {
+			if (!payload.otpStatus || !payload.auth42Status)
+				throw new HttpException('OTP VALIDATION X', HttpStatus.FORBIDDEN);
+			return { userId: payload.id, username: payload.username }; //-> req.user
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 }

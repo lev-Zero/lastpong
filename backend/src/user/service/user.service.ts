@@ -51,8 +51,8 @@ export class UserService {
 				.from(User)
 				.where("username = :username", { username: username })
 				.execute()
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 
 		}
 
@@ -64,81 +64,96 @@ export class UserService {
 
 
 	async findUserAll(): Promise<User[]> {
-		
-		const users = await this.userRepository
-			.createQueryBuilder('users')
-			.select(['users.id', 'users.username', 'users.rank', 'users.status'])
-			.leftJoinAndSelect('users.profile','profile')
-			.getMany()
+		try {
+			const users = await this.userRepository
+				.createQueryBuilder('users')
+				.select(['users.id', 'users.username', 'users.rating', 'users.status'])
+				.leftJoinAndSelect('users.avatar', 'avatar')
+				.getMany()
 
-		return users;
+			return users;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	async findUserById(id: number, relations: string[] = []): Promise<User> {
+		try {
+			const user = await this.userRepository.findOne({
+				select: {
+					id: true,
+					username: true,
+					rating: true,
+					status: true
+				},
+				where: { id },
+				relations
+			}).catch(() => null);
 
-		const user = await this.userRepository.findOne({
-			select: {
-				id: true,
-				username: true,
-				rank: true,
-				status:true
-			},
-			where: { id },
-			relations
-		}).catch(() => null);
+			if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
 
-		if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+			return user;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 
-		return user;
 	}
 
 	async findUserByName(username: string, relations: string[] = []): Promise<User> {
-		const user = await this.userRepository.findOne({
-			select: {
-				id: true,
-				username: true,
-				rank: true,
-				status: true
-			},
-			where: { username },
-			relations
-		}).catch(() => null);
-		
-		if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+		try {
+			const user = await this.userRepository.findOne({
+				select: {
+					id: true,
+					username: true,
+					rating: true,
+					status: true
+				},
+				where: { username },
+				relations
+			}).catch(() => null);
 
-		return user;
+			if (!user) throw new HttpException('USER X', HttpStatus.NOT_FOUND);
+
+			return user;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	async createUser(data: user42Dto): Promise<User> {
-		console.log("[userService] createUser")
-		console.log({data})
-		const user = await this.userRepository.create({ username: data.username });
-		console.log("2")
 		try {
-			console.log("22")
-			await this.userRepository.save(user);
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+			const user = await this.userRepository.create({ username: data.username });
+			try {
+				await this.userRepository.save(user);
+			} catch (e) {
+				throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+			}
+			delete (user.token)
+			return user;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
-		delete (user.token)
-		return user;
 	}
 
 
 
 	async updateUserToken(userId: number, token: string) {
-		this.userRepository.update(userId, { token: token });
+		try {
+			this.userRepository.update(userId, { token: token });
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
-	
-	async updateStatus(userId: number, status: userStatus): Promise<void> {
-		const user = await this.findUserById(userId);
 
-		if (user.status == status) return;
+	async updateStatus(userId: number, status: userStatus): Promise<void> {
 
 		try {
+			const user = await this.findUserById(userId);
+			if (user.status == status)
+				return;
 			await this.userRepository.update(user.id, { status });
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
