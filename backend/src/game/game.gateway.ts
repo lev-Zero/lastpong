@@ -49,8 +49,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!user) 
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let data = { gameRoomName: "게임룸" }
-			await this.exitGameRoom(socket, data);
+			const gameRoomName = this.gameService.findGameRoomOfUser(user.id)
+			if (gameRoomName)
+				await this.exitGameRoom(socket, { gameRoomName });
 
 			await this.userService.updateStatus(user.id, userStatus.ONLINE)
 
@@ -152,7 +153,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('readyGame')
-	async readyGame(socket: Socket, data: ReadyGameOptionDto): Promise<void> {
+	readyGame(socket: Socket, data: ReadyGameOptionDto): void {
 		try {
 			const user = socket.data.user;
 			if (!user)
@@ -298,13 +299,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
 	@SubscribeMessage('randomGameMatch')
-	async randomGameMatching(socket: Socket): Promise<void> {
+	randomGameMatching(socket: Socket): void {
 		try {
 			const user: User = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			const gameRoomName = await this.gameService.randomGameMatching(socket);
+			const gameRoomName = this.gameService.randomGameMatching(socket);
 
 			if (gameRoomName) {
 				this.server.to(gameRoomName).emit('randomGameMatch', { message: "랜덤 매칭 된 룸 이름입니다.", gameRoomName })

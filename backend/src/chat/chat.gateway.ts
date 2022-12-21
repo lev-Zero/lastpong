@@ -301,9 +301,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (mutedUser.user.id == user.id) {
 					const currentTime = new Date();
 					if (mutedUser.endTime > currentTime)
-						throw new HttpException(
-							'이 방에서 당신은 Mute 상태입니다.',
-							HttpStatus.FORBIDDEN)
+						throw new HttpException('이 방에서 당신은 Mute 상태입니다.', HttpStatus.BAD_REQUEST)
 					else {
 						await this.chatService.directRemoveMuteUser(mutedUser.user.id, chatRoom.id)
 					}
@@ -662,9 +660,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (isBlockedUser.blockOfferUser.find((user) => user.blockedUser.id == me.id)) {
 
 				socket.emit('blocked', { message: "you are blocked user" });
-				throw new HttpException(
-					'당신은 블락 유저 입니다.',
-					HttpStatus.FORBIDDEN)
+				throw new HttpException('당신은 블락 유저 입니다.', HttpStatus.BAD_REQUEST)
 			}
 
 			this.server.to(chatRoomDm.name).emit('directMessage', {

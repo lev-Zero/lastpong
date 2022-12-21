@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	validate(payload: Payload): any {
 		try {
 			if (!payload.otpStatus || !payload.auth42Status)
-				throw new HttpException('OTP VALIDATION X', HttpStatus.FORBIDDEN);
+				throw new HttpException('OTP가 유효하지 않습니다.', HttpStatus.BAD_REQUEST);
 			return { userId: payload.id, username: payload.username }; //-> req.user
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
