@@ -93,21 +93,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
 	@SubscribeMessage('createGameRoom')
-	createGameRoom(socket: Socket, data: GameRoomNameDto): void {
+	createGameRoom(socket: Socket): void {
 		try {
 			const user = socket.data.user;
 			if (!user)
 				throw new HttpException('소켓 연결 유저 없습니다.', HttpStatus.BAD_REQUEST);
 
-			let gameRoom = this.gameService.findGameRoom(data.gameRoomName)
+			const randomRoomName = String(Math.floor(Math.random() * 1e9));
+
+			let gameRoom = this.gameService.findGameRoom(randomRoomName)
 			if (gameRoom)
 				throw new HttpException('이미 존재하는 게임룸 입니다', HttpStatus.BAD_REQUEST);
 
-			gameRoom = this.gameService.createGameRoom(data.gameRoomName)
+			gameRoom = this.gameService.createGameRoom(randomRoomName)
 			if (!gameRoom)
 				throw new HttpException('게임룸 생성 실패했습니다.', HttpStatus.BAD_REQUEST);
 
-			socket.emit('createGameRoom', { message: `${data.gameRoomName} 게임룸이 생성되었습니다.`, gameRoom })
+			socket.emit('createGameRoom', { message: `${randomRoomName} 게임룸이 생성되었습니다.`, gameRoom })
 
 		} catch (e) {
 			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
