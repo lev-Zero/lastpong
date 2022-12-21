@@ -5,12 +5,15 @@ import { Auth42AuthGuard } from './security/auth.guard';
 import { Request } from 'src/user/interface/user.interface';
 import { JwtAuthGuard } from './security/jwt.guard';
 import { Auth42Service } from 'src/auth/service/auth42.service';
+import { UserService } from 'src/user/service/user.service';
+import { userStatus } from 'src/user/enum/status.enum';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
 		private authService: AuthService,
-		private auth42Service: Auth42Service
+		private auth42Service: Auth42Service,
+		private userService: UserService
 
 	) { }
 
@@ -128,6 +131,7 @@ export class AuthController {
 				res.cookie('access_token', token, {
 					httpOnly: false,
 				});
+				this.userService.updateStatus(payload.id, userStatus.ONLINE);
 				res.send(newToken)
 			} else {
 				throw new HttpException('AUTH42 VALIDATION', HttpStatus.FORBIDDEN);
