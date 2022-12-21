@@ -1,7 +1,7 @@
 import MainLayout from "@/layouts/MainLayout";
 import Head from "next/head";
 import { ReactElement, useState } from "react";
-import { Image } from "@chakra-ui/react";
+import { Flex, Image } from "@chakra-ui/react";
 import Modal from "@/components/modal/Modal";
 import { CustomButton } from "@/components/CustomButton";
 
@@ -23,11 +23,18 @@ export default function LandingPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
-      <CustomButton size="lg" onClick={toggleModalOpen}>
-        MATCH
-      </CustomButton>
-      {isModalOpen ? <Modal closed={toggleModalOpen} /> : null}
+      <Flex
+        height={"100%"}
+        flexDir={"column"}
+        alignItems="center"
+        justifyContent={"center"}
+      >
+        <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
+        <CustomButton size="lg" onClick={toggleModalOpen}>
+          MATCH
+        </CustomButton>
+        {isModalOpen ? <Modal closed={toggleModalOpen} /> : null}
+      </Flex>
     </>
   );
 }
