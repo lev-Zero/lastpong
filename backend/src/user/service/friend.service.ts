@@ -6,59 +6,63 @@ import { User } from '../entity/user.entity';
 import { UserService } from './user.service';
 
 @Injectable()
-export class FriendService { 
+export class FriendService {
 	constructor(
 		@InjectRepository(Friend)
 		private friendRepository: Repository<Friend>,
-		private userService:UserService
+		private userService: UserService
 	) { }
 
 	async addFriendByName(friendOfferUserId: number, friendName: string): Promise<Friend> {
-		const friendOfferUser = await this.userService.findUserById(friendOfferUserId);		
-		const friend = await this.userService.findUserByName(friendName);
-		const addedFriend = await this.friendRepository.create({ friendOfferUser, friend })
 		try {
+			const friendOfferUser = await this.userService.findUserById(friendOfferUserId);
+			const friend = await this.userService.findUserByName(friendName);
+			const addedFriend = await this.friendRepository.create({ friendOfferUser, friend })
 			await this.friendRepository.save(addedFriend);
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+			return addedFriend
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
-		return addedFriend
 	}
 
 	async addFriendById(friendOfferUserId: number, friendId: number): Promise<Friend> {
-		const friendOfferUser = await this.userService.findUserById(friendOfferUserId);		
-		const friend = await this.userService.findUserById(friendId);
-		const addedFriend = await this.friendRepository.create({ friendOfferUser, friend })
 		try {
+			const friendOfferUser = await this.userService.findUserById(friendOfferUserId);
+			const friend = await this.userService.findUserById(friendId);
+			const addedFriend = await this.friendRepository.create({ friendOfferUser, friend })
 			await this.friendRepository.save(addedFriend);
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+			return addedFriend
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
-		return addedFriend
 	}
 
-	async findFriend(id: number): Promise<Friend[]> { 
-		const user = await this.userService.findUserById(id);		
-		
-		const friend = await this.friendRepository.find({
-			relations: {
-				friend: true,
-			},
-			where: {
-				friendOfferUser: user
-			}
-		})
-		
-		for (const f of friend) { 
-			delete (f.friend.token)
-		}
-		return friend
-	}
-
-	async removeFriendByName(removeOfferUser: number, friendName: string) { 
-		const foundFriend = await this.userService.findUserByName(friendName);
-		const friend = foundFriend.id;
+	async findFriend(id: number): Promise<Friend[]> {
 		try {
+			const user = await this.userService.findUserById(id);
+
+			const friend = await this.friendRepository.find({
+				relations: {
+					friend: true,
+				},
+				where: {
+					friendOfferUser: user
+				}
+			})
+
+			for (const f of friend) {
+				delete (f.friend.token)
+			}
+			return friend
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async removeFriendByName(removeOfferUser: number, friendName: string) {
+		try {
+			const foundFriend = await this.userService.findUserByName(friendName);
+			const friend = foundFriend.id;
 			await this.friendRepository
 				.createQueryBuilder('friend') //alias = select Friend as friend
 				.delete()
@@ -66,8 +70,8 @@ export class FriendService {
 				.where('friendOfferUserId = :id', { id: removeOfferUser })
 				.where('friendId = :id', { id: friend })
 				.execute();
-		} catch (error) { 
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -80,8 +84,8 @@ export class FriendService {
 				.where('friendOfferUserId = :id', { id: removeOfferUser })
 				.where('friendId = :id', { id: friend })
 				.execute();
-		} catch (error) {
-			throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 

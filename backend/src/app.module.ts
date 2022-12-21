@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { Auth42 } from './auth/entity/auth42.entity';
-import { Profile } from './user/entity/profile.entity';
+import { Avatar } from './user/entity/avatar.entity';
 import { Block } from './user/entity/block.entity';
 import { Friend } from './user/entity/friend.entity';
 import { Match } from './user/entity/match.entity';
@@ -35,7 +35,7 @@ import { GameModule } from './game/game.module';
     database: 'chat_pong',
     entities: [
       User,
-      Profile,
+      Avatar,
       Match,
       Block,
       Friend,

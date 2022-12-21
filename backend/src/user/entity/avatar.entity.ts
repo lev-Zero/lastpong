@@ -4,7 +4,7 @@ import {
 import { User } from './user.entity';
 
 @Entity()
-export class Profile {
+export class Avatar {
 	@PrimaryGeneratedColumn()
 	id: number;
 
@@ -14,6 +14,10 @@ export class Profile {
 	@Column({ type: 'bytea', nullable:true })
 	photoData: Buffer;
 
-	@OneToOne(() => User,(user)=>user.profile, { onDelete: 'CASCADE' })
+	@OneToOne(() => User,(user)=>user.avatar, { onDelete: 'CASCADE' })
 	user: User;
+
+	@Column({ nullable: true })
+	profileUrl: string;
 }
+ 

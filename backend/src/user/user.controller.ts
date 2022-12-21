@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Response } from 'express';
 import { Match } from './entity/match.entity';
 import { User } from './entity/user.entity';
-import { ProfileService } from './service/profile.service';
+import { AvatarService } from './service/avatar.service';
 import { UserService } from './service/user.service';
 
 import { Request } from './interface/user.interface';
@@ -16,13 +16,14 @@ import { MatchService } from './service/match.service';
 import { Friend } from './entity/friend.entity';
 import { Block } from './entity/block.entity';
 import { UserMatchDto, UserNameDto } from './dto/user.dto';
-import { Profile } from './entity/profile.entity';
+import { Avatar } from './entity/avatar.entity';
+import { Readable } from 'typeorm/platform/PlatformTools';
 
 @Controller('user')
 export class UserController {
 	constructor(
 		private userService: UserService,
-		private profileService: ProfileService,
+		private avatarService: AvatarService,
 		private blockService: BlockService,
 		private friendService: FriendService,
 		private matchService: MatchService,
@@ -66,135 +67,230 @@ export class UserController {
 	----------------------------------*/
 	@Get()
 	findUserAll(): Promise<User[]> {
-		return this.userService.findUserAll();
+		try {
+			return this.userService.findUserAll();
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Get('/id/:id')
 	findUserById(
 		@Param('id', ParseIntPipe) id: number
 	): Promise<User> {
-		const user = this.userService.findUserById(id,['friend']);
-		return user;
+		try {
+			const user = this.userService.findUserById(id, ['friend']);
+			return user;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@Get('/name/:name')
 	findUserByName(
 		@Param('name') name: string
 	): Promise<User> {
-		const user = this.userService.findUserByName(name);
-		return user;
+		try {
+			const user = this.userService.findUserByName(name);
+			return user;
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@Get('/me')
 	@UseGuards(JwtAuthGuard)
 	findMe(@Req() req: Request): Promise<User> {
-		return this.userService.findUserById(req.user.userId);
+		try {
+			return this.userService.findUserById(req.user.userId);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 
 	/*----------------------------------
-	|								profile							 |
+	|								avatar							 |
 	----------------------------------*/
 
-	@Get('/profile/id/:userId')
-	async findProfileById(
+	@Get('/avatar/id/:userId')
+	async findAvatarById(
 		@Param('userId', ParseIntPipe) userId: number,
 		@Res({ passthrough: true }) res: Response,
 	) {
-		const profile = await this.profileService.findProfileById(userId);
-		const data = profile.photoData.toString('base64');
-		const mimeType = 'image/*';
-		return `<img src="data:${mimeType};base64,${data}" />`
+		try {
+			const avatar = await this.avatarService.findAvatarById(userId).catch(() => null);
+			if (!avatar.photoData && !avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: "empty" }
+			else if (!avatar.photoData && avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: avatar.profileUrl }
+			else {
+				res.set({
+					'Content-Disposition': `inline; filename="${avatar.filename}"`,
+					'Content-Type': 'image/*',
+				});
+				return new StreamableFile(Readable.from(avatar.photoData))
+			}
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
-	@Get('/profile/name/:name')
-	async findProfileByName(
+	@Get('/avatar/name/:name')
+	async findAvatarByName(
 		@Param('name') name: string,
 		@Res({ passthrough: true }) res: Response,
 	) {
-		const profile = await this.profileService.findProfileByName(name);
-		const data = profile.photoData.toString('base64');
-		const mimeType = 'image/*';
-		return `<img src="data:${mimeType};base64,${data}" />`
+		try {
+			const avatar = await this.avatarService.findAvatarByName(name).catch(() => null);
+			if (!avatar.photoData && !avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: "empty" }
+			else if (!avatar.photoData && avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: avatar.profileUrl }
+			else {
+				res.set({
+					'Content-Disposition': `inline; filename="${avatar.filename}"`,
+					'Content-Type': 'image/*',
+				});
+				return new StreamableFile(Readable.from(avatar.photoData))
+			}
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
-	@Get('/profile/me')
+	@Get('/avatar/me')
 	@UseGuards(JwtAuthGuard)
-	async findProfileMe(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-		const profile = await this.profileService.findProfileById(req.user.userId);
-		const data = profile.photoData.toString('base64');
-		const mimeType = 'image/*';
-		return `<img src="data:${mimeType};base64,${data}" />`
+	async findAvatarMe(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+		try {
+			const avatar = await this.avatarService.findAvatarById(req.user.userId).catch(() => null);
+			if (!avatar.photoData && !avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: "empty" }
+			else if (!avatar.photoData && avatar.profileUrl)
+				return { profilePhoto: "empty", profileUrl: avatar.profileUrl }
+			else {
+				res.set({
+					'Content-Disposition': `inline; filename="${avatar.filename}"`,
+					'Content-Type': 'image/*',
+				});
+				return new StreamableFile(Readable.from(avatar.photoData))
+			}
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
-	
-	@Put('/profile/me')
+
+	@Put('/avatar/me')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(FileInterceptor('file'))
-	updateProfile(
+	updateAvatar(
 		@Req() req: Request,
 		@UploadedFile() file: Express.Multer.File,
-	): Promise<Profile> {
-		return this.profileService.updateOrCreateProfile(req.user.userId, file);
+	): Promise<Avatar> {
+		try {
+			return this.avatarService.updateOrCreateAvatar(req.user.userId, null, file);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
-	@Delete('/profile/me')
-	@UseGuards(JwtAuthGuard)
-	deleteProfile(@Req() req: Request):Promise<void> {
-		return this.profileService.deleteProfile(req.user.userId)
-	}
+	// @Delete('/avatar/me')
+	// @UseGuards(JwtAuthGuard)
+	// deleteAvatar(@Req() req: Request):Promise<void> {
+	// 	return this.avatarService.deleteAvatar(req.user.userId)
+	// }
 
 	/*----------------------------------
 	|								match							 |
-  ----------------------------------*/
-	
+	----------------------------------*/
+
 	@Get('/match/id/:id')
 	findMatcheById(@Param('id', ParseIntPipe) userid: number): Promise<Match[]> {
-		return this.matchService.findMatcheById(userid);
+		try {
+			return this.matchService.findMatcheById(userid);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@Get('/match/name/:name')
 	findMatcheByName(@Param('name') username: string): Promise<Match[]> {
-		return this.matchService.findMatcheByName(username);
+		try {
+			return this.matchService.findMatcheByName(username);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@Post('/match/add')
-	addMatchById(@Body() body: UserMatchDto): Promise<void> { 
-		return this.matchService.addMatchById(body);
+	addMatchById(@Body() body: UserMatchDto): Promise<void> {
+		try {
+			return this.matchService.addMatchById(body);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
-	
-	
+
+
 
 	/*----------------------------------
 	|								friend						 |
 	----------------------------------*/
 	@Post('/friend/name/:name')
 	@UseGuards(JwtAuthGuard)
-	addFriendByName(@Req() req: Request, @Body() body: UserNameDto):Promise<Friend> { 
-		return this.friendService.addFriendByName(req.user.userId ,body.username);
+	addFriendByName(@Req() req: Request, @Body() body: UserNameDto): Promise<Friend> {
+		try {
+			return this.friendService.addFriendByName(req.user.userId, body.username);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Post('/friend/id/:id')
 	@UseGuards(JwtAuthGuard)
-	addFriendById(@Req() req: Request, @Param('id',ParseIntPipe) id: number): Promise<Friend> {
-		return this.friendService.addFriendById(req.user.userId, id);
+	addFriendById(@Req() req: Request, @Param('id', ParseIntPipe) id: number): Promise<Friend> {
+		try {
+			return this.friendService.addFriendById(req.user.userId, id);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Get('/friend')
 	@UseGuards(JwtAuthGuard)
 	findFriend(@Req() req: Request): Promise<Friend[]> {
-		return this.friendService.findFriend(req.user.userId);
+		try {
+			return this.friendService.findFriend(req.user.userId);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Delete('/friend/name/:name')
 	@UseGuards(JwtAuthGuard)
 	removeFriendByName(@Req() req: Request, @Body() body: UserNameDto): Promise<void> {
-		return this.friendService.removeFriendByName(req.user.userId, body.username);
+		try {
+			return this.friendService.removeFriendByName(req.user.userId, body.username);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Delete('/friend/id/:id')
 	@UseGuards(JwtAuthGuard)
 	removeFriendById(@Req() req: Request, @Param('id', ParseIntPipe) id: number): Promise<void> {
-		return this.friendService.removeFriendById(req.user.userId, id);
+		try {
+			return this.friendService.removeFriendById(req.user.userId, id);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 
@@ -205,31 +301,56 @@ export class UserController {
 	@Post('/block/name/:name')
 	@UseGuards(JwtAuthGuard)
 	addBlockByName(@Req() req: Request, @Body() body: UserNameDto): Promise<Block> {
-		return this.blockService.addBlockByName(req.user.userId, body.username);
+		try {
+			return this.blockService.addBlockByName(req.user.userId, body.username);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Post('/block/id/:id')
 	@UseGuards(JwtAuthGuard)
 	addBlockById(@Req() req: Request, @Param('id', ParseIntPipe) id: number): Promise<Block> {
-		return this.blockService.addBlockById(req.user.userId, id);
+		try {
+			return this.blockService.addBlockById(req.user.userId, id);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Get('/block')
 	@UseGuards(JwtAuthGuard)
 	findBlock(@Req() req: Request): Promise<Block[]> {
-		return this.blockService.findBlock(req.user.userId);
+		try {
+			return this.blockService.findBlock(req.user.userId);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Delete('/block/name/:name')
 	@UseGuards(JwtAuthGuard)
 	removeBlockByName(@Req() req: Request, @Body() body: UserNameDto): Promise<void> {
-		return this.blockService.removeBlockByName(req.user.userId, body.username);
+		try {
+			return this.blockService.removeBlockByName(req.user.userId, body.username);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	@Delete('/block/id/:id')
 	@UseGuards(JwtAuthGuard)
 	removeBlockById(@Req() req: Request, @Param('id', ParseIntPipe) id: number): Promise<void> {
-		return this.blockService.removeBlockById(req.user.userId,id);
+		try {
+			return this.blockService.removeBlockById(req.user.userId, id);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 

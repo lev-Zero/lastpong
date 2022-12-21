@@ -6,5 +6,5 @@ export class user42Dto {
 	@IsString()
 	username: string;
 	@IsString()
-	profileUrl: string;
+	avatarUrl: string;
 }

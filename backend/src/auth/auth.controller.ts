@@ -22,7 +22,11 @@ export class AuthController {
 
 	@Get('/')
 	viaPath(@Res() res: Response) {
-		res.status(301).redirect("http://localhost:3000/auth/42/callback")
+		try {
+			res.status(301).redirect("http://localhost:3000/auth/42/callback")
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	/*
@@ -30,24 +34,33 @@ export class AuthController {
 	*/
 	@Get('/42/callback')
 	@UseGuards(Auth42AuthGuard)
-	async redirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {		
+	async redirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+		try {
 
-		if (req.user) {
-		const token = await this.auth42Service.login(req.user);
-			res.cookie('access_token', token, {
-				httpOnly: false,
-			});
-		res.send({ "status": "login" })//redirect -> token x
+			if (req.user) {
+				const data = await this.auth42Service.login(req.user);
+
+				res.cookie('access_token', data.token, {
+					httpOnly: false,
+				});
+				return ({ "status": "login", profileUrl: data.profileUrl })
+			}
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@Get('/logout')
 	@UseGuards(JwtAuthGuard)
 	logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-		res.cookie('access_token', '', {
-			httpOnly: false,
-		});
-		res.send({ "status": "logout" })//redirect
+		try {
+			res.cookie('access_token', '', {
+				httpOnly: false,
+			});
+			res.send({ "status": "logout" })//redirect
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 
@@ -59,30 +72,34 @@ export class AuthController {
 
 	@Get('/login/otp/check')
 	async loginOTPCheck(
-		@Req() req:Request
-	): Promise<string>{
-		let token;
-		if (req.headers.authorization)
-			token = req.headers.authorization.split(' ')[1]
-		else
-			throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
-		
-		const payload = await this.authService.verifyJWT(token);
+		@Req() req: Request
+	): Promise<string> {
+		try {
+			let token;
+			if (req.headers.authorization)
+				token = req.headers.authorization.split(' ')[1]
+			else
+				throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
 
-		if (payload.auth42Status) { 
-			const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(()=>null)
-			if (!auth42)
-				throw new HttpException('AUTH42 X', HttpStatus.FORBIDDEN);
-				
-			if (!auth42.otp) {
-				const qrcodeImg = await this.auth42Service.create42QRCode(payload.id);
+			const payload = await this.authService.verifyJWT(token);
 
-				return qrcodeImg
+			if (payload.auth42Status) {
+				const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(() => null)
+				if (!auth42)
+					throw new HttpException('AUTH42 X', HttpStatus.FORBIDDEN);
+
+				// if (!auth42.otp) {
+					const qrcodeImg = await this.auth42Service.create42QRCode(payload.id);
+
+					return qrcodeImg
+				// } else {
+				// 	return 'Write OTP Code'
+				// }
 			} else {
-				return 'Write OTP Code'
+				throw new HttpException('AUTH42 VALIDATION X', HttpStatus.FORBIDDEN);
 			}
-		} else {
-			throw new HttpException('AUTH42 VALIDATION X', HttpStatus.FORBIDDEN);
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -92,26 +109,31 @@ export class AuthController {
 		@Res() res: Response,
 		@Body('code') code: string,
 	): Promise<void> {
+		try {
 
-		let token;
-		if (req.headers.authorization)
-			token = req.headers.authorization.split(' ')[1]
-		else
-			throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
+			let token;
+			if (req.headers.authorization)
+				token = req.headers.authorization.split(' ')[1]
+			else
+				throw new HttpException('TOKEN X', HttpStatus.FORBIDDEN);
 
-		const payload = await this.authService.verifyJWT(token);
+			const payload = await this.authService.verifyJWT(token);
 
-		const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(()=>null)
+			const auth42 = await this.auth42Service.findAuth42ById(payload.id).catch(() => null)
+			if(!auth42)
+				throw new HttpException('Auth42 X', HttpStatus.FORBIDDEN);
 
-		
-		if (payload.auth42Status) { 
-			const newToken = await this.auth42Service.loginOTP(payload, code);
-			res.cookie('access_token', token, {
-				httpOnly: false,
-			});
-			res.send(newToken)
-		} else {
-			throw new HttpException('AUTH42 VALIDATION', HttpStatus.FORBIDDEN);
+			if (payload.auth42Status) {
+				const newToken = await this.auth42Service.loginOTP(payload, code);
+				res.cookie('access_token', token, {
+					httpOnly: false,
+				});
+				res.send(newToken)
+			} else {
+				throw new HttpException('AUTH42 VALIDATION', HttpStatus.FORBIDDEN);
+			}
+		} catch (e) {
+			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
 		}
 	}
 
