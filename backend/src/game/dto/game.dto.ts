@@ -123,4 +123,9 @@ export class TouchBarDto {
 	@IsNumber()
 	@IsNotEmpty()
 	touchBar: number;
+
+	@IsString()
+	@IsNotEmpty()
+	@Transform(({ value }) => value.trim())
+	gameRoomName: string;
 }

@@ -24,7 +24,7 @@ export class AuthController {
 	----------------------------------*/
 
 	@Get('/')
-	viaPath(@Res() res: Response) {
+	viaPath(@Res({ passthrough: true }) res: Response) {
 		try {
 			res.status(301).redirect("http://localhost:3000/auth/42/callback")
 		} catch (e) {
@@ -37,7 +37,7 @@ export class AuthController {
 	*/
 	@Get('/42/callback')
 	@UseGuards(Auth42AuthGuard)
-	async redirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+	async redirect(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
 		try {
 
 			if (req.user) {
@@ -109,7 +109,7 @@ export class AuthController {
 	@Post('/login/otp')
 	async loginOTP(
 		@Req() req: Request,
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 		@Body('code') code: string,
 	): Promise<void> {
 		try {
