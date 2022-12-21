@@ -1,0 +1,9 @@
+@font-face {
+  font-family: "Knewave";
+  src: url("./../fonts/KnewaveRegular.ttf");
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("./../fonts/Roboto/Roboto-Medium.ttf");
+}
