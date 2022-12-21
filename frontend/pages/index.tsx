@@ -1,9 +1,9 @@
-import MainLayout from '@/layouts/MainLayout';
-import Head from 'next/head';
-import { ReactElement, useState } from 'react';
-import { Image } from '@chakra-ui/react';
-import Modal from '@/components/modal/Modal';
-import { CustomButton } from '@/components/CustomButton';
+import MainLayout from "@/layouts/MainLayout";
+import Head from "next/head";
+import { ReactElement, useState } from "react";
+import { Image } from "@chakra-ui/react";
+import Modal from "@/components/modal/Modal";
+import { CustomButton } from "@/components/CustomButton";
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -16,7 +16,10 @@ export default function LandingPage() {
     <>
       <Head>
         <title>LastPong</title>
-        <meta name="description" content="ft_transcendence project in 42 Seoul" />
+        <meta
+          name="description"
+          content="ft_transcendence project in 42 Seoul"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

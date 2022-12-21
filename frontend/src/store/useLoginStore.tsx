@@ -52,7 +52,7 @@ const useLoginStore = create<LoginState>((set) => ({
       avatarImg,
     })),
 
-  otpCheck: 0,
+  otpCheck: 999,
   setOtpCheck: (otpCheck) =>
     set((state) => ({
       ...state,

@@ -1,5 +1,5 @@
 import React from "react";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Input, Text, Flex, Button } from "@chakra-ui/react";
 import useLoginStore from "@/store/useLoginStore";
@@ -46,24 +46,67 @@ const styles = {
 };
 
 export default function BasicIdPage() {
+  const [check, setCheck] = useState("block");
   const { name, setName } = useLoginStore();
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const buttonCheckRef = useRef<HTMLDivElement>(null);
+  const buttonNextRef = useRef<HTMLDivElement>(null);
+
+  const onClickCheck = (event: React.MouseEvent<HTMLElement>) => {
+    var str: string;
+    str = "";
+    if (inputRef.current) str = inputRef.current?.value;
+
+    //공백만 입력된 경우
+    var blank_pattern = /^\s+|\s+$/g;
+    if (str.replace(blank_pattern, "") == "") {
+      alert("공백만 입력되었습니다.");
+      return;
+    }
+
+    //문자열에 공백이 있는 경우
+    var blank_pattern = /[\s]/g;
+    if (blank_pattern.test(str) == true) {
+      alert("공백이 입력되었습니다.");
+      return;
+    }
+
+    //특수문자가 있는 경우
+    var special_pattern = /[`~!@#$%^&*|\\\'\";:\/?]/gi;
+    if (special_pattern.test(str) == true) {
+      alert("특수문자가 입력되었습니다.");
+      return;
+    }
+
+    //공백 혹은 특수문자가 있는 경우
+    if (str.search(/\W|\s/g) > -1) {
+      alert("특수문자 또는 공백이 입력되었습니다.");
+      return;
+    }
+
+    if (check === "none") {
+      setCheck("block");
+    } else {
+      {
+        setCheck("none");
+        if (inputRef.current) inputRef.current.disabled = true;
+        if (buttonNextRef.current)
+          buttonNextRef.current.style.display = "block";
+      }
+    }
+    setName(inputRef.current?.value);
+  };
 
   const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
     setName(inputRef.current?.value);
   };
 
-  // const onChangeInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const str = event.currentTarget.value;
-  //   if (str === "" || str === null) {
-  //     buttonRef.current?.setAttribute("disabled", "false");
-  //   } else {
-  //     buttonRef.current?.setAttribute("disabled", "true");
-  //   }
-  //   // var regExp = /[ \{\}\[\]\/?.,;:|\)*~`!^\-_+┼<>@\#$%&\'\"\\\(\=]/gi;
-  //   // const curText = event.currentTarget.value;
-  // };
+  const onChangeInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const str = event.currentTarget.value;
+    console.log(str);
+  };
 
   return (
     <>
@@ -75,14 +118,23 @@ export default function BasicIdPage() {
               style={styles.InputText}
               maxLength={12}
               ref={inputRef}
-              // onChange={onChangeInput}
+              onChange={onChangeInput}
+              // disabled={true}
             />
+            <Button
+              style={styles.ThemaButton}
+              onClick={onClickCheck}
+              ref={buttonCheckRef}
+              display={check}
+            >
+              CHECk
+            </Button>
             <Link href={"/auth/basicAvatar"} style={{ textDecoration: "none" }}>
               <Button
                 style={styles.ThemaButton}
                 onClick={onClickNext}
-                ref={buttonRef}
-                // disabled={true}
+                ref={buttonNextRef}
+                display={"none"}
               >
                 NEXT
               </Button>
