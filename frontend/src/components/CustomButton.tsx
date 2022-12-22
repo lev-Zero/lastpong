@@ -9,7 +9,7 @@ export interface CustomButtonProps {
 }
 
 export function CustomButton({ children, size, isDisabled = false, onClick }: CustomButtonProps) {
-  const [bg, color]: [string, string] = !isDisabled ? ['main', 'white'] : ['gray', '#AAAAAA'];
+  const [bg, color]: [string, string] = !isDisabled ? ['main', 'white'] : ['gray.200', '#AAAAAA'];
 
   return (
     <Button

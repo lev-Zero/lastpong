@@ -20,7 +20,7 @@ function getBg(status: UserStatus) {
 
 export default function CustomAvatar({ url, size, status }: CustomAvatarProps) {
   return (
-    <Avatar src={url} size={size}>
+    <Avatar src={url} size={size} bg="gray.200">
       {status !== undefined ? <AvatarBadge bg={getBg(status)} boxSize="1.25em" /> : null}
     </Avatar>
   );
