@@ -25,14 +25,17 @@ import { GameModule } from './game/game.module';
 	imports: [
 		ChatModule,
 		GameModule,
-    ConfigModule.forRoot({isGlobal:true}),
-    TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: 'postgres',
-    port: 5432,
-    username: 'transcendence',
-    password: 'transcendence',
-    database: 'chat_pong',
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: 'nestjs.env',
+		}),
+		TypeOrmModule.forRoot({
+		type: 'postgres',
+		host: process.env.POSTGRES_HOST,
+		database: process.env.POSTGRES_DATABASE,
+		username: process.env.POSTGRES_USERNAME,
+		password: process.env.POSTGRES_PASSWORD,
+		port: +process.env.POSTGRES_PORT,
     entities: [
       User,
       Avatar,
@@ -48,9 +51,8 @@ import { GameModule } from './game/game.module';
 			MutedUser,
 			JoinedDmUser,
     ],
-    autoLoadEntities:true, //entity 자동 불러옴 (default:false)
-    // logging:true, //query확인가능 (default:false)
-    synchronize: true, //프로그램 시작때마다 DB스키마 자동생성 및 테이블 수정사항 반영(default:false)
+    autoLoadEntities:true,
+    synchronize: true,
     } ),
     ChatModule,
     GameModule	],
