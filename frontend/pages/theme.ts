@@ -8,7 +8,7 @@ const colors = {
   lose: '#FF0000',
   online: '#6ADC10',
   offline: '#BEC8BC',
-  ingame: '#4267B2',
+  inGame: '#4267B2',
   crown: '#F4C621',
 };
 
