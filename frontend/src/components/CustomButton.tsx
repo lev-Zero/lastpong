@@ -13,8 +13,11 @@ export function CustomButton({ children, size, isDisabled = false, onClick }: Cu
 
   return (
     <Button
+      w={120}
       bg={bg}
       color={color}
+      border="2px"
+      borderColor="white"
       borderRadius="42"
       size={size}
       disabled={isDisabled}
