@@ -15,7 +15,8 @@ import { Auth42Service } from './service/auth42.service';
 			Auth42
 		]),
 		JwtModule.register({
-			secret: "SECRET_KEY",
+			// secret: "SECRET_KEY",
+			secret: process.env.JWT_SECRET,
 			signOptions: { expiresIn: '1d' },
 		})
 		, UserModule
