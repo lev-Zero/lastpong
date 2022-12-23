@@ -19,7 +19,6 @@ export class Auth42Strategy extends PassportStrategy(Strategy) {
     try {
       const user = {
         username: profile.username,
-        id42: profile.id,
         profileUrl: profile.profileUrl,
       };
       return user;

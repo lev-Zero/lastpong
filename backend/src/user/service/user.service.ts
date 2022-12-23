@@ -38,7 +38,10 @@ export class UserService {
   }
 
   async testFindUser(username: string): Promise<User> {
-    const user = this.userRepository.findOne({ where: { username } });
+    const user = this.userRepository.findOne({
+      where: { username },
+      relations: ['avatar'],
+    });
 
     return user;
   }
