@@ -14,7 +14,7 @@ export default function Sidebar() {
   };
 
   return (
-    <VStack w="100%" h="90vh" padding={5} backgroundColor="white">
+    <VStack w="100%" h="100%" padding={5} backgroundColor="white">
       <Flex w="100%">
         <Text>FRIENDS</Text>
         <Spacer />
