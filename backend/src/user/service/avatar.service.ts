@@ -1,8 +1,4 @@
-import {
-	HttpException,
-	HttpStatus,
-	Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Avatar } from '../entity/avatar.entity';
@@ -11,41 +7,49 @@ import { UserService } from './user.service';
 
 @Injectable()
 export class AvatarService {
-	constructor(
-		@InjectRepository(Avatar)
-		private avatarRepository: Repository<Avatar>,
-		private userService: UserService
-	) { }
+  constructor(
+    @InjectRepository(Avatar)
+    private avatarRepository: Repository<Avatar>,
+    private userService: UserService,
+  ) {}
 
-
-	/*----------------------------------
+  /*----------------------------------
 	|								avatar							 |
 	----------------------------------*/
 
-	async findAvatarById(userId: number): Promise<Avatar> {
-		try {
-			const user: User = await this.userService.findUserById(userId, ['avatar']);
-			if (!user.avatar)
-				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
-			return user.avatar;
-		} catch (e) {
-			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-		}
-	}
+  async findAvatarById(userId: number): Promise<Avatar> {
+    try {
+      const user: User = await this.userService.findUserById(userId, [
+        'avatar',
+      ]);
+      if (!user.avatar)
+        throw new HttpException(
+          '유저를 찾을 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      return user.avatar;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 
-	async findAvatarByName(username: string): Promise<Avatar> {
-		try {
-			const user: User = await this.userService.findUserByName(username, ['avatar']);
-			if (!user.avatar)
-				throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.BAD_REQUEST);
-			return user.avatar;
-		} catch (e) {
-			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-		}
-	}
+  async findAvatarByName(username: string): Promise<Avatar> {
+    try {
+      const user: User = await this.userService.findUserByName(username, [
+        'avatar',
+      ]);
+      if (!user.avatar)
+        throw new HttpException(
+          '유저를 찾을 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      return user.avatar;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 
-
-	/*
+  /*
 		file: {
 			fieldname: 'file',
 			originalname: 'asdf.png',
@@ -56,35 +60,44 @@ export class AvatarService {
 		}
 	*/
 
-	async updateOrCreateAvatar(userId: number, profileUrl?: string, file?: Express.Multer.File): Promise<Avatar> {
-		try {
-			let filename = null;
-			let photoData = null;
+  async updateOrCreateAvatar(
+    userId: number,
+    profileUrl?: string,
+    file?: Express.Multer.File,
+  ): Promise<Avatar> {
+    try {
+      let filename = null;
+      let photoData = null;
 
-			if (file) {
-				filename = file.originalname;
-				photoData = file.buffer;
-			}
-			const user = await this.userService.findUserById(userId);
+      if (file) {
+        filename = file.originalname;
+        photoData = file.buffer;
+      }
+      const user = await this.userService.findUserById(userId);
 
-			let avatar = await this.avatarRepository.findOne({
-				where: { user }
-			}).catch(() => null)
+      let avatar = await this.avatarRepository
+        .findOne({
+          where: { user },
+        })
+        .catch(() => null);
 
-			if (!avatar) {
-				if (!profileUrl)
-					profileUrl = "empty";
-				avatar = await this.avatarRepository.create({ filename, photoData, user, profileUrl });
-			} else {
-				avatar.filename = filename;
-				avatar.photoData = photoData;
-			}
-			await this.avatarRepository.save(avatar);
+      if (!avatar) {
+        if (!profileUrl) profileUrl = 'empty';
+        avatar = await this.avatarRepository.create({
+          filename,
+          photoData,
+          user,
+          profileUrl,
+        });
+      } else {
+        avatar.filename = filename;
+        avatar.photoData = photoData;
+      }
+      await this.avatarRepository.save(avatar);
 
-			return avatar;
-		} catch (e) {
-			throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-		}
-	}
-
+      return avatar;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
