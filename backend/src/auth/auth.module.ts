@@ -10,20 +10,18 @@ import { Auth42 } from './entity/auth42.entity';
 import { Auth42Service } from './service/auth42.service';
 
 @Module({
-	imports: [
-		TypeOrmModule.forFeature([
-			Auth42
-		]),
-		JwtModule.register({
-			// secret: "SECRET_KEY",
-			secret: process.env.JWT_SECRET,
-			signOptions: { expiresIn: '1d' },
-		})
-		, UserModule
-	],
+  imports: [
+    TypeOrmModule.forFeature([Auth42]),
+    JwtModule.register({
+      // secret: "SECRET_KEY",
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
+    }),
+    UserModule,
+  ],
 
   controllers: [AuthController],
-	providers: [AuthService, Auth42Service, Auth42Strategy, JwtStrategy],
-	exports:[AuthService, Auth42Service]
+  providers: [AuthService, Auth42Service, Auth42Strategy, JwtStrategy],
+  exports: [AuthService, Auth42Service],
 })
 export class AuthModule {}

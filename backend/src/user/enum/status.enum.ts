@@ -1,15 +1,14 @@
-
 export enum userStatus {
-	OFFLINE,
-	ONLINE,
-	CHATCHANNEL,
-	CHATROOM,
-	GAMECHANNEL,
-	GAMEROOM
+  OFFLINE,
+  ONLINE,
+  CHATCHANNEL,
+  CHATROOM,
+  GAMECHANNEL,
+  GAMEROOM,
 }
 
-export enum chatRoomStatus{
-	PUBLIC,
-	PROTECTED,
-	PRIVATE
+export enum chatRoomStatus {
+  PUBLIC,
+  PROTECTED,
+  PRIVATE,
 }
