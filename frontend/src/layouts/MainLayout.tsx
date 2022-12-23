@@ -12,8 +12,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <Box h="100%">
       <Header />
       <Flex bg="gray.200" h="90%">
-        <Box flexGrow={4}>{children}</Box>
-        <Box flexGrow={1}>
+        <Box w="80%">{children}</Box>
+        <Box w="20%">
           <Sidebar />
         </Box>
       </Flex>
