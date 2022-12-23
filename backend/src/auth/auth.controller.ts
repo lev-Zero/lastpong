@@ -53,10 +53,12 @@ export class AuthController {
       if (req.user) {
         const data = await this.auth42Service.login(req.user);
 
-        res.cookie('access_token', data.token, {
-          httpOnly: false,
-        });
-        return { status: 'login', profileUrl: data.profileUrl };
+        res.cookie('access_token', data.token);
+        res.cookie('profileUrl', data.profileUrl);
+
+        res.status(301).redirect('http://localhost:8080/로그인성공했어요');
+      } else {
+        res.status(301).redirect('http://localhost:8080/재로그인시도하시오');
       }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
