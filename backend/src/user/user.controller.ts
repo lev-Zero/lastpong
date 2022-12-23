@@ -52,13 +52,37 @@ export class UserController {
 
   //http://localhost:3000/user/test/create/fakeuser
   @Get('/test/create/fakeuser')
-  testCreateUser() {
+  async testCreateUser() {
     console.log('[userController] testCreateUser');
     this.testDeleteUser();
-    this.userService.testCreateFakeUser('fake_U1');
-    this.userService.testCreateFakeUser('fake_U2');
-    this.userService.testCreateFakeUser('fake_U3');
-    this.userService.testCreateFakeUser('fake_U4');
+    const photoUrl =
+      'https://velog.velcdn.com/images%2Fseeh_h%2Fpost%2F46d59d0b-4a8a-4f5d-a173-045d433919bc%2Fimage.png';
+    let user;
+    user = await this.userService.testCreateFakeUser('fake_U1');
+    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+      originalname: 'fakePhoto',
+      buffer: null,
+    } as Express.Multer.File);
+    user = await this.userService.testCreateFakeUser('fake_U2');
+    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+      originalname: 'fakePhoto',
+      buffer: null,
+    } as Express.Multer.File);
+    user = await this.userService.testCreateFakeUser('fake_U3');
+    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+      originalname: 'fakePhoto',
+      buffer: null,
+    } as Express.Multer.File);
+    user = await this.userService.testCreateFakeUser('fake_U4');
+    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+      originalname: 'fakePhoto',
+      buffer: null,
+    } as Express.Multer.File);
+    user = await this.userService.testCreateFakeUser('fake_U5');
+    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+      originalname: 'fakePhoto',
+      buffer: null,
+    } as Express.Multer.File);
   }
 
   //http://localhost:3000/user/test/delete/fakeuser

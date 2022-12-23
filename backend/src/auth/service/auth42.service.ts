@@ -35,7 +35,7 @@ export class Auth42Service {
       if (!findUser) {
         const user = await this.userService.createUser(data);
 
-        await this.createAuth42(user.id, data.id42);
+        await this.createAuth42(user.id);
 
         if (data.profileUrl) {
           await this.avatarService.updateOrCreateAvatar(
@@ -72,7 +72,7 @@ export class Auth42Service {
 	|								OTP								 |
 	----------------------------------*/
 
-  async createAuth42(userId: number, userIdIn42?: number): Promise<Auth42> {
+  async createAuth42(userId: number): Promise<Auth42> {
     try {
       let auth42 = await this.findAuth42ById(userId).catch(() => null);
 
@@ -84,7 +84,6 @@ export class Auth42Service {
 
       auth42 = this.auth42Repository.create({
         user: { id: userId },
-        userIdIn42,
       });
 
       await this.auth42Repository.save(auth42);
