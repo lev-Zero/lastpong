@@ -38,7 +38,10 @@ export class UserService {
   }
 
   async testFindUser(username: string): Promise<User> {
-    const user = this.userRepository.findOne({ where: { username } });
+    const user = this.userRepository.findOne({
+      where: { username },
+      relations: ['avatar'],
+    });
 
     return user;
   }
@@ -65,7 +68,7 @@ export class UserService {
       const users = await this.userRepository
         .createQueryBuilder('users')
         .select(['users.id', 'users.username', 'users.rating', 'users.status'])
-        .leftJoinAndSelect('users.avatar', 'avatar')
+        // .leftJoinAndSelect('users.avatar', 'avatar')
         .getMany();
 
       return users;

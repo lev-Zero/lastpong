@@ -18,7 +18,4 @@ export class Auth42 {
 
   @Column({ nullable: true })
   otp: string;
-
-  @Column({ nullable: true })
-  userIdIn42: number;
 }
