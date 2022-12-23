@@ -14,20 +14,20 @@ import { JoinedDmUser } from './entity/JoinedDmUser.entity';
 import { ChatController } from './chat.controller';
 
 @Module({
-	imports: [
-		TypeOrmModule.forFeature([
-			ChatRoom,
-			ChatRoomDm,
-			BannedUser,
-			AdminUser,
-			JoinedUser,
-			MutedUser,
-			JoinedDmUser,
-		]),
-		AuthModule,
-		UserModule
-	],
-	controllers: [ChatController],
-	providers: [ChatService, ChatGateway]
+  imports: [
+    TypeOrmModule.forFeature([
+      ChatRoom,
+      ChatRoomDm,
+      BannedUser,
+      AdminUser,
+      JoinedUser,
+      MutedUser,
+      JoinedDmUser,
+    ]),
+    AuthModule,
+    UserModule,
+  ],
+  controllers: [ChatController],
+  providers: [ChatService, ChatGateway],
 })
-export class ChatModule { }
+export class ChatModule {}
