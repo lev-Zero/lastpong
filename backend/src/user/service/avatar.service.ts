@@ -94,7 +94,7 @@ export class AvatarService {
         avatar.photoData = photoData;
       }
       await this.avatarRepository.save(avatar);
-
+      delete avatar.photoData;
       return avatar;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
