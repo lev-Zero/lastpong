@@ -17,18 +17,6 @@ const styles = {
   } as React.CSSProperties,
 };
 
-function onLoginUser() {
-  console.log("Clicked!");
-
-  const getAuth = async () => {
-    const res = await fetch("http://localhost:3000/auth", {
-      headers: { "Access-Control-Allow-Origin": "http://localhost:3000" },
-    });
-  };
-  getAuth();
-  return;
-}
-
 export default function AuthLoginPage() {
   return (
     <>
@@ -44,9 +32,16 @@ export default function AuthLoginPage() {
       <main>
         <Center flexDir={"column"}>
           <Text style={styles.MainText}> LAST PONG </Text>
-          <CustomButton size="md" onClick={onLoginUser}>
-            START
-          </CustomButton>
+          <Link href={"http://localhost:3000/auth/"}>
+            <CustomButton
+              size="md"
+              onClick={() => {
+                console.log("OK");
+              }}
+            >
+              START
+            </CustomButton>
+          </Link>
         </Center>
       </main>
     </>
