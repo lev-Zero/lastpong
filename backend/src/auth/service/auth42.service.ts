@@ -10,7 +10,6 @@ import { AuthService } from './auth.service';
 
 @Injectable()
 export class Auth42Service {
-  private secrets: Map<number, string> = new Map();
   constructor(
     @InjectRepository(Auth42)
     private readonly auth42Repository: Repository<Auth42>,
@@ -127,15 +126,13 @@ export class Auth42Service {
     try {
       const auth42 = await this.findAuth42ById(userId, ['user']);
 
-      if (auth42.otp)
-        throw new HttpException(
-          '이미 유저는 OTP 인증을 마쳤습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      // if (auth42.otp)
+      //   throw new HttpException(
+      //     '이미 유저는 OTP 인증을 마쳤습니다.',
+      //     HttpStatus.BAD_REQUEST,
+      //   );
 
       const output = await generateSecret(auth42.user.username, 'jeonghwl');
-
-      this.secrets.set(auth42.user.id, output.secret);
 
       auth42.otp = output.secret;
       await this.auth42Repository.save(auth42);
