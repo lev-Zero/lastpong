@@ -55,7 +55,7 @@ export default function Header() {
       </Box>
       <Box mx={5}>
         <Link href="/auth/logout">
-          <Image src="/Logout.png" />
+          <Image src="/Logout.svg" />
         </Link>
       </Box>
     </Flex>
