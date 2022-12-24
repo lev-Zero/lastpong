@@ -146,16 +146,21 @@ export class Auth42Service {
 
   async loginOTP(payload: Payload, code: string): Promise<string> {
     try {
+      console.log('[auth42C] loginOTP');
+      console.log(1);
       if (payload.otpStatus)
         throw new HttpException(
           '이미 로그인한 유저 입니다.',
           HttpStatus.BAD_REQUEST,
         );
 
+      console.log(11);
       await this.verifyCode(payload.id, code);
 
+      console.log(111);
       const auth42Status = true;
       const otpStatus = true;
+      console.log(1111);
       return this.authService.generateJWT(payload.id, auth42Status, otpStatus);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
