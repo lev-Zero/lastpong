@@ -58,7 +58,7 @@ export class AuthController {
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
 
-        res.status(301).redirect('http://localhost:8080/auth/loading');
+        res.status(301).redirect('http://localhost:8080/auth/login/otp');
       } else {
         res.status(301).redirect('http://localhost:8080/auth/login');
       }
@@ -132,9 +132,9 @@ export class AuthController {
   ): Promise<void> {
     try {
       let token;
-      if (req.headers.authorization)
+      if (req.headers.authorization) {
         token = req.headers.authorization.split(' ')[1];
-      else
+      } else
         throw new HttpException(
           '토큰을 찾을 수 없습니다.',
           HttpStatus.BAD_REQUEST,
@@ -152,7 +152,9 @@ export class AuthController {
         );
 
       if (payload.auth42Status) {
+        console.log('A');
         const newToken = await this.auth42Service.loginOTP(payload, code);
+        console.log('B');
         res.cookie('accessToken', token);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
         res.send(newToken);
