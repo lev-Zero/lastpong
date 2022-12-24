@@ -82,7 +82,7 @@ export class AvatarService {
         .catch(() => null);
 
       if (!avatar) {
-        if (!profileUrl) profileUrl = 'empty';
+        // if (!profileUrl) profileUrl = 'empty';
         avatar = await this.avatarRepository.create({
           filename,
           photoData,

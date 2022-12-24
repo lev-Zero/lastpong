@@ -23,11 +23,9 @@ export class User {
   id: number;
 
   @OneToOne(() => Auth42, (auth42) => auth42.user)
-  @JoinColumn()
   auth42: Auth42;
 
   @OneToOne(() => Avatar, (avatar) => avatar.user)
-  @JoinColumn()
   avatar: Avatar;
 
   @Column({ unique: true, nullable: true })

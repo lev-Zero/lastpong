@@ -42,7 +42,7 @@ export class Auth42Service {
             user.id,
             data.profileUrl,
             {
-              originalname: 'profilePhoto',
+              originalname: `profilePhoto${user.id}`,
               buffer: null,
             } as Express.Multer.File,
           );
