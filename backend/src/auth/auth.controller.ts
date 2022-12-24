@@ -56,6 +56,7 @@ export class AuthController {
 
         res.cookie('accessToken', data.token);
         res.cookie('profileUrl', data.profileUrl);
+        res.cookie('otpStatus', data.otpStatus);
 
         res.status(301).redirect('http://localhost:8080/로그인성공했어요');
       } else {
