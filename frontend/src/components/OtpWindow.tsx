@@ -1,3 +1,4 @@
+import { SERVER_URL } from '@/variables';
 import {
   Flex,
   Image,
@@ -14,8 +15,6 @@ import { useState } from 'react';
 interface OtpWindowProps {
   src: string;
 }
-
-const SERVER_URL: string = 'http://localhost:3000';
 
 export default function OtpWindow({ src }: OtpWindowProps) {
   const [code, setCode] = useState<string>('');
@@ -44,6 +43,7 @@ export default function OtpWindow({ src }: OtpWindowProps) {
           console.log('틀렸습니다');
           return;
         }
+        console.log(res);
         router.push('/');
       });
     }
