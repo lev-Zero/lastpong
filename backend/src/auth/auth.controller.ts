@@ -155,7 +155,7 @@ export class AuthController {
         const newToken = await this.auth42Service.loginOTP(payload, code);
         res.cookie('accessToken', newToken);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
-        res.send(newToken);
+        res.send({ token: newToken });
       } else {
         throw new HttpException(
           'AUTH42가 유효하지 않습니다.',
