@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -13,8 +19,9 @@ export class Avatar {
   photoData: Buffer;
 
   @OneToOne(() => User, (user) => user.avatar, { onDelete: 'CASCADE' })
+  @JoinColumn()
   user: User;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: null })
   profileUrl: string;
 }

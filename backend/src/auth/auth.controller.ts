@@ -53,7 +53,7 @@ export class AuthController {
       if (req.user) {
         const data = await this.auth42Service.login(req.user);
 
-        res.cookie('access_token', data.token);
+        res.cookie('accessToken', data.token);
         res.cookie('profileUrl', data.profileUrl);
 
         res.status(301).redirect('http://localhost:8080/로그인성공했어요');
@@ -69,7 +69,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
-      res.cookie('access_token', '', {
+      res.cookie('accessToken', '', {
         httpOnly: false,
       });
       res.send({ status: 'logout' }); //redirect
