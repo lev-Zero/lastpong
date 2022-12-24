@@ -11,10 +11,15 @@ import { ReactElement } from 'react';
 
 export default function UserProfilePage() {
   const router = useRouter();
-  const { username } = router.query;
+  let username: string | string[] | undefined = router.query.username;
+  if (username === undefined) {
+    username = '';
+  } else if (Array.isArray(username)) {
+    username = username.join('');
+  }
 
   const user: UserProps = {
-    name: 'yopark',
+    name: username,
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
@@ -24,7 +29,7 @@ export default function UserProfilePage() {
   };
 
   const dummyMatchHistory: MatchHistoryProps = {
-    myName: 'yopark',
+    myName: username,
     myScore: 4,
     oppName: 'pongmaster',
     oppScore: 10,
