@@ -66,6 +66,7 @@ export class Auth42Service {
           otpStatus,
         ),
         profileUrl: data.profileUrl,
+        otpStatus,
       };
       return result;
     } catch (e) {
