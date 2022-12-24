@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -164,6 +165,26 @@ export class AuthController {
           HttpStatus.BAD_REQUEST,
         );
       }
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Patch('/otp/on')
+  @UseGuards(JwtAuthGuard)
+  updateOtpOn(@Req() req: Request) {
+    try {
+      return this.auth42Service.updateOtpOn(req.user.userId);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Patch('/otp/off')
+  @UseGuards(JwtAuthGuard)
+  updateOtpOff(@Req() req: Request) {
+    try {
+      return this.auth42Service.updateOtpOff(req.user.userId);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

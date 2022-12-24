@@ -49,10 +49,16 @@ export class Auth42Service {
         }
       }
 
-      const user = await this.userService.findUserByName(data.username);
+      const user = await this.userService.findUserByName(data.username, [
+        'auth42',
+      ]);
 
       const auth42Status = true;
-      const otpStatus = false;
+      let otpStatus = false;
+
+      if (findUser && user.auth42.otpOn == false) {
+        otpStatus = true;
+      }
 
       const result = {
         token: await this.authService.generateJWT(
@@ -84,6 +90,7 @@ export class Auth42Service {
 
       auth42 = this.auth42Repository.create({
         user: { id: userId },
+        userId,
       });
 
       await this.auth42Repository.save(auth42);
@@ -180,6 +187,37 @@ export class Auth42Service {
           '잘못된 6자리 숫자 입력하셨습니다.',
           HttpStatus.BAD_REQUEST,
         );
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateOtpOn(userId: number) {
+    try {
+      const user = await this.userService.findUserById(userId, ['auth42']);
+      const auth42User = await this.auth42Repository.findOne({
+        where: { userId: user.id },
+      });
+      if (auth42User.otpOn == false) auth42User.otpOn = true;
+      await this.auth42Repository.save(auth42User);
+      const result = { status: 'otpOn' };
+      return result;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateOtpOff(userId: number) {
+    try {
+      console.log('[auth42Service] updateOtpOff');
+      const user = await this.userService.findUserById(userId, ['auth42']);
+      const auth42User = await this.auth42Repository.findOne({
+        where: { userId: user.id },
+      });
+      if (auth42User.otpOn == true) auth42User.otpOn = false;
+      await this.auth42Repository.save(auth42User);
+      const result = { status: 'otpOff' };
+      return result;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
