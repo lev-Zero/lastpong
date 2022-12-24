@@ -70,9 +70,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
-      res.cookie('accessToken', '', {
-        httpOnly: false,
-      });
+      res.cookie('accessToken', '');
       res.send({ status: 'logout' }); //redirect
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -154,9 +152,7 @@ export class AuthController {
 
       if (payload.auth42Status) {
         const newToken = await this.auth42Service.loginOTP(payload, code);
-        res.cookie('access_token', token, {
-          httpOnly: false,
-        });
+        res.cookie('accessToken', token);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
         res.send(newToken);
       } else {
