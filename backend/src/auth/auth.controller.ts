@@ -152,9 +152,7 @@ export class AuthController {
         );
 
       if (payload.auth42Status) {
-        console.log('A');
         const newToken = await this.auth42Service.loginOTP(payload, code);
-        console.log('B');
         res.cookie('accessToken', token);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
         res.send(newToken);

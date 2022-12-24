@@ -8,6 +8,7 @@ import {
   PinInputDescendantsProvider,
   Input,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 interface OtpWindowProps {
@@ -18,6 +19,7 @@ const SERVER_URL: string = 'http://localhost:3000';
 
 export default function OtpWindow({ src }: OtpWindowProps) {
   const [code, setCode] = useState<string>('');
+  const router = useRouter();
 
   function handleOtpCode(code: string) {
     setCode(code);
@@ -28,17 +30,22 @@ export default function OtpWindow({ src }: OtpWindowProps) {
 
       const jwtToken: string = `Bearer ${cookies['accessToken']}`;
       const headers = {
-        authorization: jwtToken,
+        Authorization: jwtToken,
+        'Content-Type': 'application/json',
       };
-      const body = { code };
+      const body = { code: code };
 
       fetch(SERVER_URL + '/auth/login/otp', {
         method: 'POST',
         body: JSON.stringify(body),
         headers: headers,
-      })
-        .then(console.log)
-        .catch();
+      }).then((res) => {
+        if (!res.ok) {
+          console.log('틀렸습니다');
+          return;
+        }
+        router.push('/');
+      });
     }
   }
 
