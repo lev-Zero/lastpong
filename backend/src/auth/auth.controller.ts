@@ -58,9 +58,9 @@ export class AuthController {
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
 
-        res.status(301).redirect('http://localhost:8080/로그인성공했어요');
+        res.status(301).redirect('http://localhost:8080/auth/loading');
       } else {
-        res.status(301).redirect('http://localhost:8080/재로그인시도하시오');
+        res.status(301).redirect('http://localhost:8080/auth/login');
       }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
