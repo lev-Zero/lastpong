@@ -18,4 +18,10 @@ export class Auth42 {
 
   @Column({ nullable: true })
   otp: string;
+
+  @Column()
+  userId: number;
+
+  @Column({ default: true })
+  otpOn: boolean;
 }
