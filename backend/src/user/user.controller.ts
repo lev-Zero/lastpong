@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Req,
@@ -140,6 +141,15 @@ export class UserController {
   findMe(@Req() req: Request): Promise<User> {
     try {
       return this.userService.findUserById(req.user.userId);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+  @Patch('/me')
+  @UseGuards(JwtAuthGuard)
+  updateUserName(@Req() req: Request, @Body() body): Promise<User> {
+    try {
+      return this.userService.updateUserName(req.user.userId, body.newUserName);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
