@@ -57,6 +57,7 @@ export class AuthController {
         res.cookie('accessToken', data.token);
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
+        res.cookie('accessToken42', data.accessToken42);
 
         res.status(301).redirect('http://localhost:8080/auth/login/otp');
       } else {

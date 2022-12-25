@@ -20,6 +20,7 @@ export class Auth42Strategy extends PassportStrategy(Strategy) {
       const user = {
         username: profile.username,
         profileUrl: profile.profileUrl,
+        accessToken42: accessToken,
       };
       return user;
     } catch (e) {
