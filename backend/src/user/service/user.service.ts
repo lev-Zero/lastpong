@@ -164,4 +164,31 @@ export class UserService {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async updateUserName(userId: number, newUserName: string): Promise<User> {
+    try {
+      let user = await this.findUserById(userId).catch(() => null);
+      if (!user)
+        throw new HttpException(
+          '해당 유저는 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      const isUsingUserName = await this.findUserByName(newUserName).catch(
+        () => null,
+      );
+      if (!isUsingUserName) {
+        await this.userRepository.update(user.id, { username: newUserName });
+        user = await this.findUserById(userId);
+      } else {
+        throw new HttpException(
+          '이미 사용중인 username 입니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      console.log({ user });
+      return user;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
