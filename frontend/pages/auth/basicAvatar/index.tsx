@@ -2,9 +2,18 @@ import React from "react";
 // import Head from "next/head";
 import BasicLayout from "@/layouts/BasicLayout";
 import { useRef, useState } from "react";
-import { Avatar, Text, Flex, Input, Box, Button } from "@chakra-ui/react";
+import {
+  Avatar,
+  Text,
+  Flex,
+  Input,
+  Image,
+  Box,
+  Button,
+} from "@chakra-ui/react";
 import useLoginStore from "@/store/useLoginStore";
-import Link from "next/link";
+import { useRouter } from "next/router";
+import { SERVER_URL } from "@/variables";
 
 const styles = {
   MenualText: {
@@ -48,12 +57,94 @@ export default function BasicAvatarPage() {
     if (event.currentTarget.files !== null) {
       if (event.currentTarget.files.length === 0) return;
       const file = event.currentTarget.files[0];
+      console.log(file);
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         setImageFile(reader.result);
         setAvatarImg(reader.result);
       };
     }
+  };
+
+  const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
+    const router = useRouter();
+    router.push("/");
+  };
+
+  const onClickCheck = (event: React.MouseEvent<HTMLElement>) => {
+    const cookies = Object.fromEntries(
+      document.cookie.split(";").map((cookie) => cookie.trim().split("="))
+    );
+
+    const jwtToken: string = `Bearer ${cookies["accessToken"]}`;
+    const jwtToken42: string = `Bearer ${cookies["accessToken42"]}`;
+
+    let headers = {
+      Authorization: jwtToken,
+      "Content-Type": "application/json",
+    };
+
+    const headersOTP = {
+      Authorization: jwtToken,
+      "Content-Type": "application/json",
+    };
+
+    const headers42 = {
+      Authorization: jwtToken42,
+      "Content-Type": "application/json",
+    };
+
+    let profilePhoto: any;
+    let userName: any;
+    headers = headersOTP;
+
+    fetch(SERVER_URL + "/user/avatar/me", { headers })
+      .then((response) => response.json())
+      .then((json) => {
+        profilePhoto = json.profilePhoto;
+        userName = json.username;
+        console.log(json);
+      });
+
+    if (profilePhoto === undefined) {
+      console.log("AVATAR EMPTY");
+      headers = headers42;
+      var decodeURL = decodeURIComponent(cookies["profileUrl"]);
+
+      fetch(decodeURL, { headers })
+        .then((response) => response.json())
+        .then((json) => {
+          setAvatarImg(json.image.link);
+          profilePhoto = json.image.link;
+          console.log(profilePhoto);
+        });
+    }
+
+    var myFile;
+    fetch(profilePhoto)
+      .then((res) => res.blob())
+      .then((myBlob) => {
+        // debugger;
+        myFile = new File(["File"], "image.jpeg", { type: myBlob.type });
+        return myFile;
+      })
+      .then((ImageFile) => {
+        var form = new FormData();
+        form.append("file", ImageFile, "image.jpg");
+        console.log(form.getAll("file"));
+        const body = { file: form };
+        headers = headersOTP;
+
+        fetch(SERVER_URL + "/user/avatar/me", {
+          method: "PUT",
+          body: JSON.stringify(body),
+          headers: headers,
+        })
+          .then((res) => res.json())
+          .then((json) => console.log(json));
+      });
+
+    console.log(myFile);
   };
 
   return (
@@ -84,6 +175,7 @@ export default function BasicAvatarPage() {
                 maxWidth={"300px"}
                 borderRadius={"150px"}
                 src={avatarImg}
+                size={"full"}
                 ref={selectAvatar}
               />
               {/* <Avatar size={"full"} ref={selectAvatar} /> */}
@@ -94,9 +186,12 @@ export default function BasicAvatarPage() {
             >
               UPLOAD
             </Button>
-            <Link href={"/"} style={{ textDecoration: "none" }}>
-              <Button style={styles.ThemaButton}>NEXT</Button>
-            </Link>
+            <Button style={styles.ThemaButton} onClick={onClickNext}>
+              NEXT
+            </Button>
+            <Button style={styles.ThemaButton} onClick={onClickCheck}>
+              Avatar ME TEST
+            </Button>
           </Flex>
         </main>
       </BasicLayout>

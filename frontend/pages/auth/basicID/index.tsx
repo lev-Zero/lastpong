@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Input, Text, Flex, Button } from "@chakra-ui/react";
 import useLoginStore from "@/store/useLoginStore";
 import BasicLayout from "@/layouts/BasicLayout";
+import { SERVER_URL } from "@/variables";
+import { useRouter } from "next/router";
 
 const styles = {
   MenualText: {
@@ -48,6 +50,7 @@ const styles = {
 export default function BasicIdPage() {
   const [check, setCheck] = useState("block");
   const { name, setName } = useLoginStore();
+  const router = useRouter();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -99,13 +102,31 @@ export default function BasicIdPage() {
     setName(inputRef.current?.value);
   };
 
-  const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
-    setName(inputRef.current?.value);
-  };
-
   const onChangeInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const str = event.currentTarget.value;
     console.log(str);
+  };
+
+  const onClickUser = (event: React.MouseEvent<HTMLElement>) => {
+    const cookies = Object.fromEntries(
+      document.cookie.split(";").map((cookie) => cookie.trim().split("="))
+    );
+
+    const jwtToken: string = `Bearer ${cookies["accessToken"]}`;
+    const headers = {
+      Authorization: jwtToken,
+      "Content-Type": "application/json",
+    };
+    fetch(SERVER_URL + "/user/me", { headers }).then((res) => {
+      if (!res.ok) {
+        console.log(res);
+      }
+    });
+  };
+
+  const onClickNext = (event: React.MouseEvent<HTMLElement>) => {
+    setName(inputRef.current?.value);
+    router.push("/auth/basicAvatar");
   };
 
   return (
@@ -115,6 +136,7 @@ export default function BasicIdPage() {
           <Flex style={styles.CenterFlex}>
             <Text style={styles.MenualText}>PLEASE ENTER THE ID</Text>
             <Input
+              color={"black"}
               style={styles.InputText}
               maxLength={12}
               ref={inputRef}
@@ -139,6 +161,7 @@ export default function BasicIdPage() {
                 NEXT
               </Button>
             </Link>
+            <Button onClick={onClickUser}>UserSetting</Button>
           </Flex>
         </main>
       </BasicLayout>
