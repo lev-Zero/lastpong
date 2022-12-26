@@ -1,8 +1,8 @@
-import { NextPage } from "next";
-import type { AppProps } from "next/app";
-import { ReactElement, ReactNode } from "react";
-import theme from "./theme";
-import "/styles/global.css";
+import { NextPage } from 'next';
+import type { AppProps } from 'next/app';
+import { ReactElement, ReactNode } from 'react';
+import theme from './theme';
+import '/styles/global.css';
 import {
   Button,
   Center,
@@ -21,12 +21,12 @@ import {
   Box,
   HStack,
   Link,
-} from "@chakra-ui/react";
-import { SERVER_URL } from "@/variables";
-import { CustomButton } from "@/components/CustomButton";
-import CustomAvatar from "@/components/CustomAvatar";
-import { UserProps, UserStatus } from "@/interfaces/UserProps";
-import { useRouter } from "next/router";
+} from '@chakra-ui/react';
+import { SERVER_URL } from '@/utils/variables';
+import { CustomButton } from '@/components/CustomButton';
+import CustomAvatar from '@/components/CustomAvatar';
+import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { useRouter } from 'next/router';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -42,8 +42,8 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const user: UserProps = {
-    name: "yopark",
-    imgUrl: "",
+    name: 'yopark',
+    imgUrl: '',
     // status: UserStatus.inGame,
     rating: 1028,
     winCnt: 3,
@@ -53,23 +53,23 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   const onClickUser = (event: React.MouseEvent<HTMLElement>) => {
     const cookies = Object.fromEntries(
-      document.cookie.split(";").map((cookie) => cookie.trim().split("="))
+      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
     );
 
-    const jwtToken: string = `Bearer ${cookies["accessToken"]}`;
+    const jwtToken: string = `Bearer ${cookies['accessToken']}`;
     const headers = {
       Authorization: jwtToken,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     };
 
     console.log(jwtToken);
-    fetch(SERVER_URL + "/user/me", { headers })
+    fetch(SERVER_URL + '/user/me', { headers })
       .then((response) => response.json())
       .then((json) => {
         console.log(json);
       });
 
-    router.push("/auth/basicID");
+    router.push('/auth/basicID');
   };
 
   return (
@@ -77,30 +77,21 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       {getLayout(<Component {...pageProps} />)}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent bg="win" color="white" borderRadius={30} top={"30%"}>
+        <ModalContent bg="win" color="white" borderRadius={30} top={'30%'}>
           <Center>
             <VStack>
               <ModalHeader></ModalHeader>
               <ModalBody>
                 <VStack>
-                  <Flex
-                    w="100%"
-                    justifyContent="space-around"
-                    alignItems="center"
-                    bg="Win"
-                  >
+                  <Flex w="100%" justifyContent="space-around" alignItems="center" bg="Win">
                     <Box mr={5}>
-                      <CustomAvatar
-                        url={user.imgUrl}
-                        size="xl"
-                        status={user.status}
-                      />
+                      <CustomAvatar url={user.imgUrl} size="xl" status={user.status} />
                     </Box>
                     <VStack>
                       <Text fontSize="4xl">{user.name.toUpperCase()}</Text>
                       <HStack>
                         <Text>RATING</Text>
-                        <Text color={"opponent"}>{user.rating}</Text>
+                        <Text color={'opponent'}>{user.rating}</Text>
                       </HStack>
                     </VStack>
                   </Flex>
@@ -108,7 +99,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                 </VStack>
               </ModalBody>
               <ModalFooter>
-                <VStack mb={"7"}>
+                <VStack mb={'7'}>
                   {/* TODO:onclick 핸들러로 매치 잡는 기능 */}
                   <CustomButton size="lg" onClick={onClose}>
                     MATCH
@@ -117,7 +108,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                     size="lg"
                     onClick={onClose}
                     btnStyle={{
-                      background: "transparent",
+                      background: 'transparent',
                     }}
                   >
                     CANCEL
