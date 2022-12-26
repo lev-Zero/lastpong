@@ -48,9 +48,9 @@ export async function customFetch(method: string, path: string, body?: Object) {
       body: JSON.stringify(body),
     });
   }
-  if (!response.ok) {
-    throw Error(`${response.status}`);
-  }
   const json = await response.json();
+  if (!response.ok) {
+    throw Error(`${response.status} ${json.message}`);
+  }
   return json;
 }
