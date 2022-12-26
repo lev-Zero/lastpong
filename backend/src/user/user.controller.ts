@@ -174,7 +174,7 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          'Content-Disposition': `inline; filename="${avatar.filename}"`,
+          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
@@ -199,7 +199,7 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          'Content-Disposition': `inline; filename="${avatar.filename}"`,
+          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
@@ -225,7 +225,7 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          'Content-Disposition': `inline; filename="${avatar.filename}"`,
+          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
