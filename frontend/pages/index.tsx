@@ -77,8 +77,8 @@ export default function LandingPage() {
   };
   return (
     <>
-      {!isLoaded ? (
-        <Text>LOADING...</Text>
+      {!isLoaded || !isLogin ? (
+        <Text fontSize="2xl">LOADING...</Text>
       ) : (
         <>
           <Head>
