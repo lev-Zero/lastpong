@@ -27,14 +27,14 @@ class UserProps {
   }
 }
 
-interface userDataInfo {
+interface userStoreProps {
   user: UserProps;
-  setUser: (select: UserProps) => void;
+  setUser: (user: UserProps) => void;
 }
 
-export const userStore = create<userDataInfo>((set) => ({
+export const userStore = create<userStoreProps>((set) => ({
   user: new UserProps(),
-  setUser: (select: UserProps) => {
-    set((state) => ({ ...state, user: select }));
+  setUser: (user: UserProps) => {
+    set((state) => ({ ...state, user: user }));
   },
 }));
