@@ -1,16 +1,20 @@
 import Link from 'next/link';
 import ChatPage from 'pages/chat';
-import { Flex, Box, Text, Image, Spacer, Circle, HStack } from '@chakra-ui/react';
-// import { useState, useRef } from 'react';
-import useLoginStore from '@/store/useLoginStore';
-import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { Flex, Box, Text, Image, Spacer, Circle, HStack, Button } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
 import { userStore } from '@/stores/userStore';
+import { useRouter } from 'next/router';
+import { removeCookie, setCookie } from 'typescript-cookie';
 
 export default function Header() {
   // TODO: 클릭 시 useOtp가 변경되게 만들려면 zustand에서 user를 꺼내서 써야한다. 그렇지 않으면 리렌더링이 발생하지 않는다.
   const { user } = userStore();
-  console.log(user);
+  const router = useRouter();
+
+  function logout() {
+    removeCookie('accessToken');
+    router.push('/');
+  }
 
   return (
     <Flex
@@ -48,9 +52,7 @@ export default function Header() {
         </HStack>
       </Box>
       <Box mx={5}>
-        <Link href="/auth/logout">
-          <Image src="/Logout.svg" />
-        </Link>
+        <Image onClick={logout} src="/Logout.svg" />
       </Box>
     </Flex>
   );

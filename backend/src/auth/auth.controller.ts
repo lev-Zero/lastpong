@@ -68,16 +68,18 @@ export class AuthController {
     }
   }
 
-  @Get('/logout')
-  @UseGuards(JwtAuthGuard)
-  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    try {
-      res.cookie('accessToken', '');
-      res.send({ status: 'logout' }); //redirect
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-    }
-  }
+  // @Get('/logout')
+  // @UseGuards(JwtAuthGuard)
+  // logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  //   try {
+  //     res.cookie('accessToken', '', {
+  //       maxAge: 0,
+  //     });
+  //     res.send({ status: 'logout' }); //redirect
+  //   } catch (e) {
+  //     throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   /*----------------------------------
 	|								OTP								 |
