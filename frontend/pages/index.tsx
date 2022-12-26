@@ -16,8 +16,9 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
-import { SERVER_URL } from '@/variables';
+import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
+import { customFetch } from '@/utils/customFetch';
 
 export default function LandingPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -27,27 +28,18 @@ export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const cookies = Object.fromEntries(
-      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
-    );
-
-    const jwtToken: string = `Bearer ${cookies['accessToken']}`;
-    const headers = {
-      Authorization: jwtToken,
-      'Content-Type': 'application/json',
-    };
-    fetch(SERVER_URL + '/user/me', { headers })
-      .then((res) => {
-        if (!res.ok) {
-          setIsLogin(false);
-          setIsLoaded(true);
-        }
-        return res.json();
-      })
-      .then((json) => {
+    async function fetchData() {
+      try {
+        const json = await customFetch('GET', '/user/me');
+        // user 정보 zustand에 저장하기
         setIsLogin(true);
+      } catch (e) {
+        setIsLogin(false);
+      } finally {
         setIsLoaded(true);
-      });
+      }
+    }
+    fetchData();
   }, []);
 
   useEffect(() => {
