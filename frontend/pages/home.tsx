@@ -17,7 +17,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
-import { userStore } from '@/store/storeMe';
 
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -33,18 +32,6 @@ export default function HomePage() {
       setTimeSpent(1);
     }
   }, [isOpen]);
-
-  const { userData, setUserData } = userStore();
-
-  const tmpUser = {
-    name: 'cmoon',
-    imgUrl: 'kkkk',
-    status: 2,
-    rating: 333,
-    winCnt: 1222,
-    loseCnt: 999,
-    useOtp: false,
-  };
   return (
     <>
       <Head>
@@ -53,15 +40,6 @@ export default function HomePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Button
-        onClick={() => {
-          console.log(userData);
-          setUserData(tmpUser);
-          console.log(userData);
-        }}
-      >
-        User Data
-      </Button>
       <Flex height={'100%'} flexDir={'column'} alignItems="center" justifyContent={'center'}>
         <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
         <CustomButton

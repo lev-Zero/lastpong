@@ -7,6 +7,8 @@ import BasicLayout from '@/layouts/BasicLayout';
 import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
 import { customFetch } from '@/utils/customFetch';
+import { userStore } from '@/stores/userStore';
+import { UserProps } from '@/interfaces/UserProps';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -17,11 +19,27 @@ export default function LandingPage() {
     router.push(`${SERVER_URL}/auth`);
   };
 
+  const { user, setUser } = userStore();
+
   useEffect(() => {
     async function fetchData() {
       try {
         const json = await customFetch('GET', '/user/me');
+        console.log(json);
+
         // user 정보 zustand에 저장하기
+        const dummyUser: UserProps = {
+          name: json.username,
+          imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',
+          status: json.status,
+          rating: json.rating,
+          winCnt: 1222,
+          loseCnt: 999,
+          useOtp: false,
+        };
+
+        setUser(dummyUser);
+
         setIsLogin(true);
       } catch (e) {
         setIsLogin(false);
