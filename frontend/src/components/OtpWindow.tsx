@@ -1,5 +1,5 @@
 import React from 'react';
-import { SERVER_URL } from '@/variables';
+import { SERVER_URL } from '@/utils/variables';
 
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie';
 import {

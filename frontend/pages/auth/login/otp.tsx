@@ -5,7 +5,7 @@ import { ReactElement } from 'react';
 import { Center, Text } from '@chakra-ui/react';
 import BasicLayout from '@/layouts/BasicLayout';
 import OtpWindow from '@/components/OtpWindow';
-import { SERVER_URL } from '@/variables';
+import { SERVER_URL } from '@/utils/variables';
 
 const styles = {
   MainText: {

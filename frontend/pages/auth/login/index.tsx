@@ -7,6 +7,7 @@ import Link from 'next/link';
 
 import useLoginStore from '@/store/useLoginStore';
 import BasicLayout from '@/layouts/BasicLayout';
+import { SERVER_URL } from '@/utils/variables';
 
 const styles = {
   MainText: {
@@ -29,7 +30,7 @@ export default function AuthLoginPage() {
       <main>
         <Center flexDir={'column'}>
           <Text style={styles.MainText}> LASTPONG </Text>
-          <Link href={'http://localhost:3000/auth'}>
+          <Link href={SERVER_URL + '/auth'}>
             <CustomButton
               size="md"
               onClick={() => {
