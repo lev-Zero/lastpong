@@ -8,6 +8,7 @@ import Link from "next/link";
 import useLoginStore from "@/store/useLoginStore";
 import BasicLayout from "@/layouts/BasicLayout";
 import OtpWindow from "@/components/OtpWindow";
+import { SERVER_URL } from "@/utils/variables";
 
 const styles = {
   MainText: {
@@ -38,7 +39,7 @@ export default function AuthLoadingPage() {
     otpStatus = cookies["otpStatus"];
     profileURl = cookies["profileUrl"];
 
-    fetch("http://localhost:3000/auth/login/otp/check", {
+    fetch(SERVER_URL + "/auth/login/otp/check", {
       method: "GET",
       headers: {
         authorization: authStr,
