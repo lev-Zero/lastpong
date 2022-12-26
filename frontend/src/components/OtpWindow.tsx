@@ -32,7 +32,7 @@ export default function OtpWindow({ src }: OtpWindowProps) {
       const json = await customFetch('POST', '/auth/login/otp', { code });
       removeCookie('accessToken');
       setCookie('accessToken', json.token);
-      router.push('/');
+      router.push('/auth/basic/id');
     } catch (e) {
       console.log(e);
       setBgColor(false);
