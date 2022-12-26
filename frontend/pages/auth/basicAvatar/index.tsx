@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import useLoginStore from "@/store/useLoginStore";
 import { useRouter } from "next/router";
-import { SERVER_URL } from "@/variables";
+import { SERVER_URL } from "@/utils/variables";
 
 const styles = {
   MenualText: {
