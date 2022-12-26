@@ -28,7 +28,7 @@ export default function AuthLoginPage() {
       </Head>
       <main>
         <Center flexDir={'column'}>
-          <Text style={styles.MainText}> LAST PONG </Text>
+          <Text style={styles.MainText}> LASTPONG </Text>
           <Link href={'http://localhost:3000/auth'}>
             <CustomButton
               size="md"
