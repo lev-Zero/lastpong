@@ -5,18 +5,12 @@ import { Flex, Box, Text, Image, Spacer, Circle, HStack } from '@chakra-ui/react
 import useLoginStore from '@/store/useLoginStore';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import CustomAvatar from './CustomAvatar';
+import { userStore } from '@/stores/userStore';
 
 export default function Header() {
   // TODO: 클릭 시 useOtp가 변경되게 만들려면 zustand에서 user를 꺼내서 써야한다. 그렇지 않으면 리렌더링이 발생하지 않는다.
-  const user: UserProps = {
-    name: 'yopark',
-    imgUrl: '',
-    status: UserStatus.inGame,
-    rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
-    useOtp: false,
-  };
+  const { user } = userStore();
+  console.log(user);
 
   return (
     <Flex
