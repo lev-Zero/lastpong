@@ -1,33 +1,21 @@
-import MainLayout from '@/layouts/MainLayout';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { ReactElement, useEffect, useState } from 'react';
-import {
-  Button,
-  Center,
-  Flex,
-  Image,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  useDisclosure,
-  VStack,
-} from '@chakra-ui/react';
+import { ReactElement } from 'react';
 import { CustomButton } from '@/components/CustomButton';
+import { Text, VStack } from '@chakra-ui/react';
+import BasicLayout from '@/layouts/BasicLayout';
 import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
 import { customFetch } from '@/utils/customFetch';
-import { userStore } from '@/store/storeMe';
 
 export default function LandingPage() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [timeSpent, setTimeSpent] = useState<number>(1);
+  const router = useRouter();
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [isLogin, setIsLogin] = useState<boolean>(false);
-  const router = useRouter();
+
+  const goToLogin = () => {
+    router.push(`${SERVER_URL}/auth`);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -48,88 +36,30 @@ export default function LandingPage() {
     if (!isLoaded) {
       return;
     }
-    if (!isLogin) {
-      router.push('/auth/login');
+    if (isLogin) {
+      router.push('/home');
     }
   }, [isLoaded]);
 
-  useEffect(() => {
-    const interval = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeSpent(1);
-    }
-  }, [isOpen]);
-
-  const { userData, setUserData } = userStore();
-
-  const tmpUser = {
-    name: 'cmoon',
-    imgUrl: 'kkkk',
-    status: 2,
-    rating: 333,
-    winCnt: 1222,
-    loseCnt: 999,
-    useOtp: false,
-  };
   return (
     <>
-      {!isLoaded || !isLogin ? (
-        <Text fontSize="2xl">LOADING...</Text>
+      <Head>
+        <title>LastPong</title>
+        <meta name="description" content="ft_transcendence project in 42 Seoul" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      {!isLoaded || isLogin ? (
+        <Text fontSize="6xl">LOADING...</Text>
       ) : (
         <>
-          <Head>
-            <title>LastPong</title>
-            <meta name="description" content="ft_transcendence project in 42 Seoul" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
-          <Button
-            onClick={() => {
-              console.log(userData);
-              setUserData(tmpUser);
-              console.log(userData);
-            }}
-          >
-            User Data
-          </Button>
-          <Flex height={'100%'} flexDir={'column'} alignItems="center" justifyContent={'center'}>
-            <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
-            <CustomButton
-              size="lg"
-              onClick={onOpen}
-              btnStyle={{
-                position: 'absolute',
-                top: '82%',
-                left: '42%',
-                transform: 'translate(-50%, -50%)',
-                height: '10%',
-                width: '10%',
-                fontSize: '40px',
-              }}
-            >
-              MATCH
+          <VStack spacing={10}>
+            <Text fontSize="6xl">LASTPONG</Text>
+            <CustomButton size="lg" onClick={goToLogin}>
+              START
             </CustomButton>
-          </Flex>
-          <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent bg="main" color="white">
-              <Center>
-                <VStack>
-                  <ModalHeader>LOOKING FOR AN OPPONENT...</ModalHeader>
-                  <ModalBody fontSize="6xl">{timeSpent}</ModalBody>
-                  <ModalFooter>
-                    <CustomButton size="md" onClick={onClose}>
-                      CANCEL
-                    </CustomButton>
-                  </ModalFooter>
-                </VStack>
-              </Center>
-            </ModalContent>
-          </Modal>
+          </VStack>
         </>
       )}
     </>
@@ -137,5 +67,5 @@ export default function LandingPage() {
 }
 
 LandingPage.getLayout = function (page: ReactElement) {
-  return <MainLayout>{page}</MainLayout>;
+  return <BasicLayout>{page}</BasicLayout>;
 };
