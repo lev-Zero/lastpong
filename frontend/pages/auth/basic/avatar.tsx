@@ -192,7 +192,6 @@ export default function BasicAvatarPage() {
                 borderRadius={'150px'}
                 src={avatarImg}
                 size={'full'}
-                sty
                 ref={selectAvatar}
               />
               {/* <Avatar size={"full"} ref={selectAvatar} /> */}
@@ -205,17 +204,17 @@ export default function BasicAvatarPage() {
               Avatar ME TEST
             </Button> */}
             <form
-              name='accountFrm'
-              method='put'
-              encType='multipart/form-data'
+              name="accountFrm"
+              method="put"
+              encType="multipart/form-data"
               style={{ color: 'black' }}
             >
               <input
-                type='file'
+                type="file"
                 ref={selectFile}
                 style={{ display: 'none' }}
                 accept={'image/*'}
-                name='profile_img'
+                name="profile_img"
                 onChange={onChangeInput}
               />
               <Button style={styles.ThemaButton} onClick={onClickNext}>

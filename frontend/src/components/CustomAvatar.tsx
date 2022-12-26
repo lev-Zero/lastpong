@@ -5,6 +5,7 @@ interface CustomAvatarProps {
   url: string;
   size: string;
   status?: UserStatus;
+  style?: Object;
 }
 
 function getBg(status: UserStatus) {
@@ -18,9 +19,9 @@ function getBg(status: UserStatus) {
   }
 }
 
-export default function CustomAvatar({ url, size, status }: CustomAvatarProps) {
+export default function CustomAvatar({ url, size, status, style }: CustomAvatarProps) {
   return (
-    <Avatar src={url} size={size} bg="gray.200">
+    <Avatar src={url} size={size} style={style} bg="gray.200" objectFit="cover">
       {status !== undefined ? <AvatarBadge bg={getBg(status)} boxSize="1.25em" /> : null}
     </Avatar>
   );
