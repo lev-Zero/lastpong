@@ -6,6 +6,7 @@ import { Center, Text } from '@chakra-ui/react';
 import BasicLayout from '@/layouts/BasicLayout';
 import OtpWindow from '@/components/OtpWindow';
 import { SERVER_URL } from '@/utils/variables';
+import { useRouter } from 'next/router';
 
 const styles = {
   MainText: {
@@ -22,6 +23,7 @@ export default function OtpPage() {
   let profileUrl: string;
 
   const [qrCodeSrc, setQrCodeSrc] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const cookies = Object.fromEntries(
@@ -39,7 +41,11 @@ export default function OtpPage() {
     })
       .then((response) => response.json())
       .then((json) => {
-        setQrCodeSrc(json.qrcode);
+        if ('status' in json) {
+          router.push('/auth/basic/id');
+        } else {
+          setQrCodeSrc(json.qrcode);
+        }
       });
   }, []);
 
