@@ -177,13 +177,12 @@ export default function ChatPage() {
             </Flex>
 
             {/* 방생성 모달 파트 */}
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
                 <ModalContent
                     bg="white"
                     color="black"
                     borderRadius={30}
-                    top={"30%"}
                 >
                     <Center>
                         <HStack>

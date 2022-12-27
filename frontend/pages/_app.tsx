@@ -75,9 +75,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <ChakraProvider theme={theme}>
       {getLayout(<Component {...pageProps} />)}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
-        <ModalContent bg="win" color="white" borderRadius={30} top={'30%'}>
+        <ModalContent bg="win" color="white" borderRadius={30}>
           <Center>
             <VStack>
               <ModalHeader></ModalHeader>

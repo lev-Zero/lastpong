@@ -58,7 +58,7 @@ export default function HomePage() {
           MATCH
         </CustomButton>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
         <ModalContent bg="main" color="white">
           <Center>
