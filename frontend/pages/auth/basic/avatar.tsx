@@ -3,9 +3,9 @@ import React from 'react';
 import BasicLayout from '@/layouts/BasicLayout';
 import { useRef, useState } from 'react';
 import { Avatar, Text, Flex, Input, Image, Box, Button } from '@chakra-ui/react';
-import useLoginStore from '@/store/useLoginStore';
 import { useRouter } from 'next/router';
 import { SERVER_URL } from '@/utils/variables';
+import useLoginStore from '@/store/useLoginStore';
 
 const styles = {
   MenualText: {
@@ -104,71 +104,48 @@ export default function BasicAvatarPage() {
       .then((data) => {
         console.log(data);
       });
-    router.push('/');
+    // router.push('/');
   };
 
   const onClickCheck = async (event: React.MouseEvent<HTMLElement>) => {
     const cookies = Object.fromEntries(
       document.cookie.split(';').map((cookie) => cookie.trim().split('='))
     );
-
     const jwtToken: string = `Bearer ${cookies['accessToken']}`;
-    const jwtToken42: string = `Bearer ${cookies['accessToken42']}`;
 
-    let headers = {
-      Authorization: jwtToken,
-      'Content-Type': 'application/json',
-    };
-
-    const headersOTP = {
-      Authorization: jwtToken,
-      'Content-Type': 'application/json',
-    };
-
-    const headers42 = {
-      Authorization: jwtToken42,
-      'Content-Type': 'application/json',
-    };
-
-    // let profilePhoto: any;
-    // let userName: any;
-    // headers = headersOTP;
-
-    // fetch(SERVER_URL + '/user/avatar/me', {
-    //   headers: {
-    //     Authorization: jwtToken,
-    //     'Content-Type': 'application/json',
-    //   },
-    // }).then((response) => response.json());
-
-    // .then((json) => {
-    //   profilePhoto = json.profilePhoto;
-    //   userName = json.username;
-    //   console.log(json);
-    // });
-    //   .then(() => {
-    //     if (profilePhoto === undefined || profilePhoto === 'empty') {
-    //       headers = headers42;
-    //       var decodeURL = decodeURIComponent(cookies['profileUrl']);
-    //       fetch(decodeURL, { headers })
-    //         .then((response) => response.json())
-    //         .then((json) => {
-    //           profilePhoto = json.image.link;
-    //           setAvatarImg(profilePhoto);
-    //           // urlToObject(profilePhoto);
-    //         });
-    //     }
-    //   });
-
-    //   fetch(SERVER_URL + "/user/avatar/me", {
-    //     method: "PUT",
-    //     body: form,
-    //     // headers: headers,
-    //   })
-    //     .then((res) => res.json())
-    //     .then((json) => console.log(json));
-    // });
-    // console.log(myFile);
+    fetch(SERVER_URL + '/user/avatar/me', {
+      headers: {
+        Authorization: jwtToken,
+        'Content-Type': 'image/*',
+      },
+    })
+      .then((response) => {
+        const reader = response.body?.getReader();
+        return new ReadableStream({
+          start(controller) {
+            function pump() {
+              return reader?.read().then(({ done, value }) => {
+                if (done) {
+                  controller.close();
+                  return;
+                }
+                controller.enqueue(value);
+                pump();
+                return;
+              });
+            }
+            return pump();
+          },
+        });
+      })
+      .then((stream) => new Response(stream))
+      .then((response) => response.blob())
+      .then((blob) => URL.createObjectURL(blob))
+      .then((url) => {
+        setAvatarImg(url);
+        console.log(url);
+      })
+      .catch((err) => console.error(err));
   };
 
   return (
@@ -194,15 +171,14 @@ export default function BasicAvatarPage() {
                 size={'full'}
                 ref={selectAvatar}
               />
-              {/* <Avatar size={"full"} ref={selectAvatar} /> */}
             </Flex>
             <Button style={styles.ThemaButton} onClick={() => selectFile.current?.click()}>
               UPLOAD
             </Button>
 
-            {/* <Button style={styles.ThemaButton} onClick={onClickCheck}>
+            <Button style={styles.ThemaButton} onClick={onClickCheck}>
               Avatar ME TEST
-            </Button> */}
+            </Button>
             <form
               name="accountFrm"
               method="put"
