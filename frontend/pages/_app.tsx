@@ -46,8 +46,6 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     imgUrl: '',
     // status: UserStatus.inGame,
     rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
     useOtp: false,
   };
 
