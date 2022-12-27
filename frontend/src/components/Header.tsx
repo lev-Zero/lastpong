@@ -5,11 +5,15 @@ import CustomAvatar from './CustomAvatar';
 import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
 import { removeCookie, setCookie } from 'typescript-cookie';
+import { useEffect } from 'react';
 
 export default function Header() {
   // TODO: 클릭 시 useOtp가 변경되게 만들려면 zustand에서 user를 꺼내서 써야한다. 그렇지 않으면 리렌더링이 발생하지 않는다.
-  const { user } = userStore();
+
+  const { me, fetchMe } = userStore();
   const router = useRouter();
+
+  useEffect(() => fetchMe, []);
 
   function logout() {
     removeCookie('accessToken');
@@ -38,17 +42,17 @@ export default function Header() {
       </Box>
       <Spacer />
       <Box mx={5}>
-        <Link href={`/user/${user.name}`}>
-          <CustomAvatar url={user.imgUrl} size="md" />
+        <Link href={`/user/${me.name}`}>
+          <CustomAvatar url={me.imgUrl} size="md" />
         </Link>
       </Box>
       <Box mx={5}>
-        <Link href={`/user/${user.name}`}>{user.name.toUpperCase()}</Link>
+        <Link href={`/user/${me.name}`}>{me.name}</Link>
       </Box>
       <Box mx={5}>
         <HStack>
           <Text fontSize="sm">OTP</Text>
-          <Circle size="10px" bg={user.useOtp ? 'online' : 'offline'}></Circle>
+          <Circle size="10px" bg={me.useOtp ? 'online' : 'offline'}></Circle>
         </HStack>
       </Box>
       <Box mx={5}>

@@ -21,8 +21,8 @@ import { useRouter } from 'next/router';
 import { ReactElement, useState, useRef } from 'react';
 import { userStore } from '@/stores/userStore';
 import UserItem from '@/components/UserItem';
-import { UserProps } from '@/interfaces/UserProps';
-import { UserStatus } from '@/stores/userStore';
+import { UserProps, UserStatus } from '@/interfaces/UserProps';
+
 interface ChatLog {
   id: string;
   msg: string;
@@ -31,7 +31,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const { roomNo } = router.query;
   const [msg, setMsg] = useState<string>('');
-  const { user } = userStore();
+  const { me } = userStore();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const title = '지금 심심하신 분 ~';
@@ -45,17 +45,15 @@ export default function ChatRoomPage() {
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
     useOtp: false,
   };
 
   //이부분은 채팅 주고받은 로그 기록 전반이다. 백엔드에서 실시간으로 갱신하는 부분으로 바꾸어야함
   const chatLogList: ChatLog[] = [
     { id: 'tmp', msg: 'hello hello1' },
-    { id: user.name, msg: 'hello hello2' },
+    { id: me.name, msg: 'hello hello2' },
     { id: 'tmp', msg: 'hello hello3' },
-    { id: user.name, msg: 'hello hello4' },
+    { id: me.name, msg: 'hello hello4' },
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello5' },
@@ -63,9 +61,9 @@ export default function ChatRoomPage() {
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello1' },
-    { id: user.name, msg: 'hello hello2' },
+    { id: me.name, msg: 'hello hello2' },
     { id: 'tmp', msg: 'hello hello3' },
-    { id: user.name, msg: 'hello hello4' },
+    { id: me.name, msg: 'hello hello4' },
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello5' },
     { id: 'tmp', msg: 'hello hello5' },
@@ -78,7 +76,7 @@ export default function ChatRoomPage() {
     const chatRipples = [];
     for (let tmp of chatLogList) {
       chatRipples.push(
-        tmp.id === user.name ? (
+        tmp.id === me.name ? (
           <Flex width={'80rem'}>
             <Flex p={3} borderRadius={'50px'} bg={'main'} color={'white'} fontSize={'35'}>
               {tmp.msg}
