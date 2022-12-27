@@ -22,6 +22,6 @@ export class Auth42 {
   @Column()
   userId: number;
 
-  @Column({ default: true })
+  @Column({ default: false })
   otpOn: boolean;
 }
