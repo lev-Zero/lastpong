@@ -104,7 +104,7 @@ export default function BasicAvatarPage() {
       .then((data) => {
         console.log(data);
       });
-    // router.push('/');
+    router.push('/');
   };
 
   const onClickCheck = async (event: React.MouseEvent<HTMLElement>) => {
