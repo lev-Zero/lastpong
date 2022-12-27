@@ -1,4 +1,4 @@
-import { UserStatus } from './UserProps';
+import { UserStatus } from '../interfaces/UserProps';
 
 export function convertUserStatus(userStatus: number) {
   // offline | online | chatChannel | chatRoom | gameChannel | gameRoom

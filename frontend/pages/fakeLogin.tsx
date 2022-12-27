@@ -7,7 +7,7 @@ import { userStore } from '@/stores/userStore';
 import { setCookie } from 'typescript-cookie';
 import { useRouter } from 'next/router';
 import { UserProps } from '@/interfaces/UserProps';
-import { convertUserStatus } from '@/interfaces/convertUserStatus';
+import { convertUserStatus } from '@/utils/convertUserStatus';
 
 export default function FakeLogin() {
   const { setMe } = userStore();
