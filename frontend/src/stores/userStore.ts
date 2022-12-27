@@ -1,6 +1,8 @@
-import { UserStatus } from '@/interfaces/UserProps';
+import { convertUserStatus } from '@/utils/convertUserStatus';
 import { UserProps } from '@/interfaces/UserProps';
+import { UserStatus } from '@/interfaces/UserProps';
 import { customFetch } from '@/utils/customFetch';
+import { sortAndDeduplicateDiagnostics, VoidExpression } from 'typescript';
 import create from 'zustand';
 
 interface userStoreProps {
@@ -8,6 +10,10 @@ interface userStoreProps {
   setUseOtp: (useOtp: boolean) => void;
   setMe: (user: UserProps) => void;
   fetchMe: () => void;
+
+  friends: UserProps[];
+  setFriends: (friends: UserProps[]) => void;
+  fetchFriends: () => void;
 }
 
 export const userStore = create<userStoreProps>((set, get) => ({
@@ -30,12 +36,38 @@ export const userStore = create<userStoreProps>((set, get) => ({
       const user = {
         name: json.username,
         imgUrl: '', // TODO : img는 따로 가져와야 한다.
-        status: json.status,
+        status: convertUserStatus(json.status),
         rating: json.rating,
         useOtp: false,
       };
-      console.log('fetchMe', user);
       get().setMe(user);
+      console.log('fetchMe', user);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
+  },
+  friends: [],
+  setFriends: (friends: UserProps[]) => {
+    set((state) => ({ ...state, friends }));
+  },
+  fetchFriends: async () => {
+    try {
+      const arr = await customFetch('GET', 'user/friend');
+      const friends: UserProps[] = arr.map((json: any) => {
+        const friend = json.friend;
+        return {
+          name: friend.username,
+          imgUrl: '',
+          status: convertUserStatus(friend.status),
+          rating: friend.rating,
+          useOtp: false,
+        };
+      });
+      get().setFriends(friends);
+      console.log('fetchFriends', friends);
     } catch (e) {
       if (e instanceof Error) {
         console.log(e.message);
