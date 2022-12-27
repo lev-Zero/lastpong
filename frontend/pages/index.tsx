@@ -19,7 +19,7 @@ export default function LandingPage() {
     router.push(`${SERVER_URL}/auth`);
   };
 
-  const { user, setUser } = userStore();
+  const { setUser } = userStore();
 
   useEffect(() => {
     async function fetchData() {
@@ -33,8 +33,6 @@ export default function LandingPage() {
           imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',
           status: json.status,
           rating: json.rating,
-          winCnt: 1222,
-          loseCnt: 999,
           useOtp: false,
         };
 

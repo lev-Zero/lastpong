@@ -10,36 +10,9 @@ import { UserProps } from '@/interfaces/UserProps';
 import { convertUserStatus } from '@/interfaces/convertUserStatus';
 
 export default function FakeLogin() {
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //       const json = await customFetch('GET', '/user/me');
-  //       console.log(json);
-
-  //       // user 정보 zustand에 저장하기
-  //       const dummyUser: UserProps = {
-  //         name: json.username,
-  //         imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',
-  //         status: json.status,
-  //         rating: json.rating,
-  //         winCnt: 1222,
-  //         loseCnt: 999,
-  //         useOtp: false,
-  //       };
-
-  //       setUser(dummyUser);
-
-  //       setIsLogin(true);
-  //     } catch (e) {
-  //       setIsLogin(false);
-  //     } finally {
-  //       setIsLoaded(true);
-  //     }
-  //   }
-  //   fetchData();
-  // }, []);
-  const { user, setUser } = userStore();
+  const { setUser } = userStore();
   const router = useRouter();
+
   async function createFakeUsers() {
     try {
       const json = await customFetch('GET', '/user/test/create/fakeuser');
@@ -60,8 +33,6 @@ export default function FakeLogin() {
         imgUrl: json.avatar.profileUrl,
         status: convertUserStatus(json.status),
         rating: json.rating,
-        winCnt: 3,
-        loseCnt: 3,
         useOtp: false,
       };
 

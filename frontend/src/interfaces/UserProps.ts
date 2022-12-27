@@ -9,7 +9,5 @@ export interface UserProps {
   imgUrl: string;
   status?: UserStatus;
   rating: number;
-  winCnt: number;
-  loseCnt: number;
   useOtp: boolean;
 }
