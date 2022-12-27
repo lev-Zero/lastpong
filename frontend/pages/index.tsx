@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { CustomButton } from '@/components/CustomButton';
-import { Text, VStack } from '@chakra-ui/react';
+import { Spacer, Text, VStack } from '@chakra-ui/react';
 import BasicLayout from '@/layouts/BasicLayout';
 import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
@@ -59,6 +59,9 @@ export default function LandingPage() {
     }
   }, [isLoaded]);
 
+  function goToFakeLogin() {
+    router.push('/fakeLogin');
+  }
   return (
     <>
       <Head>
@@ -76,6 +79,11 @@ export default function LandingPage() {
             <Text fontSize="6xl">LASTPONG</Text>
             <CustomButton size="lg" onClick={goToLogin}>
               START
+            </CustomButton>
+            <Spacer />
+            <Text fontSize={30}>FAKE LOGIN</Text>
+            <CustomButton size="lg" onClick={goToFakeLogin}>
+              GO
             </CustomButton>
           </VStack>
         </>
