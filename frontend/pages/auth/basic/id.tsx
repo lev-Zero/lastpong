@@ -39,7 +39,6 @@ export default function BasicIdPage() {
           textAlign="center"
           fontSize="2xl"
           maxLength={10}
-          textTransform="uppercase"
           onChange={handleChange}
         />
       </Box>
