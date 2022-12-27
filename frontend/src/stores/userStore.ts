@@ -6,7 +6,7 @@ import create from 'zustand';
 interface userStoreProps {
   me: UserProps;
   setUseOtp: (useOtp: boolean) => void;
-  setUser: (user: UserProps) => void;
+  setMe: (user: UserProps) => void;
   fetchMe: () => void;
 }
 
@@ -21,7 +21,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
   setUseOtp: (useOtp: boolean) => {
     set((state) => ({ ...state, me: { ...get().me, useOtp } }));
   },
-  setUser: (user: UserProps) => {
+  setMe: (user: UserProps) => {
     set((state) => ({ ...state, me: user }));
   },
   fetchMe: async () => {
@@ -35,7 +35,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
         useOtp: false,
       };
       console.log('fetchMe', user);
-      get().setUser(user);
+      get().setMe(user);
     } catch (e) {
       if (e instanceof Error) {
         console.log(e.message);

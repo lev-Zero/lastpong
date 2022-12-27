@@ -19,7 +19,7 @@ export default function LandingPage() {
     router.push(`${SERVER_URL}/auth`);
   };
 
-  const { setUser } = userStore();
+  const { setMe } = userStore();
 
   useEffect(() => {
     async function fetchData() {
@@ -36,7 +36,7 @@ export default function LandingPage() {
           useOtp: false,
         };
 
-        setUser(dummyUser);
+        setMe(dummyUser);
 
         setIsLogin(true);
       } catch (e) {

@@ -8,8 +8,6 @@ export default function Sidebar() {
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
     useOtp: false,
   };
 
@@ -19,8 +17,6 @@ export default function Sidebar() {
       'https://images.ctfassets.net/usf1vwtuqyxm/3SQ3X2km8wkQIsQWa02yOY/8801d7055a3e99dae8e60f54bb4b1db8/HarryPotter_WB_F4_HarryPotterMidshot_Promo_080615_Port.jpg?w=914&q=70&fm=jpg',
     status: UserStatus.online,
     rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
     useOtp: false,
   };
 

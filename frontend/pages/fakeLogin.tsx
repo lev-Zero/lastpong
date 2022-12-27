@@ -10,7 +10,7 @@ import { UserProps } from '@/interfaces/UserProps';
 import { convertUserStatus } from '@/interfaces/convertUserStatus';
 
 export default function FakeLogin() {
-  const { setUser } = userStore();
+  const { setMe } = userStore();
   const router = useRouter();
 
   async function createFakeUsers() {
@@ -36,7 +36,7 @@ export default function FakeLogin() {
         useOtp: false,
       };
 
-      setUser(user);
+      setMe(user);
 
       console.log('set user : ', user);
       console.log(json);
