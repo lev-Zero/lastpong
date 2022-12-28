@@ -18,6 +18,43 @@ export function CustomButton({
 }: CustomButtonProps) {
   const [bg, color]: [string, string] = !isDisabled ? ['main', 'white'] : ['gray.200', '#AAAAAA'];
 
+  if (size === 'xl') {
+    return (
+      <Button
+        fontSize="3xl"
+        p={10}
+        bg={bg}
+        color={color}
+        border="2px"
+        borderColor="white"
+        borderRadius="4242"
+        disabled={isDisabled}
+        style={btnStyle}
+        onClick={onClick}
+      >
+        {children}
+      </Button>
+    );
+  }
+  if (size === '2xl') {
+    return (
+      <Button
+        fontSize="6xl"
+        p={16}
+        bg={bg}
+        color={color}
+        border="2px"
+        borderColor="white"
+        borderRadius="4242"
+        disabled={isDisabled}
+        style={btnStyle}
+        onClick={onClick}
+      >
+        {children}
+      </Button>
+    );
+  }
+
   return (
     <Button
       w={120}

@@ -1,4 +1,5 @@
 import CustomAvatar from '@/components/CustomAvatar';
+import { CustomButton } from '@/components/CustomButton';
 import MatchHistory from '@/components/MatchHistory';
 import WinLoseSum from '@/components/WinLoseSum';
 import { MatchHistoryProps } from '@/interfaces/MatchProps';
@@ -36,7 +37,7 @@ export default function UserProfilePage() {
   };
 
   return (
-    <>
+    <VStack>
       <Head>
         <title>{`${username} | LastPong`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -79,7 +80,10 @@ export default function UserProfilePage() {
           ))}
         </VStack>
       </Flex>
-    </>
+      <CustomButton size="xl" onClick={() => {}}>
+        ADD FRIEND
+      </CustomButton>
+    </VStack>
   );
 }
 

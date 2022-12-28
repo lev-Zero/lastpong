@@ -43,17 +43,9 @@ export default function HomePage() {
       <Flex height={'100%'} flexDir={'column'} alignItems="center" justifyContent={'center'}>
         <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
         <CustomButton
-          size="lg"
+          size="2xl"
           onClick={onOpen}
-          btnStyle={{
-            position: 'absolute',
-            top: '82%',
-            left: '42%',
-            transform: 'translate(-50%, -50%)',
-            height: '10%',
-            width: '10%',
-            fontSize: '40px',
-          }}
+          btnStyle={{ position: 'absolute', bottom: '13%', right: '52%' }}
         >
           MATCH
         </CustomButton>
