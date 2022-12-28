@@ -49,27 +49,6 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     useOtp: false,
   };
 
-  const onClickUser = (event: React.MouseEvent<HTMLElement>) => {
-    const cookies = Object.fromEntries(
-      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
-    );
-
-    const jwtToken: string = `Bearer ${cookies['accessToken']}`;
-    const headers = {
-      Authorization: jwtToken,
-      'Content-Type': 'application/json',
-    };
-
-    console.log(jwtToken);
-    fetch(SERVER_URL + '/user/me', { headers })
-      .then((response) => response.json())
-      .then((json) => {
-        console.log(json);
-      });
-
-    router.push('/auth/basicID');
-  };
-
   return (
     <ChakraProvider theme={theme}>
       {getLayout(<Component {...pageProps} />)}
@@ -117,9 +96,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           </Center>
         </ModalContent>
       </Modal>
-      <Button onClick={onOpen}>Invited</Button>
-
-      <Button onClick={onClickUser}>UserSetting</Button>
+      {/* <Button onClick={onOpen}>Invited</Button> */}
     </ChakraProvider>
   );
 }
