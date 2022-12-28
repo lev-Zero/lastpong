@@ -14,7 +14,7 @@ export default function BasicIdPage() {
   }
   async function submitUsername() {
     if (username.search(/\W|\s/g) > -1) {
-      alert('특수문자 또는 공백이 입력되었습니다.');
+      alert('영문자와 숫자만 이용할 수 있습니다');
       return;
     }
     try {
