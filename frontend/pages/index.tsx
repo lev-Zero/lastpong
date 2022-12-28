@@ -27,7 +27,7 @@ export default function LandingPage() {
         const json = await customFetch('GET', '/user/me');
         console.log(json);
 
-        // user 정보 zustand에 저장하기
+        // TODO: user 정보 zustand에 저장하기
         const dummyUser: UserProps = {
           name: json.username,
           imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',

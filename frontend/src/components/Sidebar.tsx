@@ -7,43 +7,64 @@ import {
   Spacer,
   Box,
   Modal,
-  ModalOverlay,
   ModalContent,
-  Center,
   ModalHeader,
   ModalBody,
-  ModalFooter,
   useDisclosure,
   Image,
   HStack,
   Input,
   InputGroup,
   InputLeftElement,
+  SimpleGrid,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
 import { CustomButton } from './CustomButton';
+import { customFetch } from '@/utils/customFetch';
+import { convertUserStatus } from '@/utils/convertUserStatus';
 
 export default function Sidebar() {
   const { friends, fetchFriends } = userStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [serchId, setSearchId] = useState<string>('');
+  const [searchId, setSearchId] = useState<string>('');
+  const [allUsers, setAllUsers] = useState<UserProps[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => fetchFriends, []);
 
   function searchKeySubmit(e: React.KeyboardEvent<HTMLElement>) {
     if (e.key === 'Enter') {
-      console.log(serchId);
+      console.log(searchId);
       setSearchId('');
     }
   }
 
   function seerchSubmit() {
-    console.log(serchId);
+    console.log(searchId);
     setSearchId('');
     if (searchInputRef.current !== null) searchInputRef.current.focus();
   }
+
+  //fetch localhost:3000/user get ALL USERS
+  async function getAllUser() {
+    let users = await customFetch('GET', '/user');
+    let userList: UserProps[] = users.map((json: any): UserProps => {
+      console.log(json);
+      return {
+        name: json.username,
+        imgUrl: '',
+        status: convertUserStatus(json.status),
+        rating: json.rating,
+        useOtp: false,
+      };
+    });
+
+    //const [allUsers, setAllUsers] = useState<UserProps[]>([]);
+    console.log('userList : ', userList);
+    setAllUsers(userList);
+  }
+
   return (
     <>
       <VStack
@@ -56,7 +77,9 @@ export default function Sidebar() {
         marginBottom={'100'}
       >
         <Flex w="100%">
-          <Text fontSize={30}>FRIENDS</Text>
+          <Text ml={'15px'} fontSize={30}>
+            FRIENDS
+          </Text>
           <Spacer />
           <Image
             src="/AddFriend.svg"
@@ -67,11 +90,16 @@ export default function Sidebar() {
             borderRadius={7}
             bg="main"
             alt="add friend"
-            onClick={onOpen}
+            onClick={() => {
+              onOpen();
+              getAllUser();
+            }}
+            mr={'5px'}
           />
         </Flex>
         <VStack w="100%" overflowY="scroll">
           {friends.map((friend, index) => (
+            // TODO: message Stack
             <UserItem key={index} user={friend} msgNum={0} />
           ))}
         </VStack>
@@ -117,7 +145,7 @@ export default function Sidebar() {
                       setSearchId(e.target.value);
                     }}
                     onKeyDown={searchKeySubmit}
-                    value={serchId}
+                    value={searchId}
                     autoFocus
                     ref={searchInputRef}
                   />
@@ -135,19 +163,22 @@ export default function Sidebar() {
               </Flex>
             </HStack>
           </ModalHeader>
+          <ModalBody>
+            <Box overflowY="scroll" mb={10}>
+              <SimpleGrid columns={2} spacing={1}>
+                {searchId
+                  ? allUsers
+                      .filter((user) => {
+                        const regex = new RegExp(searchId, 'i');
+                        return user.name.match(regex);
+                      })
+                      .map((user, index) => <UserItem key={index} user={user} />)
+                  : allUsers.map((user, index) => <UserItem key={index} user={user} />)}
+              </SimpleGrid>
+            </Box>
+          </ModalBody>
         </ModalContent>
       </Modal>
     </>
   );
-}
-
-{
-  /* <VStack>
-              {/* <ModalHeader>LOOKING FOR AN OPPONENT...</ModalHeader>
-              <ModalBody fontSize="6xl">{timeSpent}</ModalBody>
-              <ModalFooter>
-                <CustomButton size="md" onClick={onClose}>
-                  CANCEL
-                </CustomButton>
-              </ModalFooter> */
 }
