@@ -64,7 +64,7 @@ export async function customFetch(method: string, path: string, body?: Object) {
     }
     return text;
   }
-  const json = await response.json();
+  const json = JSON.parse(text);
   if (!response.ok) {
     throw Error(`${response.status} ${json.message}`);
   }
