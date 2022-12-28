@@ -23,7 +23,7 @@ export default function UserProfilePage() {
     username = rawUsername;
   }
 
-  const { addFriends, deleteFriends } = userStore();
+  const { addFriend, deleteFriend } = userStore();
   const user: UserProps = {
     name: username,
     imgUrl: '',
@@ -88,7 +88,7 @@ export default function UserProfilePage() {
       <CustomButton
         size="xl"
         onClick={() => {
-          addFriends(username);
+          addFriend(username);
         }}
       >
         ADD FRIEND
@@ -96,7 +96,7 @@ export default function UserProfilePage() {
       <CustomButton
         size="xl"
         onClick={() => {
-          deleteFriends(username);
+          deleteFriend(username);
         }}
       >
         DEL FRIEND
