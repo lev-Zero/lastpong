@@ -1,14 +1,7 @@
-import { UserProps } from '@/interfaces/UserProps';
 import {
   Box,
-  Button,
-  Circle,
-  Flex,
   HStack,
-  MenuItem,
-  MenuList,
   Popover,
-  PopoverArrow,
   PopoverBody,
   PopoverCloseButton,
   PopoverContent,
@@ -20,48 +13,15 @@ import {
 import { ContextMenu } from 'chakra-ui-contextmenu';
 import CustomAvatar from './CustomAvatar';
 import { OptionMenu } from './OptionMenu';
+import RawUserItemProps from '@/interfaces/RawUserItemProps';
+import RawUserItem from './RawUserItem';
 
-interface UserItemProps {
-  user: UserProps;
-  msgNum?: number;
-}
-
-function UserItem({ user, msgNum }: UserItemProps) {
-  return (
-    <>
-      {msgNum !== undefined && msgNum !== 0 ? (
-        <Circle
-          position="absolute"
-          size="40px"
-          transform="translate(-30%, -30%)"
-          bg="#FF3D00"
-          color="white"
-        >
-          {msgNum}
-        </Circle>
-      ) : null}
-      <Flex
-        w="100%"
-        justifyContent="space-around"
-        alignItems="center"
-        p={4}
-        bg="gray.100"
-        border="2px"
-        borderRadius={20}
-      >
-        <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
-        <Text>{user.name.toUpperCase()}</Text>
-      </Flex>
-    </>
-  );
-}
-
-function PopoverHoc({ user, msgNum }: UserItemProps) {
+function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   return (
     <Popover placement="left">
       <PopoverTrigger>
         <Box>
-          <UserItem user={user} msgNum={msgNum} />
+          <RawUserItem user={user} msgNum={msgNum} />
         </Box>
       </PopoverTrigger>
       <Portal>
@@ -80,7 +40,7 @@ function PopoverHoc({ user, msgNum }: UserItemProps) {
   );
 }
 
-export default function ContextMenuHoc({ user, msgNum }: UserItemProps) {
+export default function ContextMenuHoc({ user, msgNum }: RawUserItemProps) {
   return (
     <ContextMenu<HTMLDivElement>
       renderMenu={() => <OptionMenu user={user} isFriend={true} isBlocked={false} />}

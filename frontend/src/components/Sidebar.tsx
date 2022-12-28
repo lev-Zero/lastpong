@@ -17,12 +17,13 @@ import {
   InputGroup,
   InputLeftElement,
   SimpleGrid,
+  Link,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
-import { CustomButton } from './CustomButton';
 import { customFetch } from '@/utils/customFetch';
 import { convertUserStatus } from '@/utils/convertUserStatus';
+import RawUserItem from './RawUserItem';
 
 export default function Sidebar() {
   const { friends, fetchFriends } = userStore();
@@ -172,8 +173,16 @@ export default function Sidebar() {
                         const regex = new RegExp(searchId, 'i');
                         return user.name.match(regex);
                       })
-                      .map((user, index) => <UserItem key={index} user={user} />)
-                  : allUsers.map((user, index) => <UserItem key={index} user={user} />)}
+                      .map((user, index) => (
+                        <Link key={index} href={`/user/${user.name}`}>
+                          <RawUserItem user={user} />
+                        </Link>
+                      ))
+                  : allUsers.map((user, index) => (
+                      <Link key={index} href={`/user/${user.name}`}>
+                        <RawUserItem user={user} />
+                      </Link>
+                    ))}
               </SimpleGrid>
             </Box>
           </ModalBody>

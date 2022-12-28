@@ -23,11 +23,24 @@ export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
       )}
       {!isFriend ? (
         <MenuItem>
-          <Text color="win"></Text>ADD FRIEND
+          <Text
+            color="win"
+            onClick={() => {
+              console.log('add friend');
+            }}
+          ></Text>
+          ADD FRIEND
         </MenuItem>
       ) : (
         <MenuItem>
-          <Text color="red">DELETE FRIEND</Text>
+          <Text
+            color="red"
+            onClick={() => {
+              console.log('delete friend');
+            }}
+          >
+            DELETE FRIEND
+          </Text>
         </MenuItem>
       )}
       {!isBlocked ? (
