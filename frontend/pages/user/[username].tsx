@@ -1,9 +1,11 @@
 import CustomAvatar from '@/components/CustomAvatar';
+import { CustomButton } from '@/components/CustomButton';
 import MatchHistory from '@/components/MatchHistory';
 import WinLoseSum from '@/components/WinLoseSum';
 import { MatchHistoryProps } from '@/interfaces/MatchProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
+import { userStore } from '@/stores/userStore';
 import { Box, Center, Divider, Flex, HStack, Text, VStack } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -11,13 +13,17 @@ import { ReactElement } from 'react';
 
 export default function UserProfilePage() {
   const router = useRouter();
-  let username: string | string[] | undefined = router.query.username;
-  if (username === undefined) {
+  let rawUsername: string | string[] | undefined = router.query.username;
+  let username: string = '';
+  if (rawUsername === undefined) {
     username = '';
-  } else if (Array.isArray(username)) {
-    username = username.join('');
+  } else if (Array.isArray(rawUsername)) {
+    username = rawUsername.join('');
+  } else {
+    username = rawUsername;
   }
 
+  const { addFriends, deleteFriends } = userStore();
   const user: UserProps = {
     name: username,
     imgUrl: '',
@@ -36,7 +42,7 @@ export default function UserProfilePage() {
   };
 
   return (
-    <>
+    <VStack>
       <Head>
         <title>{`${username} | LastPong`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -79,7 +85,23 @@ export default function UserProfilePage() {
           ))}
         </VStack>
       </Flex>
-    </>
+      <CustomButton
+        size="xl"
+        onClick={() => {
+          addFriends(username);
+        }}
+      >
+        ADD FRIEND
+      </CustomButton>
+      <CustomButton
+        size="xl"
+        onClick={() => {
+          deleteFriends(username);
+        }}
+      >
+        DEL FRIEND
+      </CustomButton>
+    </VStack>
   );
 }
 
