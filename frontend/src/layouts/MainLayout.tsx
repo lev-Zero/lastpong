@@ -13,7 +13,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <Flex bg="gray.200" h="90%">
         <Box w="80%">{children}</Box>
-        <Box w="20%">
+        <Box w="20%" mr={'25px'}>
           <Sidebar />
         </Box>
       </Flex>
