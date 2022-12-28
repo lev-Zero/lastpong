@@ -14,6 +14,8 @@ interface userStoreProps {
   friends: UserProps[];
   setFriends: (friends: UserProps[]) => void;
   fetchFriends: () => void;
+  addFriends: (name: string) => void;
+  deleteFriends: (name: string) => void;
 }
 
 export const userStore = create<userStoreProps>((set, get) => ({
@@ -68,6 +70,29 @@ export const userStore = create<userStoreProps>((set, get) => ({
       });
       get().setFriends(friends);
       console.log('fetchFriends', friends);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
+  },
+  // http://localhost:3000/user/friend/name
+  addFriends: async (name: string) => {
+    try {
+      const json = await customFetch('POST', 'user/friend/name/' + name, { username: name });
+      get().fetchFriends();
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
+  },
+  deleteFriends: async (name: string) => {
+    try {
+      await customFetch('DELETE', 'user/friend/name/' + name, { username: name });
+      get().fetchFriends();
     } catch (e) {
       if (e instanceof Error) {
         console.log(e.message);
