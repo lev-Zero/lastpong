@@ -19,6 +19,15 @@ import { SERVER_URL } from './variables';
 
 // accessToken이 쿠키에 있다면 읽어서 Authorization 헤더에 넣어주는 일 자동화
 
+function isJsonString(str: string) {
+  try {
+    var json = JSON.parse(str);
+    return typeof json === 'object';
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function customFetch(method: string, path: string, body?: Object) {
   method = method.toUpperCase();
   if (path[0] !== '/') {
@@ -47,6 +56,13 @@ export async function customFetch(method: string, path: string, body?: Object) {
       headers: headers,
       body: JSON.stringify(body),
     });
+  }
+  const text = await response.text();
+  if (!isJsonString(text)) {
+    if (!response.ok) {
+      throw Error(`${response.status} ${text}`);
+    }
+    return text;
   }
   const json = await response.json();
   if (!response.ok) {
