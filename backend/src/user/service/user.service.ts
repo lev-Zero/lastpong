@@ -175,7 +175,7 @@ export class UserService {
   async createUser(data: user42Dto): Promise<User> {
     try {
       const user = await this.userRepository.create({
-        username: null,
+        username: '',
         username42: data.username,
       });
       await this.userRepository.save(user);
