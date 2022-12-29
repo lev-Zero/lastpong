@@ -237,4 +237,15 @@ export class AuthController {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
+  @Get('/otp')
+  @UseGuards(JwtAuthGuard)
+  async findOtpOn(@Req() req: Request) {
+    try {
+      return JSON.stringify({
+        otpOn: await this.auth42Service.findOtpOn(req.user.userId),
+      });
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }

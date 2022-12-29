@@ -278,4 +278,13 @@ export class Auth42Service {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async findOtpOn(userId: number): Promise<boolean> {
+    try {
+      const user = await this.userService.findUserById(userId, ['auth42']);
+      return user.auth42.otpOn;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
