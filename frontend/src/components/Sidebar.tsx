@@ -22,7 +22,6 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
 import { customFetch } from '@/utils/customFetch';
-import { convertUserStatus } from '@/utils/convertUserStatus';
 import RawUserItem from './RawUserItem';
 
 export default function Sidebar() {
@@ -55,7 +54,7 @@ export default function Sidebar() {
       return {
         name: json.username,
         imgUrl: '',
-        status: convertUserStatus(json.status),
+        status: json.status,
         rating: json.rating,
         useOtp: false,
       };

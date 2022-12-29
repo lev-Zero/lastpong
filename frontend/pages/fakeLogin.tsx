@@ -7,7 +7,6 @@ import { userStore } from '@/stores/userStore';
 import { setCookie } from 'typescript-cookie';
 import { useRouter } from 'next/router';
 import { UserProps } from '@/interfaces/UserProps';
-import { convertUserStatus } from '@/utils/convertUserStatus';
 
 export default function FakeLogin() {
   const { setMe } = userStore();
@@ -31,7 +30,7 @@ export default function FakeLogin() {
       const user: UserProps = {
         name: json.username,
         imgUrl: json.avatar.profileUrl,
-        status: convertUserStatus(json.status),
+        status: json.status,
         rating: json.rating,
         useOtp: false,
       };

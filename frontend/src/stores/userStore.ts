@@ -1,4 +1,3 @@
-import { convertUserStatus } from '@/utils/convertUserStatus';
 import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
 import { customFetch } from '@/utils/customFetch';
@@ -38,7 +37,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       const user = {
         name: json.username,
         imgUrl: '', // TODO : img는 따로 가져와야 한다.
-        status: convertUserStatus(json.status),
+        status: json.status,
         rating: json.rating,
         useOtp: false,
       };
@@ -63,7 +62,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
         return {
           name: friend.username,
           imgUrl: '',
-          status: convertUserStatus(friend.status),
+          status: friend.status,
           rating: friend.rating,
           useOtp: false,
         };
