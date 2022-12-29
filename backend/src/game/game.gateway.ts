@@ -517,7 +517,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('responseInvite')
   async responseInvite(socket: Socket, @Body() body: ResponseInviteDto) {
     try {
-      socket.to(body.randomInviteRoomName).emit('responseInvite', {
+      socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
         randomInviteRoomName: body.randomInviteRoomName,
         hostId: body.hostId,
