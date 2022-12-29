@@ -58,7 +58,7 @@ export default function Sidebar() {
       setAllUsersExceptMe(await getAllUsers());
       setAllUsersExceptMe((prev: UserProps[]) => {
         return prev.filter((user) => {
-          console.log(user.name, me.name, user.name !== me.name);
+          // console.log(user.name, me.name, user.name !== me.name);
           return user.name !== me.name;
         });
       });

@@ -160,14 +160,16 @@ export default function ChatPage() {
             </CustomButton>
           </Box>
         </VStack>
-        <VStack w="25%" h="90%" m={10} p={7} backgroundColor="white">
+        <VStack w="25%" h="90%" m={10} p={7} backgroundColor="white" borderRadius={'25px'}>
           <VStack w="100%" overflowY="scroll">
             {/* 향후에 유저 상태에 따라 불러오는거 달라지면 이부분 filter 수정 */}
             {allUsers
               .filter((user) => user.status === 0)
               .map((user, index) => (
                 <Link key={index} href={`/user/${user.name}`}>
-                  <RawUserItem user={user} />
+                  <Flex width={'200px'}>
+                    <RawUserItem user={user} />
+                  </Flex>
                 </Link>
               ))}
           </VStack>
