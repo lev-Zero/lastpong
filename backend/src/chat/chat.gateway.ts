@@ -703,6 +703,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(chatRoomDm.name).emit('join', {
         message: `${chatRoomDm.name}방에 ${target.username}이/가 들어왔습니다`,
+        inviteUserId: user.id,
       });
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
