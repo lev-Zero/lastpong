@@ -32,6 +32,7 @@ export default function Sidebar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => fetchFriends, []);
+  const { me } = userStore();
 
   function searchKeySubmit(e: React.KeyboardEvent<HTMLElement>) {
     if (e.key === 'Enter') {
@@ -61,7 +62,7 @@ export default function Sidebar() {
 
     //const [allUsers, setAllUsers] = useState<UserProps[]>([]);
     console.log('userList : ', userList);
-    setAllUsers(userList);
+    setAllUsers(userList.filter((user) => user.name !== me.name));
   }
 
   return (
