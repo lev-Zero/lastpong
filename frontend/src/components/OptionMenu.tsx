@@ -1,4 +1,5 @@
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { userStore } from '@/stores/userStore';
 import { Menu, MenuItem, MenuList, Text, VStack } from '@chakra-ui/react';
 import Link from 'next/link';
 
@@ -9,6 +10,8 @@ export interface OptionMenuProps {
 }
 
 export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
+  const { deleteFriend } = userStore();
+
   return (
     <MenuList>
       <MenuItem as={Link} href={`/user/${user.name}`}>
@@ -33,12 +36,7 @@ export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
         </MenuItem>
       ) : (
         <MenuItem>
-          <Text
-            color="red"
-            onClick={() => {
-              console.log('delete friend');
-            }}
-          >
+          <Text color="red" onClick={() => deleteFriend(user.name)}>
             DELETE FRIEND
           </Text>
         </MenuItem>
