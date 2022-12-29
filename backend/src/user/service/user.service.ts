@@ -67,7 +67,13 @@ export class UserService {
     try {
       const users = await this.userRepository
         .createQueryBuilder('users')
-        .select(['users.id', 'users.username', 'users.rating', 'users.status'])
+        .select([
+          'users.id',
+          'users.username',
+          'users.rating',
+          'users.status',
+          'users.username42',
+        ])
         // .leftJoinAndSelect('users.avatar', 'avatar')
         .getMany();
 
@@ -86,6 +92,7 @@ export class UserService {
             username: true,
             rating: true,
             status: true,
+            username42: true,
           },
           where: { id },
           relations,
@@ -116,6 +123,7 @@ export class UserService {
             username: true,
             rating: true,
             status: true,
+            username42: true,
           },
           where: { username },
           relations,
