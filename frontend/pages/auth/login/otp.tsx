@@ -8,15 +8,6 @@ import OtpWindow from '@/components/OtpWindow';
 import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
 
-const styles = {
-  MainText: {
-    fontSize: '140px',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDir: 'column',
-  } as React.CSSProperties,
-};
-
 export default function OtpPage() {
   let otpStatus: boolean;
   let authStr: string;
@@ -42,7 +33,7 @@ export default function OtpPage() {
       .then((response) => response.json())
       .then((json) => {
         if ('status' in json) {
-          router.push('/auth/basic/id');
+          router.push('/');
         } else {
           setQrCodeSrc(json.qrcode);
         }

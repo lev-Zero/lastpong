@@ -13,8 +13,20 @@ export default function Header() {
   const { me, fetchMe, useOtp, fetchUseOtp, toggleUseOtp } = userStore();
   const router = useRouter();
 
-  useEffect(() => fetchMe, []);
-  useEffect(() => fetchUseOtp, []);
+  useEffect(() => {
+    try {
+      fetchMe();
+    } catch (e) {
+      console.log(e);
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      fetchUseOtp();
+    } catch (e) {
+      console.log(e);
+    }
+  }, []);
 
   function logout() {
     removeCookie('accessToken');

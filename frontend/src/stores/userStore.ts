@@ -22,7 +22,7 @@ interface userStoreProps {
 
 export const userStore = create<userStoreProps>((set, get) => ({
   me: {
-    name: '',
+    name: ' ', // FIXME: name=''은 첫 로그인인지(이름 정하는 페이지로 라우팅해야 하는지) 구분하는데 사용되므로 초기화는 다른 이름으로 해야함...
     imgUrl: '',
     status: UserStatus.offline,
     rating: 0,
