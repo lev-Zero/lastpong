@@ -110,7 +110,7 @@ export default function UserProfilePage() {
           <CustomButton
             size="xl"
             onClick={() => {
-              addFriend(username);
+              addFriend(user.name);
             }}
           >
             ADD FRIEND
