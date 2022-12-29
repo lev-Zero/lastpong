@@ -11,18 +11,12 @@ export default function WatchPage() {
     imgUrl: 'https://bit.ly/dan-abramov',
     status: UserStatus.inGame,
     rating: 1028,
-    winCnt: 3,
-    loseCnt: 2,
-    useOtp: false,
   };
   const opp: UserProps = {
     name: 'pongmaster',
     imgUrl: 'https://bit.ly/dan-abramov',
     status: UserStatus.inGame,
     rating: 2510,
-    winCnt: 300,
-    loseCnt: 200,
-    useOtp: true,
   };
 
   return (

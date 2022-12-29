@@ -1,14 +1,16 @@
 import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
 import { customFetch } from '@/utils/customFetch';
-import { sortAndDeduplicateDiagnostics, VoidExpression } from 'typescript';
 import create from 'zustand';
 
 interface userStoreProps {
   me: UserProps;
-  setUseOtp: (useOtp: boolean) => void;
   setMe: (user: UserProps) => void;
   fetchMe: () => void;
+
+  useOtp: boolean;
+  fetchUseOtp: () => void;
+  setUseOtp: (useOtp: boolean) => void;
 
   friends: UserProps[];
   setFriends: (friends: UserProps[]) => void;
@@ -23,10 +25,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
     imgUrl: '',
     status: UserStatus.offline,
     rating: 0,
-    useOtp: false,
-  },
-  setUseOtp: (useOtp: boolean) => {
-    set((state) => ({ ...state, me: { ...get().me, useOtp } }));
   },
   setMe: (user: UserProps) => {
     set((state) => ({ ...state, me: user }));
@@ -39,7 +37,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
         imgUrl: '', // TODO : img는 따로 가져와야 한다.
         status: json.status,
         rating: json.rating,
-        useOtp: false,
       };
       get().setMe(user);
       console.log('fetchMe', user);
@@ -49,6 +46,23 @@ export const userStore = create<userStoreProps>((set, get) => ({
         return;
       }
     }
+  },
+  useOtp: false,
+  fetchUseOtp: async () => {
+    try {
+      const json = await customFetch('GET', '/auth/otp');
+      const useOtp = json.otpOn;
+      get().setUseOtp(useOtp);
+      console.log('fetchUseOtp', useOtp);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
+  },
+  setUseOtp: (useOtp: boolean) => {
+    set((state) => ({ ...state, useOtp }));
   },
   friends: [],
   setFriends: (friends: UserProps[]) => {
@@ -64,7 +78,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
           imgUrl: '',
           status: friend.status,
           rating: friend.rating,
-          useOtp: false,
         };
       });
       get().setFriends(friends);

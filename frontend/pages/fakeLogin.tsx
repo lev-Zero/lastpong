@@ -32,7 +32,6 @@ export default function FakeLogin() {
         imgUrl: json.avatar.profileUrl,
         status: json.status,
         rating: json.rating,
-        useOtp: false,
       };
 
       setMe(user);

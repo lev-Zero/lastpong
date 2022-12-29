@@ -36,7 +36,6 @@ export default function ChatPage() {
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
-    useOtp: false,
   };
 
   const owner: UserProps = {
@@ -44,7 +43,6 @@ export default function ChatPage() {
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
-    useOtp: false,
   };
 
   const dummyChatRoom: ChatRoomItemProps = {

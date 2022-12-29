@@ -56,7 +56,6 @@ export default function Sidebar() {
         imgUrl: '',
         status: json.status,
         rating: json.rating,
-        useOtp: false,
       };
     });
 
