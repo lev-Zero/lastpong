@@ -36,6 +36,7 @@ import { Block } from './entity/block.entity';
 import { UserMatchDto, UserNameDto } from './dto/user.dto';
 import { Avatar } from './entity/avatar.entity';
 import { Readable } from 'typeorm/platform/PlatformTools';
+import { Auth42Service } from 'src/auth/service/auth42.service';
 
 @Controller('user')
 export class UserController {
@@ -45,6 +46,7 @@ export class UserController {
     private blockService: BlockService,
     private friendService: FriendService,
     private matchService: MatchService,
+    private auth42Service: Auth42Service,
   ) {}
 
   /*----------------------------------
@@ -64,26 +66,31 @@ export class UserController {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
+    await this.auth42Service.createAuth42(user.id);
     user = await this.userService.testCreateFakeUser('fake_U2');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
+    await this.auth42Service.createAuth42(user.id);
     user = await this.userService.testCreateFakeUser('fake_U3');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
+    await this.auth42Service.createAuth42(user.id);
     user = await this.userService.testCreateFakeUser('fake_U4');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
+    await this.auth42Service.createAuth42(user.id);
     user = await this.userService.testCreateFakeUser('fake_U5');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
+    await this.auth42Service.createAuth42(user.id);
   }
 
   //http://localhost:3000/user/test/delete/fakeuser
