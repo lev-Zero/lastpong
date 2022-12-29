@@ -23,7 +23,7 @@ export default function LandingPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        fetchMe();
+        await fetchMe();
         console.log('me', me);
         if (me.name === ' ') {
           return;
