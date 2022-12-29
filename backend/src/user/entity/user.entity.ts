@@ -31,7 +31,10 @@ export class User {
   @Column({ unique: true, nullable: true })
   username: string;
 
-  @Column({ default: 100 })
+  @Column({ unique: true, nullable: true })
+  username42: string;
+
+  @Column({ default: 1000 })
   rating: number;
 
   @OneToMany(() => Friend, (friend) => friend.friendOfferUser)

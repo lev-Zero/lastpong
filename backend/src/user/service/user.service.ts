@@ -134,10 +134,41 @@ export class UserService {
     }
   }
 
+  async find42UserByName(
+    username42: string,
+    relations: string[] = [],
+  ): Promise<User> {
+    try {
+      const user = await this.userRepository
+        .findOne({
+          select: {
+            id: true,
+            username42: true,
+            rating: true,
+            status: true,
+          },
+          where: { username42 },
+          relations,
+        })
+        .catch(() => null);
+
+      if (!user)
+        throw new HttpException(
+          '유저를 찾을 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      return user;
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async createUser(data: user42Dto): Promise<User> {
     try {
       const user = await this.userRepository.create({
         username: data.username,
+        username42: data.username,
       });
       await this.userRepository.save(user);
       delete user.token;
