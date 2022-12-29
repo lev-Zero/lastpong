@@ -19,24 +19,12 @@ export default function LandingPage() {
     router.push(`${SERVER_URL}/auth`);
   };
 
-  const { setMe } = userStore();
+  const { fetchMe } = userStore();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const json = await customFetch('GET', '/user/me');
-        console.log(json);
-
-        // TODO: user 정보 zustand에 저장하기
-        const dummyUser: UserProps = {
-          name: json.username,
-          imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',
-          status: json.status,
-          rating: json.rating,
-        };
-
-        setMe(dummyUser);
-
+        await fetchMe();
         setIsLogin(true);
       } catch (e) {
         setIsLogin(false);

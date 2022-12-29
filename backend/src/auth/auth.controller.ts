@@ -61,7 +61,7 @@ export class AuthController {
 
         res.status(301).redirect('http://localhost:8080/auth/login/otp');
       } else {
-        res.status(301).redirect('http://localhost:8080/auth/login');
+        res.status(301).redirect('http://localhost:8080/');
       }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
