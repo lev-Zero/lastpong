@@ -1,5 +1,6 @@
 import { CustomButton } from '@/components/CustomButton';
 import BasicLayout from '@/layouts/BasicLayout';
+import { userStore } from '@/stores/userStore';
 import { customFetch } from '@/utils/customFetch';
 import { Box, Input, Text, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
@@ -8,6 +9,7 @@ import { ReactElement, useState } from 'react';
 export default function BasicIdPage() {
   const [username, setUsername] = useState<string>('');
   const router = useRouter();
+  const { fetchMe } = userStore();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setUsername(e.currentTarget.value.toUpperCase());
@@ -19,8 +21,9 @@ export default function BasicIdPage() {
     }
     try {
       const json = await customFetch('PATCH', '/user/me', { newUserName: username });
-      router.push('/auth/basic/avatar');
+      fetchMe();
       console.log(json);
+      router.push('/auth/basic/avatar');
     } catch (e) {
       if (e instanceof Error) {
         alert(e.message);

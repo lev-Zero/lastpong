@@ -23,21 +23,24 @@ export default function LandingPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        await fetchMe();
+        fetchMe();
+        console.log('me', me);
+        if (me.name === ' ') {
+          return;
+        }
         if (me.name === '') {
-          console.log(me.name);
           setIsFirstLogin(true);
         }
         setIsLogin(true);
+        setIsLoaded(true);
       } catch (e) {
         console.log(e);
         setIsLogin(false);
-      } finally {
         setIsLoaded(true);
       }
     }
     fetchData();
-  }, []);
+  }, [me]);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -48,7 +51,7 @@ export default function LandingPage() {
     } else if (isLogin) {
       router.push('/home');
     }
-  }, [isLoaded]);
+  }, [isLogin, isFirstLogin, isLoaded]);
 
   function goToFakeLogin() {
     router.push('/fakeLogin');
