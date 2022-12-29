@@ -47,7 +47,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
       }
 
-      await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
+      // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       socket.data.user = user;
 
@@ -188,7 +189,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
       }
 
-      await this.userService.updateStatus(user.id, userStatus.GAMEROOM);
+      // await this.userService.updateStatus(user.id, userStatus.GAMEROOM);
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -376,7 +378,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
             .to(gameRoom.gameRoomName)
             .emit('exitGameRoom', { message: `관찰자가 게임룸에서 나갑니다.` });
         socket.emit('exitGameRoom', { message: `게임룸에서 나왔습니다.` });
-        await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
+        // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
+        await this.userService.updateStatus(user.id, userStatus.INGAME);
       } else {
         throw new HttpException(
           '해당룸에 당신은 존재하지 않습니다.',

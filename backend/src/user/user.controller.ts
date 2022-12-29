@@ -392,6 +392,23 @@ export class UserController {
     }
   }
 
+  @Get('/block/id/:id')
+  findBlockById(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Block[]> {
+    return this.blockService.findBlock(id);
+  }
+
+  @Get('/block/name/:name')
+  async findBlockByName(
+    @Req() req: Request,
+    @Body() body: UserNameDto,
+  ): Promise<Block[]> {
+    const user = await this.findUserByName(body.username);
+    return await this.blockService.findBlock(user.id);
+  }
+
   @Delete('/block/name/:name')
   @UseGuards(JwtAuthGuard)
   removeBlockByName(

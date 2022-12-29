@@ -58,7 +58,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
       }
 
-      await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
+      // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       const initChatRooms = await this.chatService
         .findChatRoomByUserId(user.id)
@@ -319,7 +320,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         'joinedUser',
       ]);
 
-      this.userService.updateStatus(user.id, userStatus.CHATROOM);
+      // await this.userService.updateStatus(user.id, userStatus.CHATROOM);
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       socket.join(chatRoom.name);
 
@@ -355,15 +357,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         offerUser.id,
       );
 
-      socket.to(chatRoom.name).emit('leave', {
-        message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`,
-        chatRoom,
-        targetUser,
-      });
+      if (chatRoom.owner.id == offerUser.id) {
+        const clients = this.server.sockets.clients(chatRoom.name);
+        for (const clientId of clients) {
+          const clientSocket = this.server.sockets.sockets.get(clientId);
+          // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+          await this.userService.updateStatus(clientId, userStatus.INGAME);
+          clientSocket.emit('leave', {
+            message: `owner가 ${chatRoom.name} 채팅방 나가서 방이 삭제 됐습니다.`,
+            chatRoom,
+            targetUser,
+          });
+          clientSocket.leave(chatRoom.name);
+        }
+      } else {
+        socket.to(chatRoom.name).emit('leave', {
+          message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`,
+          chatRoom,
+          targetUser,
+        });
 
-      const targetUserSocket = socket_username[targetUser.username];
-      this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-      targetUserSocket.leave(chatRoom.name);
+        socket.emit('leave', {
+          message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`,
+          chatRoom,
+          targetUser,
+        });
+
+        const targetUserSocket = socket_username[targetUser.username];
+        // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+        await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
+        targetUserSocket.leave(chatRoom.name);
+      }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -578,7 +602,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const targetUserSocket = socket_username[targetUser.username];
       targetUserSocket.leave(chatRoom.name);
-      this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+      // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+      await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
 
       chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -757,7 +782,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<void> {
     try {
       const offerUser = socket.data.user;
-      const leaveUser = await this.userService.findUserById(body.targetUserId);
+      const targetUser = await this.userService.findUserById(body.targetUserId);
 
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
@@ -765,18 +790,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
 
       await this.chatService.leaveChatRoomDm(
-        leaveUser.id,
+        targetUser.id,
         body.chatRoomId,
         offerUser.id,
       );
 
-      socket.to(chatRoomDm.name).emit('leave', {
-        message: `${chatRoomDm.name}방에 ${leaveUser.username}이 / 가 나갔습니다.`,
-        chatRoomDm,
-        leaveUser,
-      });
+      if (chatRoomDm.owner.id == offerUser.id) {
+        const clients = this.server.sockets.clients(chatRoomDm.name);
+        for (const clientId of clients) {
+          const clientSocket = this.server.sockets.sockets.get(clientId);
+          // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+          await this.userService.updateStatus(clientId, userStatus.INGAME);
+          clientSocket.emit('leave', {
+            message: `owner가 ${chatRoomDm.name} 채팅방 나가서 방이 삭제 됐습니다.`,
+            chatRoomDm,
+            targetUser,
+          });
+          clientSocket.leave(chatRoomDm.name);
+        }
+      } else {
+        socket.to(chatRoomDm.name).emit('leave', {
+          message: `${chatRoomDm.name}방에 ${targetUser.username}이/가 나갔습니다.`,
+          chatRoomDm,
+          targetUser,
+        });
 
-      socket.leave(chatRoomDm.name);
+        socket.emit('leave', {
+          message: `${chatRoomDm.name}방에 ${targetUser.username}이/가 나갔습니다.`,
+          chatRoomDm,
+          targetUser,
+        });
+
+        const targetUserSocket = socket_username[targetUser.username];
+        // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
+        await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
+        targetUserSocket.leave(chatRoomDm.name);
+      }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

@@ -25,7 +25,7 @@ export class Auth42Service {
   /*
 	Auth42AuthGuard -> Auth42Strategy -> FtauthGuard -> authController.redirect -> authService.login
 	*/
-//원본
+  //원본
   // async login(data): Promise<any> {
   //   try {
   //     const findUser = await this.userService
@@ -76,14 +76,14 @@ export class Auth42Service {
   //   }
   // }
 
-//테스트
+  //테스트
   async login(data): Promise<any> {
     try {
-      const findUser = await this.userService
-        .findUserByName(data.username)
+      const find42User = await this.userService
+        .find42UserByName(data.username)
         .catch(() => null);
 
-      if (!findUser) {
+      if (!find42User) {
         const user = await this.userService.createUser(data);
 
         await this.createAuth42(user.id);
@@ -100,14 +100,14 @@ export class Auth42Service {
         }
       }
 
-      const user = await this.userService.findUserByName(data.username, [
+      const user = await this.userService.find42UserByName(data.username, [
         'auth42',
       ]);
 
       const auth42Status = true;
       let otpStatus = true;
 
-      if (findUser && user.auth42.otpOn == true) {
+      if (find42User && user.auth42.otpOn == true) {
         otpStatus = false;
       }
 
