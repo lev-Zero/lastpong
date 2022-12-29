@@ -6,27 +6,31 @@ import { Spacer, Text, VStack } from '@chakra-ui/react';
 import BasicLayout from '@/layouts/BasicLayout';
 import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
-import { customFetch } from '@/utils/customFetch';
 import { userStore } from '@/stores/userStore';
-import { UserProps } from '@/interfaces/UserProps';
 
 export default function LandingPage() {
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [isLogin, setIsLogin] = useState<boolean>(false);
+  const [isFirstLogin, setIsFirstLogin] = useState<boolean>(false);
 
   const goToLogin = () => {
     router.push(`${SERVER_URL}/auth`);
   };
 
-  const { fetchMe } = userStore();
+  const { me, fetchMe } = userStore();
 
   useEffect(() => {
     async function fetchData() {
       try {
         await fetchMe();
+        if (me.name === '') {
+          console.log(me.name);
+          setIsFirstLogin(true);
+        }
         setIsLogin(true);
       } catch (e) {
+        console.log(e);
         setIsLogin(false);
       } finally {
         setIsLoaded(true);
@@ -39,7 +43,9 @@ export default function LandingPage() {
     if (!isLoaded) {
       return;
     }
-    if (isLogin) {
+    if (isFirstLogin) {
+      router.push('/auth/basic/id');
+    } else if (isLogin) {
       router.push('/home');
     }
   }, [isLoaded]);
