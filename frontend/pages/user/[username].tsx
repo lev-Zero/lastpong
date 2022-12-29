@@ -38,7 +38,6 @@ export default function UserProfilePage() {
           imgUrl: '', // TODO: img는 따로 가져와야 한다.
           status: json.status,
           rating: json.rating,
-          useOtp: false,
         };
         console.log('fetchedUser', fetchedUser);
         setUser(fetchedUser);

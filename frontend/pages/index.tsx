@@ -33,7 +33,6 @@ export default function LandingPage() {
           imgUrl: 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png',
           status: json.status,
           rating: json.rating,
-          useOtp: false,
         };
 
         setMe(dummyUser);

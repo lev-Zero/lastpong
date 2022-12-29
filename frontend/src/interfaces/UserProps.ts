@@ -9,5 +9,4 @@ export interface UserProps {
   imgUrl: string;
   status?: UserStatus;
   rating: number;
-  useOtp: boolean;
 }

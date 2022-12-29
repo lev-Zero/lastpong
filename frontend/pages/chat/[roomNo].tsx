@@ -45,7 +45,6 @@ export default function ChatRoomPage() {
     imgUrl: '',
     status: UserStatus.inGame,
     rating: 1028,
-    useOtp: false,
   };
 
   //이부분은 채팅 주고받은 로그 기록 전반이다. 백엔드에서 실시간으로 갱신하는 부분으로 바꾸어야함
