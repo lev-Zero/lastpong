@@ -23,15 +23,19 @@ import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
 import { customFetch } from '@/utils/customFetch';
 import RawUserItem from './RawUserItem';
+import { allUserStore } from '@/stores/allUserStore';
 
 export default function Sidebar() {
   const { friends, fetchFriends } = userStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchId, setSearchId] = useState<string>('');
-  const [allUsers, setAllUsers] = useState<UserProps[]>([]);
+  const { allUsers, getAllUsers } = allUserStore();
+  const [allUsersExceptMe, setAllUsersExceptMe] = useState<UserProps[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => fetchFriends, []);
+  useEffect(() => {
+    fetchFriends();
+  }, []);
   const { me } = userStore();
 
   function searchKeySubmit(e: React.KeyboardEvent<HTMLElement>) {
@@ -48,23 +52,23 @@ export default function Sidebar() {
   }
 
   //fetch localhost:3000/user get ALL USERS
-  async function getAllUser() {
-    let users = await customFetch('GET', '/user');
-    let userList: UserProps[] = users.map((json: any): UserProps => {
-      console.log(json);
-      return {
-        name: json.username,
-        imgUrl: '',
-        status: json.status,
-        rating: json.rating,
-      };
-    });
-
-    //const [allUsers, setAllUsers] = useState<UserProps[]>([]);
-    console.log('userList : ', userList);
-    setAllUsers(userList.filter((user) => user.name !== me.name));
+  //전체 유저를 불러 온 후 나는 제외 하고 띄워 야함
+  async function getAllUsersExceptMe() {
+    try {
+      setAllUsersExceptMe(await getAllUsers());
+      setAllUsersExceptMe((prev: UserProps[]) => {
+        return prev.filter((user) => {
+          console.log(user.name, me.name, user.name !== me.name);
+          return user.name !== me.name;
+        });
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
   }
-
   return (
     <>
       <VStack
@@ -92,7 +96,7 @@ export default function Sidebar() {
             alt="add friend"
             onClick={() => {
               onOpen();
-              getAllUser();
+              getAllUsersExceptMe();
             }}
             mr={'5px'}
           />
@@ -167,7 +171,7 @@ export default function Sidebar() {
             <Box overflowY="scroll" mb={10}>
               <SimpleGrid columns={2} spacing={1}>
                 {searchId
-                  ? allUsers
+                  ? allUsersExceptMe
                       .filter((user) => {
                         const regex = new RegExp(searchId, 'i');
                         return user.name.match(regex);
@@ -177,7 +181,7 @@ export default function Sidebar() {
                           <RawUserItem user={user} />
                         </Link>
                       ))
-                  : allUsers.map((user, index) => (
+                  : allUsersExceptMe.map((user, index) => (
                       <Link key={index} href={`/user/${user.name}`}>
                         <RawUserItem user={user} />
                       </Link>

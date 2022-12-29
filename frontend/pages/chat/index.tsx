@@ -3,12 +3,11 @@ import { CustomButton } from '@/components/CustomButton';
 import UserItem from '@/components/UserItem';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
+import { customFetch } from '@/utils/customFetch';
 import {
   Button,
   Center,
-  ChakraProvider,
   Flex,
-  Image,
   Modal,
   ModalBody,
   ModalContent,
@@ -21,16 +20,23 @@ import {
   Text,
   Box,
   HStack,
-  Stack,
   Input,
   InputGroup,
   InputRightElement,
   Checkbox,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import { ReactElement, ReactEventHandler, ReactNode, useState } from 'react';
-
+import { ReactElement, ReactEventHandler, ReactNode, useEffect, useState } from 'react';
+import { allUserStore } from '@/stores/allUserStore';
+import Link from 'next/link';
+import RawUserItem from '@/components/RawUserItem';
 export default function ChatPage() {
+  const { allUsers, getAllUsers } = allUserStore();
+
+  //전체 유저를 불러온 후 온라인 상태인 유저만 띄워야함 혹은 채팅방에있던지
+  useEffect(() => {
+    getAllUsers;
+  }, []);
   const friend: UserProps = {
     name: 'yopark',
     imgUrl: '',
@@ -74,6 +80,7 @@ export default function ChatPage() {
       onClose();
     }
   };
+
   return (
     <>
       <Head>
@@ -155,14 +162,14 @@ export default function ChatPage() {
         </VStack>
         <VStack w="25%" h="90%" m={10} p={7} backgroundColor="white">
           <VStack w="100%" overflowY="scroll">
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
+            {/* 향후에 유저 상태에 따라 불러오는거 달라지면 이부분 filter 수정 */}
+            {allUsers
+              .filter((user) => user.status === 0)
+              .map((user, index) => (
+                <Link key={index} href={`/user/${user.name}`}>
+                  <RawUserItem user={user} />
+                </Link>
+              ))}
           </VStack>
         </VStack>
       </Flex>
