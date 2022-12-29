@@ -43,8 +43,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       console.log('fetchMe', user);
     } catch (e) {
       if (e instanceof Error) {
-        console.log(e.message);
-        return;
+        throw Error(e.message);
       }
     }
   },
@@ -57,8 +56,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       console.log('fetchUseOtp', useOtp);
     } catch (e) {
       if (e instanceof Error) {
-        console.log(e.message);
-        return;
+        throw Error(e.message);
       }
     }
   },
@@ -77,8 +75,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       get().fetchUseOtp();
     } catch (e) {
       if (e instanceof Error) {
-        console.log(e.message);
-        return;
+        throw Error(e.message);
       }
     }
   },
@@ -113,8 +110,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       get().fetchFriends();
     } catch (e) {
       if (e instanceof Error) {
-        console.log(e.message);
-        return;
+        throw Error(e.message);
       }
     }
   },
@@ -125,8 +121,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
       get().fetchFriends();
     } catch (e) {
       if (e instanceof Error) {
-        console.log(e.message);
-        return;
+        throw Error(e.message);
       }
     }
   },
