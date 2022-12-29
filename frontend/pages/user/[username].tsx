@@ -15,26 +15,27 @@ import { ReactElement, useEffect, useState } from 'react';
 export default function UserProfilePage() {
   const router = useRouter();
   let rawUsername: string | string[] | undefined = router.query.username;
-  let username: string = '';
-  if (rawUsername === undefined) {
-    username = ''; // FIXME: 에러 핸들링
-  } else if (Array.isArray(rawUsername)) {
-    username = rawUsername.join(''); // FIXME: 에러 핸들링
-  } else {
-    username = rawUsername;
-  }
-
-  const { addFriend } = userStore();
-
   const [user, setUser] = useState<UserProps | null>(null);
+  const { addFriend } = userStore();
 
   useEffect(() => {
     async function setUserInfo() {
       try {
+        console.log(rawUsername);
+        let username: string = '';
+        if (rawUsername === undefined) {
+          username = '';
+          return;
+        } else if (Array.isArray(rawUsername)) {
+          username = rawUsername.join('');
+          return;
+        } else {
+          username = rawUsername;
+        }
         const json = await customFetch('GET', `/user/name/${username}`);
         const fetchedUser = {
           name: json.username,
-          imgUrl: '', // TODO : img는 따로 가져와야 한다.
+          imgUrl: '', // TODO: img는 따로 가져와야 한다.
           status: json.status,
           rating: json.rating,
           useOtp: false,
@@ -49,13 +50,13 @@ export default function UserProfilePage() {
       }
     }
     setUserInfo();
-  }, []);
+  }, [rawUsername]);
 
   const winCnt = 42;
   const loseCnt = 42;
 
   const dummyMatchHistory: MatchHistoryProps = {
-    myName: username,
+    myName: 'asdfasdf',
     myScore: 4,
     oppName: 'pongmaster',
     oppScore: 10,
@@ -66,7 +67,7 @@ export default function UserProfilePage() {
       {user === null ? null : (
         <VStack>
           <Head>
-            <title>{`${username} | LastPong`}</title>
+            <title>{`${user.name} | LastPong`}</title>
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
