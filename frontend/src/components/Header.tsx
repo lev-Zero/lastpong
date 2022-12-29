@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 export default function Header() {
   // TODO: 클릭 시 useOtp가 변경되게 만들려면 zustand에서 user를 꺼내서 써야한다. 그렇지 않으면 리렌더링이 발생하지 않는다.
 
-  const { me, fetchMe, useOtp, fetchUseOtp } = userStore();
+  const { me, fetchMe, useOtp, fetchUseOtp, toggleUseOtp } = userStore();
   const router = useRouter();
 
   useEffect(() => fetchMe, []);
@@ -51,7 +51,7 @@ export default function Header() {
         <Link href={`/user/${me.name}`}>{me.name}</Link>
       </Box>
       <Box mx={5}>
-        <HStack>
+        <HStack onClick={toggleUseOtp}>
           <Text fontSize="sm">OTP</Text>
           <Circle size="10px" bg={useOtp ? 'online' : 'offline'}></Circle>
         </HStack>

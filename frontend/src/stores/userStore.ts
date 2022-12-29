@@ -11,6 +11,7 @@ interface userStoreProps {
   useOtp: boolean;
   fetchUseOtp: () => void;
   setUseOtp: (useOtp: boolean) => void;
+  toggleUseOtp: () => void;
 
   friends: UserProps[];
   setFriends: (friends: UserProps[]) => void;
@@ -63,6 +64,23 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   setUseOtp: (useOtp: boolean) => {
     set((state) => ({ ...state, useOtp }));
+  },
+  toggleUseOtp: async () => {
+    let path: string = '';
+    if (get().useOtp) {
+      path = '/auth/otp/off';
+    } else {
+      path = '/auth/otp/on';
+    }
+    try {
+      await customFetch('PATCH', path);
+      get().fetchUseOtp();
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
   },
   friends: [],
   setFriends: (friends: UserProps[]) => {
