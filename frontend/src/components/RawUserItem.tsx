@@ -1,4 +1,4 @@
-import { Circle, Flex, Text } from '@chakra-ui/react';
+import { Circle, Flex, Text, Spacer } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 
@@ -26,7 +26,8 @@ export default function RawUserItem({ user, msgNum }: RawUserItemProps) {
         borderRadius={20}
       >
         <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
-        <Text>{user.name.toUpperCase()}</Text>
+        <Spacer />
+        <Text mr={2}>{user.name.toUpperCase()}</Text>
       </Flex>
     </>
   );
