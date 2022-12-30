@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { AdminUser } from './AdminUser.entity';
 import { BannedUser } from './BannedUser.entity';
+import { ChatLog } from './chatLog.entity';
 import { JoinedUser } from './JoinedUser.entity';
 import { MutedUser } from './MutedUser.entity';
 
@@ -41,4 +42,7 @@ export class ChatRoom {
 
   @OneToMany(() => BannedUser, (bannedUser) => bannedUser.chatRoom)
   bannedUser: BannedUser[];
+
+  @OneToMany(() => ChatLog, (chatLog) => chatLog.chatRoom)
+  chatLog: ChatLog[];
 }
