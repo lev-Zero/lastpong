@@ -69,7 +69,7 @@ export default function Header() {
         </HStack>
       </Box>
       <Box mx={5}>
-        <Image onClick={logout} src="/Logout.svg" />
+        <Image onClick={logout} src="/exit.svg" />
       </Box>
     </Flex>
   );

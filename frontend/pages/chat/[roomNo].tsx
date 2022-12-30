@@ -72,13 +72,13 @@ export default function ChatRoomPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex w="100%" h="100%" m={7}>
-        <VStack w="70%" h="90%" my={10} bg="white" borderRadius="42" border="2px">
-          <Flex w="full" h="120px" bg="main" color="white" borderTopRadius="50px" fontSize="4xl">
+      <Flex w="100%" h="100%" p={5}>
+        <VStack w="70%" h="90%" my={10} bg="white" borderRadius="42px" border="2px">
+          <Flex w="full" py={5} bg="main" color="white" borderTopRadius="40px" fontSize="3xl">
             <Center ml={20}>{title}</Center>
             <Spacer />
-            <Image w="50px" src="/chatroom-setting.svg" />
-            <Image w="40px" mx={10} src="/exit-chatroom.svg" />
+            <Image w="40px" src="/chatroom-setting.svg" />
+            <Image w="30px" mx={10} src="/exit.svg" />
           </Flex>
           {/* Chat Part */}
           <VStack p={5} w="full" mt={10} bg="white" overflow="scroll">
