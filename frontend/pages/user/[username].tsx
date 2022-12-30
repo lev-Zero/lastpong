@@ -6,6 +6,7 @@ import { MatchHistoryProps } from '@/interfaces/MatchProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
 import { userStore } from '@/stores/userStore';
+import { avatarFetch } from '@/utils/avatarFetch';
 import { customFetch } from '@/utils/customFetch';
 import { Box, Center, Divider, Flex, HStack, Text, VStack } from '@chakra-ui/react';
 import Head from 'next/head';
@@ -33,9 +34,10 @@ export default function UserProfilePage() {
           username = rawUsername;
         }
         const json = await customFetch('GET', `/user/name/${username}`);
+        const imgUrl = await avatarFetch('GET', `/user/avatar/name/${username}`);
         const fetchedUser = {
           name: json.username,
-          imgUrl: '', // TODO: img는 따로 가져와야 한다.
+          imgUrl: imgUrl,
           status: json.status,
           rating: json.rating,
         };
