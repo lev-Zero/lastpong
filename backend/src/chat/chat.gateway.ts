@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
+import { User } from 'src/user/entity/user.entity';
 import { userStatus } from 'src/user/enum/status.enum';
 import { UserService } from 'src/user/service/user.service';
 import { ChatService } from './chat.service';
@@ -25,6 +26,9 @@ import {
   ChatRoomMessageDto,
   ChatRoomNameDto,
   ChatRoomUserIdDto,
+  InviteGameRoomInfoDto,
+  InviteUserDto,
+  ResponseInviteDto,
   updatePwdDto,
 } from './dto/chat.dto';
 
@@ -881,6 +885,104 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message: body.message,
         chatRoomId: chatRoomDm.id,
       });
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /* --------------------------
+	|				createInviteRoom 		|
+	|				responseInvite 		|
+	|				inviteGameRoomInfo |
+	---------------------------*/
+
+  @SubscribeMessage('createInviteRoom')
+  async createInviteRoom(socket: Socket, @Body() body: InviteUserDto) {
+    try {
+      const user: User = socket.data.user;
+      if (!user)
+        throw new HttpException(
+          '소켓 연결 유저 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const target = await this.userService
+        .findUserById(body.userId)
+        .catch(() => null);
+      if (!target)
+        throw new HttpException(
+          '해당 타겟 유저는 존재하지 않습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const targetSocket: Socket = socket_username[target.username];
+      if (!targetSocket) {
+        throw new HttpException(
+          '상대방은 채팅 가능 상태가 아닙니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const randomInviteRoomName = String(Math.floor(Math.random() * 1e9));
+      socket.join(randomInviteRoomName);
+      targetSocket.join(randomInviteRoomName);
+
+      socket.to(randomInviteRoomName).emit('requestInvite', {
+        message: '게임 초대 위한 요청',
+        randomInviteRoomName,
+        hostId: user.id,
+        targetId: target.id,
+      });
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @SubscribeMessage('responseInvite')
+  async responseInvite(socket: Socket, @Body() body: ResponseInviteDto) {
+    try {
+      socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
+        message: '게임 초대 요청에 대한 응답',
+        randomInviteRoomName: body.randomInviteRoomName,
+        hostId: body.hostId,
+        targetId: body.targetId,
+        response: body.response,
+      });
+      if (body.response == false) {
+        const host = await this.userService.findUserById(body.hostId);
+        const target = await this.userService.findUserById(body.targetId);
+        const hostSocket: Socket = socket_username[host.username];
+        const targetSocket: Socket = socket_username[target.username];
+        hostSocket.leave(body.randomInviteRoomName);
+        targetSocket.leave(body.randomInviteRoomName);
+      }
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+  //response == true 이면
+  //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
+  //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
+  @SubscribeMessage('inviteGameRoomInfo')
+  async inviteGameRoomInfo(
+    socket: Socket,
+    @Body() body: InviteGameRoomInfoDto,
+  ) {
+    try {
+      socket.to(body.inviteGameRoomName).emit('inviteGameRoomInfo', {
+        message: '게임룸 참여를 위한 정보',
+        randomInviteRoomName: body.randomInviteRoomName,
+        hostId: body.hostId,
+        targetId: body.targetId,
+        gameRoomName: body.inviteGameRoomName,
+      });
+
+      const host = await this.userService.findUserById(body.hostId);
+      const target = await this.userService.findUserById(body.targetId);
+      const hostSocket: Socket = socket_username[host.username];
+      const targetSocket: Socket = socket_username[target.username];
+      hostSocket.leave(body.randomInviteRoomName);
+      targetSocket.leave(body.randomInviteRoomName);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
