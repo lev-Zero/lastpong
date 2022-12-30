@@ -16,6 +16,8 @@ import { AdminUser } from 'src/chat/entity/AdminUser.entity';
 import { JoinedUser } from 'src/chat/entity/JoinedUser.entity';
 import { MutedUser } from 'src/chat/entity/MutedUser.entity';
 import { BannedUser } from 'src/chat/entity/BannedUser.entity';
+import { ChatLog } from 'src/chat/entity/chatLog.entity';
+import { ChatDmLog } from 'src/chat/entity/chatDmLog.entity';
 
 @Entity()
 export class User {
@@ -70,4 +72,10 @@ export class User {
 
   @OneToMany(() => BannedUser, (bannedUser) => bannedUser.user)
   bannedUser: AdminUser;
+
+  @OneToMany(() => ChatLog, (chatLog) => chatLog.user)
+  chatLog: AdminUser;
+
+  @OneToMany(() => ChatDmLog, (chatDmLog) => chatDmLog.user)
+  chatDmLog: AdminUser;
 }

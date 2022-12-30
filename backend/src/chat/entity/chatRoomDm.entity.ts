@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ChatDmLog } from './chatDmLog.entity';
 import { JoinedDmUser } from './JoinedDmUser.entity';
 
 @Entity()
@@ -26,4 +27,7 @@ export class ChatRoomDm {
 
   @OneToMany(() => JoinedDmUser, (joinedDmUser) => joinedDmUser.chatRoomDm)
   joinedDmUser: JoinedDmUser[];
+
+  @OneToMany(() => ChatDmLog, (chatDmLog) => chatDmLog.chatRoomDm)
+  chatDmLog: ChatDmLog[];
 }
