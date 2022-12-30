@@ -726,7 +726,7 @@ export class ChatService {
         );
       if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
         throw new HttpException(
-          '당신은 admin이 아닙니다.',
+          '당신은 admin이 아닙니다..',
           HttpStatus.BAD_REQUEST,
         );
 
