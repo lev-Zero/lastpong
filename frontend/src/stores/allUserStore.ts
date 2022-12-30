@@ -13,7 +13,6 @@ export const allUserStore = create<allUserStoreProps>((set, get) => ({
   allUsers: [],
   setAllUsers: (allUsers: UserProps[]) => {
     set((state) => ({ ...state, allUsers }));
-    console.log('allUsers333', get().allUsers);
   },
   getAllUsers: async (): Promise<UserProps[]> => {
     try {
@@ -31,7 +30,6 @@ export const allUserStore = create<allUserStoreProps>((set, get) => ({
         })
       );
       get().setAllUsers(userList);
-      console.log('getAllUsers22', get().allUsers);
     } catch (e) {
       if (e instanceof Error) {
         console.log(e.message);
