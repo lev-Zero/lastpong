@@ -228,6 +228,7 @@ export class ChatService {
         select: {
           id: true,
           name: true,
+          status: true,
         },
         relations: ['owner'],
       });
