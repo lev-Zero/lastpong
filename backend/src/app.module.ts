@@ -18,6 +18,8 @@ import { JoinedUser } from './chat/entity/JoinedUser.entity';
 import { MutedUser } from './chat/entity/MutedUser.entity';
 import { JoinedDmUser } from './chat/entity/JoinedDmUser.entity';
 import { GameModule } from './game/game.module';
+import { ChatLog } from './chat/entity/chatLog.entity';
+import { ChatDmLog } from './chat/entity/chatDmLog.entity';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { GameModule } from './game/game.module';
         JoinedUser,
         MutedUser,
         JoinedDmUser,
+        ChatLog,
+        ChatDmLog,
       ],
       autoLoadEntities: true,
       synchronize: true,
