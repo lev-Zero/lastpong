@@ -140,3 +140,44 @@ export class ChatRoomDmMessageDto {
   @IsNotEmpty()
   message: string;
 }
+
+export class InviteUserDto {
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+}
+
+export class ResponseInviteDto {
+  @IsNumber()
+  @IsNotEmpty()
+  hostId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  targetId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  randomInviteRoomName: string;
+
+  @IsNotEmpty()
+  response: boolean;
+}
+
+export class InviteGameRoomInfoDto {
+  @IsNumber()
+  @IsNotEmpty()
+  hostId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  targetId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  randomInviteRoomName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  inviteGameRoomName: string;
+}
