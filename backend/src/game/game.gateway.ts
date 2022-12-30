@@ -145,10 +145,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinGameRoom')
-  async joinGameRoom(
-    socket: Socket,
-    @Body() body: GameRoomNameDto,
-  ): Promise<void> {
+  async joinGameRoom(socket: Socket, body: GameRoomNameDto): Promise<void> {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -200,7 +197,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('readyGame')
-  readyGame(socket: Socket, @Body() body: ReadyGameOptionDto): void {
+  readyGame(socket: Socket, body: ReadyGameOptionDto): void {
     try {
       const user = socket.data.user;
       if (!user)
@@ -241,10 +238,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('startGame')
-  async startGame(
-    socket: Socket,
-    @Body() body: GameRoomNameDto,
-  ): Promise<void> {
+  async startGame(socket: Socket, body: GameRoomNameDto): Promise<void> {
     try {
       const user = socket.data.user;
       if (!user)
@@ -343,7 +337,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('exitGameRoom')
-  async exitGameRoom(socket: Socket, @Body() body: GameRoomNameDto) {
+  async exitGameRoom(socket: Socket, body: GameRoomNameDto) {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -426,7 +420,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('touchBar')
-  updatetouchBar(socket: Socket, @Body() body: TouchBarDto): void {
+  updatetouchBar(socket: Socket, body: TouchBarDto): void {
     try {
       const user: User = socket.data.user;
       if (!user)
