@@ -113,8 +113,6 @@ export class GameService {
 	---------------------------*/
 
   createGameRoom(gameRoomName: string): GameRoomDto {
-    console.log('[gameService] createGameRoom');
-
     try {
       const gameRoom: GameRoomDto = {
         gameRoomName,
@@ -151,7 +149,6 @@ export class GameService {
     socket: Socket,
     gameRoom: GameRoomDto,
   ): { gameRoom: GameRoomDto; user: PlayerType } {
-    console.log('[gameService] joinGameRoom');
     try {
       let user: PlayerType = PlayerType.SPECTATOR;
       let gamePlayer: GamePlayerDto;

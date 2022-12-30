@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+	IsDate,
   IsIn,
   IsNotEmpty,
   IsNumber,
@@ -180,4 +181,36 @@ export class InviteGameRoomInfoDto {
   @IsString()
   @IsNotEmpty()
   inviteGameRoomName: string;
+}
+
+export class ChatLogDto {
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  chatRoomId: number;
+
+  @IsString()
+  message: string;
+
+  @IsDate()
+  createdAt: Date;
+}
+
+export class ChatDmLogDto {
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  chatRoomDmId: number;
+
+  @IsString()
+  message: string;
+
+  @IsDate()
+  createdAt: Date;
 }

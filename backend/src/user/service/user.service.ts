@@ -224,7 +224,6 @@ export class UserService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      console.log({ user });
       return user;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

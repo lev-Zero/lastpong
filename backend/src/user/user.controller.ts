@@ -56,7 +56,6 @@ export class UserController {
   //http://localhost:3000/user/test/create/fakeuser
   @Get('/test/create/fakeuser')
   async testCreateUser() {
-    console.log('[userController] testCreateUser');
     this.testDeleteUser();
     const photoUrl =
       'https://velog.velcdn.com/images%2Fseeh_h%2Fpost%2F46d59d0b-4a8a-4f5d-a173-045d433919bc%2Fimage.png';
@@ -96,7 +95,6 @@ export class UserController {
   //http://localhost:3000/user/test/delete/fakeuser
   @Get('/test/delete/fakeuser')
   testDeleteUser() {
-    console.log('[userController] testDeleteUser');
     this.userService.testDeleteFakeUser('fake_U1');
     this.userService.testDeleteFakeUser('fake_U2');
     this.userService.testDeleteFakeUser('fake_U3');
@@ -105,7 +103,6 @@ export class UserController {
   }
   @Get('/test/read/fakeuser/:name')
   testFindUser(@Param('name') name: string) {
-    console.log('[userController] testReadUser');
     const fakeuser = this.userService.testFindUser(name);
     const user = fakeuser;
     return user;

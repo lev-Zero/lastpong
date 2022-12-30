@@ -11,7 +11,15 @@ import { JoinedUser } from './entity/JoinedUser.entity';
 import { MutedUser } from './entity/MutedUser.entity';
 import * as bcrypt from 'bcrypt';
 import { JoinedDmUser } from './entity/JoinedDmUser.entity';
-import { ChatRoomDto, ChatRoomJoinDto, ChatRoomPwdDto } from './dto/chat.dto';
+import {
+  ChatDmLogDto,
+  ChatLogDto,
+  ChatRoomDto,
+  ChatRoomJoinDto,
+  ChatRoomPwdDto,
+} from './dto/chat.dto';
+import { ChatLog } from './entity/chatLog.entity';
+import { ChatDmLog } from './entity/chatDmLog.entity';
 
 const temporary = 30 * 60 * 10;
 
@@ -33,6 +41,10 @@ export class ChatService {
     private readonly mutedUserRepository: Repository<MutedUser>,
     @InjectRepository(JoinedDmUser)
     private readonly joinedDmUserRepository: Repository<JoinedDmUser>,
+    @InjectRepository(ChatLog)
+    private readonly chatLogRepository: Repository<ChatLog>,
+    @InjectRepository(ChatDmLog)
+    private readonly chatDmLogRepository: Repository<ChatDmLog>,
   ) {}
 
   // /*----------------------------------
@@ -847,15 +859,14 @@ export class ChatService {
         ['joinedUser', 'bannedUser'],
         true,
       );
-      if (findChatRoom.status !== chatRoomStatus.PROTECTED) {
+      if (findChatRoom.status === chatRoomStatus.PROTECTED) {
         let valide = false;
         if (findChatRoom.password)
           valide = await bcrypt.compareSync(
             chatRoom.password,
             findChatRoom.password,
           );
-        console.log('chatRoom.password:', chatRoom.password);
-        console.log('findChatRoom.password:', findChatRoom.password);
+
         if (!valide)
           throw new HttpException(
             '입력된 비밀번호는 잘못되었습니다.',
@@ -907,7 +918,7 @@ export class ChatService {
     offerUserId: number,
   ): Promise<void> {
     try {
-      const user = await this.userService.findUserById(targetUserId);
+      const targetUser = await this.userService.findUserById(targetUserId);
       const chatRoom = await this.findChatRoomById(chatRoomId, [
         'adminUser',
         'joinedUser',
@@ -929,7 +940,7 @@ export class ChatService {
           );
       }
 
-      if (offerUserId && offerUserId != user.id) {
+      if (offerUserId && offerUserId != targetUser.id) {
         const isAdminOfferUser = await this.adminUserRepository
           .findOne({ where: { chatRoom: chatRoom, user: offerUser } })
           .catch(() => null);
@@ -941,7 +952,7 @@ export class ChatService {
           );
 
         const isAdmintargetUser = await this.adminUserRepository.findOne({
-          where: { chatRoom: chatRoom, user: user },
+          where: { chatRoom: chatRoom, user: targetUser },
         });
 
         if (isAdmintargetUser)
@@ -950,7 +961,7 @@ export class ChatService {
             HttpStatus.BAD_REQUEST,
           );
 
-        if (user.id == chatRoom.owner.id) {
+        if (targetUser.id == chatRoom.owner.id) {
           throw new HttpException(
             '방 주인을 쫓아낼 수는 없습니다.',
             HttpStatus.BAD_REQUEST,
@@ -958,21 +969,21 @@ export class ChatService {
         }
 
         for (const joinedUser of chatRoom.joinedUser)
-          if (joinedUser.user.id == user.id) {
-            await this.removeJoinedUser(user.id, chatRoomId);
+          if (joinedUser.user.id == targetUser.id) {
+            await this.removeJoinedUser(targetUser.id, chatRoomId);
             break;
           }
       } else if (
         offerUserId &&
-        offerUserId === user.id &&
+        offerUserId === targetUser.id &&
         offerUserId !== chatRoom.owner.id
       ) {
         if (chatRoom.adminUser.find((admin) => admin.user.id == offerUserId))
           await this.directRemoveAdminUser(offerUserId, chatRoom.id);
-        return await this.removeJoinedUser(user.id, chatRoomId);
+        return await this.removeJoinedUser(targetUser.id, chatRoomId);
       } else if (
         offerUserId &&
-        offerUserId === user.id &&
+        offerUserId === targetUser.id &&
         offerUserId === chatRoom.owner.id
       ) {
         return await this.removeChatRoom(chatRoom.id);
@@ -1032,15 +1043,15 @@ export class ChatService {
     offerUserId?: number,
   ): Promise<void> {
     try {
-      const user = await this.userService.findUserById(targetUserId);
+      const targetUser = await this.userService.findUserById(targetUserId);
       const chatRoomDm = await this.findChatRoomDmById(chatRoomId, [
         'joinedDmUser',
         'owner',
       ]);
       const offerUser = await this.userService.findUserById(offerUserId);
 
-      if (offerUser.id && offerUser.id != user.id) {
-        if (user.id == chatRoomDm.owner.id) {
+      if (offerUser.id && offerUser.id != targetUser.id) {
+        if (targetUser.id == chatRoomDm.owner.id) {
           throw new HttpException(
             '방 주인을 쫓아낼 수는 없습니다.',
             HttpStatus.BAD_REQUEST,
@@ -1048,19 +1059,19 @@ export class ChatService {
         }
 
         for (const joinedUser of chatRoomDm.joinedDmUser)
-          if (joinedUser.user.id == user.id) {
-            await this.removeJoinedDmUser(user.id, chatRoomId);
+          if (joinedUser.user.id == targetUser.id) {
+            await this.removeJoinedDmUser(targetUser.id, chatRoomId);
             break;
           }
       } else if (
         offerUser.id &&
-        offerUser.id === user.id &&
+        offerUser.id === targetUser.id &&
         offerUser.id !== chatRoomDm.owner.id
       ) {
-        return await this.removeJoinedDmUser(user.id, chatRoomId);
+        return await this.removeJoinedDmUser(targetUser.id, chatRoomId);
       } else if (
         offerUser.id &&
-        offerUser.id === user.id &&
+        offerUser.id === targetUser.id &&
         offerUser.id === chatRoomDm.owner.id
       ) {
         return await this.removeChatRoomDm(chatRoomDm.id);
@@ -1098,6 +1109,110 @@ export class ChatService {
 
       await this.joinedDmUserRepository.remove(chatRoomDm.joinedDmUser);
       await this.chatRoomDmRepository.remove(chatRoomDm);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async addChatLog(body: ChatLogDto): Promise<void> {
+    try {
+      const user = await this.userService
+        .findUserById(body.userId)
+        .catch(() => null);
+      const chatRoom = await this.findChatRoomById(body.chatRoomId, [
+        'joinedUser',
+      ]).catch(() => null);
+
+      if (!user)
+        throw new HttpException(
+          '메시지 보낸 유저는 존재하지 않습니다',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      if (!chatRoom)
+        throw new HttpException(
+          '메시지 보낸 채팅룸은 존재하지 않습니다',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      if (!chatRoom.joinedUser.find((joined) => joined.user.id == user.id))
+        throw new HttpException(
+          '메시지 보낸 유저는 이 방에 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      const log = {
+        message: body.message,
+        user: user,
+        chatRoom: chatRoom,
+        createdAt: body.createdAt,
+      };
+      const chatLog = await this.chatLogRepository.create(log);
+      await this.chatLogRepository.save(chatLog);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async addChatDmLog(body: ChatDmLogDto): Promise<void> {
+    try {
+      const user = await this.userService
+        .findUserById(body.userId)
+        .catch(() => null);
+      const chatRoomDm = await this.findChatRoomDmById(body.chatRoomDmId, [
+        'joinedDmUser',
+      ]).catch(() => null);
+
+      if (!user)
+        throw new HttpException(
+          '메시지 보낸 유저는 존재하지 않습니다',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      if (!chatRoomDm)
+        throw new HttpException(
+          '메시지 보낸 채팅룸은 존재하지 않습니다',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      if (!chatRoomDm.joinedDmUser.find((joined) => joined.user.id == user.id))
+        throw new HttpException(
+          '메시지 보낸 유저는 이 방에 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      const log = {
+        message: body.message,
+        user: user,
+        chatRoomDm: chatRoomDm,
+        createdAt: body.createdAt,
+      };
+      const chatDmLog = await this.chatDmLogRepository.create(log);
+      await this.chatDmLogRepository.save(chatDmLog);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async deleteChatRoomIfOwner(userId: number) {
+    try {
+      await this.chatRoomRepository
+        .createQueryBuilder('chatRoom')
+        .delete()
+        .from(ChatRoom)
+        .where('ownerId = :ownerId', { ownerId: userId })
+        .execute();
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async deleteChatRoomDmIfOwner(userId: number) {
+    try {
+      await this.chatRoomDmRepository
+        .createQueryBuilder('chatRoomdm')
+        .delete()
+        .from(ChatRoomDm)
+        .where('ownerId = :ownerId', { ownerId: userId })
+        .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
