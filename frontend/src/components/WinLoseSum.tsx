@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import useLoginStore from '@/store/useLoginStore';
 import { Flex, Text } from '@chakra-ui/react';
 
 interface WinLoseSumProps {
@@ -9,8 +8,6 @@ interface WinLoseSumProps {
 }
 
 export default function WinLoseSum({ winCnt, loseCnt, fontSize = 'md' }: WinLoseSumProps) {
-  //   const { totalWin, totalLoss } = useLoginStore();
-
   return (
     <>
       <Flex fontSize={fontSize}>
