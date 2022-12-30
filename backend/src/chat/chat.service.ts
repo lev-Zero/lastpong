@@ -580,19 +580,16 @@ export class ChatService {
           HttpStatus.BAD_REQUEST,
         );
 
+      if (chatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
+        throw new HttpException(
+          '타겟유저는 admin 입니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+
       if (!chatRoom.adminUser.find((admin) => admin.user.id == me.id))
         throw new HttpException(
           '당신은 admin이 아닙니다.',
-          HttpStatus.FORBIDDEN,
-        );
-
-      if (
-        chatRoom.adminUser.find((admin) => admin.user.id == targetUserId) &&
-        me.id != chatRoom.owner.id
-      )
-        throw new HttpException(
-          '당신은 owner가 아니고, 타겟유저는 admin 입니다.',
-          HttpStatus.FORBIDDEN,
+          HttpStatus.BAD_REQUEST,
         );
 
       const isMutedUser = await this.mutedUserRepository
@@ -654,14 +651,7 @@ export class ChatService {
           '당신은 admin이 아닙니다.',
           HttpStatus.BAD_REQUEST,
         );
-      if (
-        chatRoom.adminUser.find((admin) => admin.user.id == targetUserId) &&
-        me.id != chatRoom.owner.id
-      )
-        throw new HttpException(
-          '당신은 owner가 아니고, 타겟유저는 admin 입니다.',
-          HttpStatus.FORBIDDEN,
-        );
+
       if (!chatRoom.mutedUser.find((muted) => muted.user.id == targetUser.id)) {
         throw new HttpException(
           '타겟유저는 mute상태가 아닙니다.',
@@ -729,19 +719,15 @@ export class ChatService {
           HttpStatus.BAD_REQUEST,
         );
 
+      if (findChatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
+        throw new HttpException(
+          '타겟유저는 admin 입니다.',
+          HttpStatus.BAD_REQUEST,
+        );
       if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
         throw new HttpException(
           '당신은 admin이 아닙니다.',
-          HttpStatus.FORBIDDEN,
-        );
-
-      if (
-        findChatRoom.adminUser.find((admin) => admin.user.id == targetUserId) &&
-        me.id != findChatRoom.owner.id
-      )
-        throw new HttpException(
-          '당신은 owner가 아니고, 타겟유저는 admin 입니다.',
-          HttpStatus.FORBIDDEN,
+          HttpStatus.BAD_REQUEST,
         );
 
       const isBannedUser = await this.bannedUserRepository
@@ -760,13 +746,6 @@ export class ChatService {
 
         for (const joinedUser of findChatRoom.joinedUser)
           if (joinedUser.user.id == targetUser.id) {
-            if (
-              findChatRoom.adminUser.find(
-                (admin) => admin.user.id == targetUserId,
-              )
-            ) {
-              await this.directRemoveAdminUser(targetUserId, findChatRoom.id);
-            }
             await this.removeJoinedUser(targetUser.id, chatRoomId);
             break;
           }
@@ -956,26 +935,21 @@ export class ChatService {
           where: { chatRoom: chatRoom, user: user },
         });
 
-        if (isAdmintargetUser && offerUserId != chatRoom.owner.id)
+        if (isAdmintargetUser)
           throw new HttpException(
-            '요청유저와 타겟유저는 admin 입니다.',
-            HttpStatus.FORBIDDEN,
+            '타겟유저는 admin 입니다.',
+            HttpStatus.BAD_REQUEST,
           );
 
         if (user.id == chatRoom.owner.id) {
           throw new HttpException(
             '방 주인을 쫓아낼 수는 없습니다.',
-            HttpStatus.FORBIDDEN,
+            HttpStatus.BAD_REQUEST,
           );
         }
 
         for (const joinedUser of chatRoom.joinedUser)
           if (joinedUser.user.id == user.id) {
-            if (
-              chatRoom.adminUser.find((admin) => admin.user.id == targetUserId)
-            ) {
-              await this.directRemoveAdminUser(targetUserId, chatRoom.id);
-            }
             await this.removeJoinedUser(user.id, chatRoomId);
             break;
           }
