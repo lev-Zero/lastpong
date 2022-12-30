@@ -5,7 +5,6 @@ import { useRef, useState } from 'react';
 import { Avatar, Text, Flex, Input, Image, Box, Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { SERVER_URL } from '@/utils/variables';
-import useLoginStore from '@/store/useLoginStore';
 import { customFetch } from '@/utils/customFetch';
 import { getJwtToken } from '@/utils/getJwtToken';
 
@@ -45,7 +44,7 @@ export default function BasicAvatarPage() {
   const selectFile = useRef<HTMLInputElement>();
   const selectAvatar = useRef<HTMLSpanElement>();
   const [imageFile, setImageFile] = useState<any>(null);
-  const { avatarImg, setAvatarImg } = useLoginStore();
+  const [avatarImg, setAvatarImg] = useState<any>();
   const router = useRouter();
 
   function FileToImg(file: any) {
