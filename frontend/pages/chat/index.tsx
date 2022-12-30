@@ -33,69 +33,40 @@ import RawUserItem from '@/components/RawUserItem';
 import io, { Socket } from 'socket.io-client';
 import { getJwtToken } from '@/utils/getJwtToken';
 
-interface ChatRoomList {
-  id: number;
-  name: string;
-}
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
-  const [chatRoomList, setChatRoomList] = useState<ChatRoomList[]>([]);
+  const [chatRoomList, setChatRoomList] = useState<ChatRoomItemProps[]>([]);
 
-  let socket = useRef<Socket>();
-  // let socket: Socket;
+  const [socket, setSocket] = useState<Socket>();
 
-  //전체 유저를 불러온 후 온라인 상태인 유저만 띄워야함 혹은 채팅방에있던지
   useEffect(() => {
-    getAllUsers();
-    // function makeSocket() {
-    //   setSocket(
-    //     io('ws://localhost:3000/chat', {
-    //       extraHeaders: {
-    //         authorization: getJwtToken(),
-    //       },
-    //     })
-    //   );
-    //   socket.on('connection', console.log);
-    // }
-    // makeSocket();
-    function makeSocket() {
-      socket.current = io('ws://localhost:3000/chat', {
-        extraHeaders: {
-          authorization: getJwtToken(),
-        },
-      });
-      // console.log('socket', socket);
-      socket.current.emit('chatRoomAll');
-      // socket.current.on('chatRoomAll', console.log);
-      // {message: "모든 채팅 방 목록", chatRoom: [{id: 4, name: "안녕하세요"}]}
-      socket.current.on('chatRoomAll', (res) => {
-        setChatRoomList(res.chatRoom);
-      });
-    }
-    console.log('ChatRoomAll_LIST', chatRoomList);
-    makeSocket();
+    const newSocket = io('ws://localhost:3000/chat', {
+      extraHeaders: {
+        authorization: getJwtToken(),
+      },
+    });
+    setSocket(newSocket);
+    newSocket.on('connection', (res) => {
+      const allChatRoom = res.allChatRooms;
+      setChatRoomList(
+        allChatRoom.map((chatRoom: any) => {
+          return {
+            id: chatRoom.id,
+            title: chatRoom.name,
+            owner: {
+              name: chatRoom.owner.username,
+              imgUrl: '',
+              status: chatRoom.owner.status,
+              rating: chatRoom.owner.rating,
+            },
+            isPrivate: chatRoom.status === 2,
+            password: '',
+          };
+        })
+      );
+    });
+    newSocket.on('join', console.log);
   }, []);
-
-  const friend: UserProps = {
-    name: 'yopark',
-    imgUrl: '',
-    status: UserStatus.inGame,
-    rating: 1028,
-  };
-
-  const owner: UserProps = {
-    name: 'yopark',
-    imgUrl: '',
-    status: UserStatus.inGame,
-    rating: 1028,
-  };
-
-  const dummyChatRoom: ChatRoomItemProps = {
-    title: 'Lonely Night Chat',
-    owner: owner,
-    isPrivate: true,
-    password: '1234',
-  };
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [show, setShow] = useState(false);
@@ -131,66 +102,14 @@ export default function ChatPage() {
         <VStack w="70%" h="90%" my={10}>
           <Box overflowY="scroll" mb={10}>
             <SimpleGrid columns={2} spacing={5}>
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={false}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={false}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
-              <ChatRoomItem
-                title={dummyChatRoom.title}
-                owner={dummyChatRoom.owner}
-                isPrivate={dummyChatRoom.isPrivate}
-                password={dummyChatRoom.password}
-              />
+              {chatRoomList.map((chatRoom, idx) => (
+                <ChatRoomItem
+                  key={idx}
+                  title={chatRoom.title}
+                  owner={chatRoom.owner}
+                  isPrivate={chatRoom.isPrivate}
+                />
+              ))}
             </SimpleGrid>
           </Box>
           <Box>
