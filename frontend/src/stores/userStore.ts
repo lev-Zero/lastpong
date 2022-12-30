@@ -87,16 +87,19 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   fetchFriends: async () => {
     try {
-      const arr = await customFetch('GET', 'user/friend');
-      const friends: UserProps[] = arr.map((json: any) => {
-        const friend = json.friend;
-        return {
-          name: friend.username,
-          imgUrl: '',
-          status: friend.status,
-          rating: friend.rating,
-        };
-      });
+      const arr = await customFetch('GET', '/user/friend');
+      const friends: UserProps[] = await Promise.all(
+        arr.map(async (json: any) => {
+          const friend = json.friend;
+          const imgUrl = await avatarFetch('GET', `/user/avatar/name/${friend.username}`);
+          return {
+            name: friend.username,
+            imgUrl: imgUrl,
+            status: friend.status,
+            rating: friend.rating,
+          };
+        })
+      );
       get().setFriends(friends);
       console.log('fetchFriends', friends);
     } catch (e) {
