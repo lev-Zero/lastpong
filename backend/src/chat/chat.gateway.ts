@@ -173,10 +173,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createChatRoom')
-  async createChatRoom(
-    socket: Socket,
-    @Body() body: ChatRoomDto,
-  ): Promise<void> {
+  async createChatRoom(socket: Socket, body: ChatRoomDto): Promise<void> {
+    console.log({ socket });
+    console.log({ body });
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
@@ -198,7 +197,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				updatePwd						|
 	---------------------------*/
   @SubscribeMessage('updatePwd')
-  async updatePwd(socket: Socket, @Body() body: updatePwdDto): Promise<void> {
+  async updatePwd(socket: Socket, body: updatePwdDto): Promise<void> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       await this.chatService.updatePwd(user.id, body.password, body.chatRoomId);
@@ -228,10 +227,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('chatRoomById')
-  async findChatRoomById(
-    socket: Socket,
-    @Body() body: ChatRoomIdDto,
-  ): Promise<void> {
+  async findChatRoomById(socket: Socket, body: ChatRoomIdDto): Promise<void> {
     try {
       const chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
@@ -250,7 +246,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('chatRoomByName')
   async findChatRoomByName(
     socket: Socket,
-    @Body() body: ChatRoomNameDto,
+    body: ChatRoomNameDto,
   ): Promise<void> {
     try {
       const chatRoom = await this.chatService.findChatRoomByName(
@@ -270,7 +266,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('chatRoomByUserId')
   async findChatRoomByUserId(
     socket: Socket,
-    @Body() body: ChatRoomUserIdDto,
+    body: ChatRoomUserIdDto,
   ): Promise<void> {
     try {
       const user = await this.userService.findUserById(body.userId);
@@ -306,10 +302,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('join')
-  async joinChatRoom(
-    socket: Socket,
-    @Body() body: ChatRoomJoinDto,
-  ): Promise<void> {
+  async joinChatRoom(socket: Socket, body: ChatRoomJoinDto): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
@@ -343,10 +336,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //offerUser가 body.targetId를 남으로 하면 강퇴, 지가 지꺼쓰면 퇴장
   @SubscribeMessage('leave')
-  async leaveChatRoom(
-    socket: Socket,
-    @Body() body: ChatRoomleaveDto,
-  ): Promise<void> {
+  async leaveChatRoom(socket: Socket, body: ChatRoomleaveDto): Promise<void> {
     try {
       const offerUser = socket.data.user;
       const targetUser = await this.userService.findUserById(body.targetUserId);
@@ -403,10 +393,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //클라이언트에서 block유저 관계 확인해서 해당 유저면 그 유저 화면에서는 특정유저의 메지시 안보여줌.
   @SubscribeMessage('message')
-  async sendMessage(
-    socket: Socket,
-    @Body() body: ChatRoomMessageDto,
-  ): Promise<void> {
+  async sendMessage(socket: Socket, body: ChatRoomMessageDto): Promise<void> {
     try {
       const user = socket.data.user;
       const chatRoom = await this.chatService
@@ -445,10 +432,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('addAdmin')
-  async addAdminUser(
-    socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  async addAdminUser(socket: Socket, body: ChatRoomIdUserIdDto): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -480,7 +464,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('removeAdmin')
   async removeAdminUser(
     socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
+    body: ChatRoomIdUserIdDto,
   ): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
@@ -516,10 +500,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 ---------------------------*/
 
   @SubscribeMessage('addMute')
-  async addMutedUser(
-    socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  async addMutedUser(socket: Socket, body: ChatRoomIdUserIdDto): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -553,7 +534,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('removeMute')
   async removeMutedUser(
     socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
+    body: ChatRoomIdUserIdDto,
   ): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
@@ -592,7 +573,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('addBan')
   async addBannedUser(
     socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
+    body: ChatRoomIdUserIdDto,
   ): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
@@ -632,7 +613,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('removeBan')
   async removeBannedUser(
     socket: Socket,
-    @Body() body: ChatRoomIdUserIdDto,
+    body: ChatRoomIdUserIdDto,
   ): Promise<void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
@@ -672,10 +653,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createChatRoomDm')
-  async createChatRoomDm(
-    socket: Socket,
-    @Body() body: ChatRoomDmDto,
-  ): Promise<void> {
+  async createChatRoomDm(socket: Socket, body: ChatRoomDmDto): Promise<void> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       const target = await this.userService.findUserById(body.targetId);
@@ -725,7 +703,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('chatRoomDmById')
   async findChatRoomDmById(
     socket: Socket,
-    @Body() body: ChatRoomIdDmDto,
+    body: ChatRoomIdDmDto,
   ): Promise<void> {
     try {
       const chatRoomDm = await this.chatService.findChatRoomDmById(
@@ -761,7 +739,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('chatRoomDmByUserId')
   async findChatRoomDmByUserId(
     socket: Socket,
-    @Body() body: ChatRoomDmUserIdDto,
+    body: ChatRoomDmUserIdDto,
   ): Promise<void> {
     try {
       const user = await this.userService.findUserById(body.userId);
@@ -784,7 +762,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveDm')
   async leaveChatRoomDm(
     socket: Socket,
-    @Body() body: ChatRoomleaveDmDto,
+    body: ChatRoomleaveDmDto,
   ): Promise<void> {
     try {
       const offerUser = socket.data.user;
@@ -844,7 +822,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('directMessage')
   async sendMessageDM(
     socket: Socket,
-    @Body() body: ChatRoomDmMessageDto,
+    body: ChatRoomDmMessageDto,
   ): Promise<void> {
     try {
       const chatRoomDm = await this.chatService.findChatRoomDmById(
@@ -892,7 +870,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createInviteRoom')
-  async createInviteRoom(socket: Socket, @Body() body: InviteUserDto) {
+  async createInviteRoom(socket: Socket, body: InviteUserDto) {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -934,7 +912,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('responseInvite')
-  async responseInvite(socket: Socket, @Body() body: ResponseInviteDto) {
+  async responseInvite(socket: Socket, body: ResponseInviteDto) {
     try {
       socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
@@ -959,10 +937,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
   //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
   @SubscribeMessage('inviteGameRoomInfo')
-  async inviteGameRoomInfo(
-    socket: Socket,
-    @Body() body: InviteGameRoomInfoDto,
-  ) {
+  async inviteGameRoomInfo(socket: Socket, body: InviteGameRoomInfoDto) {
     try {
       socket.to(body.inviteGameRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
