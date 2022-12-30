@@ -97,6 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.data.user = user;
       socket_username[user.username] = socket;
 
+      console.log('emit connection');
       socket.emit('connection', {
         message: `${user.username} 연결`,
         user,
@@ -174,10 +175,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Body() body: ChatRoomDto,
   ): Promise<void> {
     try {
+      console.log(socket);
+      console.log(body);
       const user = await this.authService.findUserByRequestToken(socket);
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
       socket.join(body.name);
 
+      console.log('emit createChatRoom');
       socket.emit('createChatRoom', {
         message: '채팅룸이 생성되었습니다',
         chatRoom,
@@ -217,6 +221,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chatRoom = await this.chatService.findChatRoomAll();
 
+      console.log('emit chatRoomAll');
       socket.emit('chatRoomAll', { message: '모든 채팅 방 목록', chatRoom });
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
