@@ -41,6 +41,7 @@ export default function ChatPage() {
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
+    getAllUsers();
     const newSocket = io('ws://localhost:3000/chat', {
       extraHeaders: {
         authorization: getJwtToken(),
