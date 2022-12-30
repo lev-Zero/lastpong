@@ -175,11 +175,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('createChatRoom')
   async createChatRoom(socket: Socket, body: ChatRoomDto): Promise<void> {
-    console.log({ socket });
-    console.log({ body });
     try {
-      console.log(socket);
-      console.log(body);
       const user = await this.authService.findUserByRequestToken(socket);
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
       socket.join(body.name);

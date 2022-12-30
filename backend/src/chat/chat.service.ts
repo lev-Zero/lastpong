@@ -847,6 +847,8 @@ export class ChatService {
             chatRoom.password,
             findChatRoom.password,
           );
+        console.log('chatRoom.password:', chatRoom.password);
+        console.log('findChatRoom.password:', findChatRoom.password);
         if (!valide)
           throw new HttpException(
             '입력된 비밀번호는 잘못되었습니다.',
