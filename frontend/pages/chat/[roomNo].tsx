@@ -1,32 +1,13 @@
-import { CustomButton } from '@/components/CustomButton';
 import MainLayout from '@/layouts/MainLayout';
-import {
-  Box,
-  Center,
-  Flex,
-  HStack,
-  Spacer,
-  Stack,
-  VStack,
-  Icon,
-  Image,
-  Text,
-  Input,
-  InputRightElement,
-  InputGroup,
-} from '@chakra-ui/react';
-import { MdSettings, MdClose, MdArrowUpward } from 'react-icons/md';
+import { Center, Flex, HStack, Spacer, VStack, Image, Input } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { ReactElement, useState, useRef } from 'react';
 import { userStore } from '@/stores/userStore';
 import UserItem from '@/components/UserItem';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { MsgProps } from '@/interfaces/MsgProps';
 
-interface ChatLog {
-  id: string;
-  msg: string;
-}
 export default function ChatRoomPage() {
   const router = useRouter();
   const { roomNo } = router.query;
@@ -48,52 +29,28 @@ export default function ChatRoomPage() {
   };
 
   //이부분은 채팅 주고받은 로그 기록 전반이다. 백엔드에서 실시간으로 갱신하는 부분으로 바꾸어야함
-  const chatLogList: ChatLog[] = [
-    { id: 'tmp', msg: 'hello hello1' },
-    { id: me.name, msg: 'hello hello2' },
-    { id: 'tmp', msg: 'hello hello3' },
-    { id: me.name, msg: 'hello hello4' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello1' },
-    { id: me.name, msg: 'hello hello2' },
-    { id: 'tmp', msg: 'hello hello3' },
-    { id: me.name, msg: 'hello hello4' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
-    { id: 'tmp', msg: 'hello hello5' },
+  const msgList: MsgProps[] = [
+    { username: 'tmp', text: 'hello hello1' },
+    { username: me.name, text: 'hello hello2' },
+    { username: 'tmp', text: 'hello hello3' },
+    { username: me.name, text: 'hello hello4' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello1' },
+    { username: me.name, text: 'hello hello2' },
+    { username: 'tmp', text: 'hello hello3' },
+    { username: me.name, text: 'hello hello4' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
+    { username: 'tmp', text: 'hello hello5' },
   ];
-
-  function makeChatRipples(chatLogList: ChatLog[]) {
-    const chatRipples = [];
-    for (let tmp of chatLogList) {
-      chatRipples.push(
-        tmp.id === me.name ? (
-          <Flex width={'80rem'}>
-            <Flex p={3} borderRadius={'50px'} bg={'main'} color={'white'} fontSize={'35'}>
-              {tmp.msg}
-            </Flex>
-            <Spacer />
-          </Flex>
-        ) : (
-          <Flex width={'80rem'}>
-            <Spacer />
-            <Flex p={3} borderRadius={'50px'} bg={'gray'} color={'white'} fontSize={'35'}>
-              {tmp.msg}
-            </Flex>
-          </Flex>
-        )
-      );
-    }
-    return chatRipples;
-  }
 
   //이부분은 백엔드 서버에 메세지를 보내주는 것으로 바뀌어야함.
   function msgSubmit() {
@@ -116,95 +73,72 @@ export default function ChatRoomPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Flex w="100%" h="100%" m={7}>
-        <VStack w="70%" h="90%" my={10} bg="white" borderRadius={'55'} border={'2px'}>
-          <Flex
-            w="100%"
-            h="10%"
-            bg={'main'}
-            color={'white'}
-            borderTopRadius={'50'}
-            border={'2px'}
-            borderColor={'main'}
-            fontSize={50}
-            alignContent={'Center'}
-          >
+        <VStack w="70%" h="90%" my={10} bg="white" borderRadius="42" border="2px">
+          <Flex w="full" h="120px" bg="main" color="white" borderTopRadius="50px" fontSize="4xl">
             <Center ml={20}>{title}</Center>
             <Spacer />
-            <Center mr={5}>
-              <Icon as={MdSettings} />
-            </Center>
-            <Center mr={10}>
-              <Icon as={MdClose} />
-            </Center>
+            <Image w="50px" src="/chatroom-setting.svg" />
+            <Image w="40px" mx={10} src="/exit-chatroom.svg" />
           </Flex>
           {/* Chat Part */}
-          <Flex mb={10} bg="white" overflowY="scroll">
-            <VStack w="100%" mt={10} bg={'white'}>
-              {makeChatRipples(chatLogList)}
-            </VStack>
-          </Flex>
+          <VStack p={5} w="full" mt={10} bg="white" overflow="scroll">
+            <>
+              {msgList.map((msg, idx) =>
+                msg.username === me.name ? (
+                  <Flex key={idx} width="100%">
+                    <Spacer />
+                    <Flex p={3} borderRadius="20px" bg={'main'} color={'white'} fontSize="2xl">
+                      {msg.text}
+                    </Flex>
+                  </Flex>
+                ) : (
+                  <Flex key={idx} width="100%">
+                    <Flex p={3} borderRadius="20px" bg="gray.200" color="black" fontSize="2xl">
+                      {msg.text}
+                    </Flex>
+                    <Spacer />
+                  </Flex>
+                )
+              )}
+            </>
+          </VStack>
           <Spacer />
-          <Flex w={'100%'}>
-            <InputGroup w="93%">
-              <Input
-                h="20"
-                m={4}
-                paddingLeft={'40px'}
-                borderRadius={'50'}
-                borderColor={'black'}
-                fontSize={'35px'}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setMsg(e.target.value);
-                }}
-                // onKeyDown={(e: KeyboardEvent<HTMLImageElement>) => {
-                //   if (e.key === 'Enter') console.log(msg);
-                // }}
-                onKeyDown={msgKeySubmit}
-                value={msg}
-                autoFocus
-                ref={inputRef}
-              />
-              <InputRightElement position={'relative'}>
-                <Icon
-                  as={MdArrowUpward}
-                  onClick={msgSubmit}
-                  w={'70px'}
-                  h={'70px'}
-                  bg={'main'}
-                  color={'white'}
-                  borderRadius={'100%'}
-                  style={{
-                    position: 'absolute',
-                    top: '135%',
-                    left: '160%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                />
-              </InputRightElement>
-            </InputGroup>
-          </Flex>
+          <HStack w="full" p={5}>
+            <Input
+              pl="40px"
+              mr="20px"
+              h="60px"
+              borderRadius="20px"
+              bg="gray.100"
+              fontSize="2xl"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setMsg(e.target.value);
+              }}
+              // onKeyDown={(e: KeyboardEvent<HTMLImageElement>) => {
+              //   if (e.key === 'Enter') console.log(msg);
+              // }}
+              onKeyDown={msgKeySubmit}
+              value={msg}
+              autoFocus
+              ref={inputRef}
+            />
+            <Image w="50px" src="/send-button.svg" />
+          </HStack>
         </VStack>
+        {/* Chat room join user Part */}
+        {/* 유저 친구 받아오는기능 구현되면 수정  */}
         <VStack
           w="25%"
           h="90%"
           m={10}
           p={7}
           backgroundColor="white"
-          borderRadius={'50'}
-          border={'2px'}
+          borderRadius="20px"
+          overflow="scroll"
         >
-          {/* Chat room join user Part */}
-          {/* 유저 친구 받아오는기능 구현되면 수정  */}
-          <VStack w="100%" overflowY="scroll">
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-            <UserItem user={friend} />
-          </VStack>
+          <UserItem user={friend} />
+          <UserItem user={friend} />
+          <UserItem user={friend} />
         </VStack>
       </Flex>
     </>
