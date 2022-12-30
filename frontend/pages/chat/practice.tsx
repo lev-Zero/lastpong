@@ -25,28 +25,18 @@ export default function ChatPracticePage() {
         authorization: getJwtToken(),
       },
     });
-    console.log('socket');
-  }
-
-  function onConnection() {
     socket.on('connection', console.log);
-    console.log('on connection');
   }
 
-  function emitConnection() {
-    socket.emit('connection');
-    console.log('emit connection');
-  }
+  // function onChatRoomAll() {
+  //   socket.on('chatRoomAll', console.log);
+  //   console.log('on chatRoomAll');
+  // }
 
-  function onChatRoomAll() {
-    socket.on('chatRoomAll', console.log);
-    console.log('on chatRoomAll');
-  }
-
-  function emitChatRoomAll() {
-    socket.emit('chatRoomAll');
-    console.log('emit chatRoomAll');
-  }
+  // function emitChatRoomAll() {
+  //   socket.emit('chatRoomAll');
+  //   console.log('emit chatRoomAll');
+  // }
 
   function createChatRoom() {
     socket.emit('createChatRoom', { name: '안녕하세요', status: 2, password: '1234' });
@@ -60,18 +50,12 @@ export default function ChatPracticePage() {
       <Button size="md" onClick={makeSocket}>
         SOCKET
       </Button>
-      <Button size="md" onClick={onConnection}>
-        ON CONNECTION
-      </Button>
-      <Button size="md" onClick={emitConnection}>
-        EMIT CONNECTION
-      </Button>
-      <Button size="md" onClick={onChatRoomAll}>
+      {/* <Button size="md" onClick={onChatRoomAll}>
         ON CHATROOMALL
       </Button>
       <Button size="md" onClick={emitChatRoomAll}>
         EMIT CHATROOMALL
-      </Button>
+      </Button> */}
       <Button size="md" onClick={createChatRoom}>
         EMIT CREATE CHATROOM
       </Button>
