@@ -26,17 +26,56 @@ import {
   Checkbox,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import { ReactElement, ReactEventHandler, ReactNode, useEffect, useState } from 'react';
+import { ReactElement, ReactEventHandler, ReactNode, useEffect, useRef, useState } from 'react';
 import { allUserStore } from '@/stores/allUserStore';
 import Link from 'next/link';
 import RawUserItem from '@/components/RawUserItem';
+import io, { Socket } from 'socket.io-client';
+import { getJwtToken } from '@/utils/getJwtToken';
+
+interface ChatRoomList {
+  id: number;
+  name: string;
+}
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
+  const [chatRoomList, setChatRoomList] = useState<ChatRoomList[]>([]);
+
+  let socket = useRef<Socket>();
+  // let socket: Socket;
 
   //전체 유저를 불러온 후 온라인 상태인 유저만 띄워야함 혹은 채팅방에있던지
   useEffect(() => {
-    getAllUsers;
+    getAllUsers();
+    // function makeSocket() {
+    //   setSocket(
+    //     io('ws://localhost:3000/chat', {
+    //       extraHeaders: {
+    //         authorization: getJwtToken(),
+    //       },
+    //     })
+    //   );
+    //   socket.on('connection', console.log);
+    // }
+    // makeSocket();
+    function makeSocket() {
+      socket.current = io('ws://localhost:3000/chat', {
+        extraHeaders: {
+          authorization: getJwtToken(),
+        },
+      });
+      // console.log('socket', socket);
+      socket.current.emit('chatRoomAll');
+      // socket.current.on('chatRoomAll', console.log);
+      // {message: "모든 채팅 방 목록", chatRoom: [{id: 4, name: "안녕하세요"}]}
+      socket.current.on('chatRoomAll', (res) => {
+        setChatRoomList(res.chatRoom);
+      });
+    }
+    console.log('ChatRoomAll_LIST', chatRoomList);
+    makeSocket();
   }, []);
+
   const friend: UserProps = {
     name: 'yopark',
     imgUrl: '',
