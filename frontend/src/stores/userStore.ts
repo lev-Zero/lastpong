@@ -1,5 +1,6 @@
 import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
+import { avatarFetch } from '@/utils/avatarFetch';
 import { customFetch } from '@/utils/customFetch';
 import create from 'zustand';
 
@@ -33,9 +34,10 @@ export const userStore = create<userStoreProps>((set, get) => ({
   fetchMe: async () => {
     try {
       const json = await customFetch('GET', '/user/me');
+      const imgUrl = await avatarFetch('GET', '/user/avatar/me');
       const user = {
         name: json.username,
-        imgUrl: '', // TODO : img는 따로 가져와야 한다.
+        imgUrl: imgUrl,
         status: json.status,
         rating: json.rating,
       };

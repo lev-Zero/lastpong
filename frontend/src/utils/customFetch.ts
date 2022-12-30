@@ -1,24 +1,5 @@
 import { SERVER_URL } from './variables';
 
-// <사용 예시>
-//
-// useEffect(() => {
-//   async function fetchData() {
-//     try {
-//       const json = await customFetch('GET', '/user/me');
-//       // user 정보 zustand에 저장하기
-//       setIsLogin(true);
-//     } catch (e) {
-//       setIsLogin(false);
-//     } finally {
-//       setIsLoaded(true);
-//     }
-//   }
-//   fetchData();
-// }, []);
-
-// accessToken이 쿠키에 있다면 읽어서 Authorization 헤더에 넣어주는 일 자동화
-
 function isJsonString(str: string) {
   try {
     var json = JSON.parse(str);

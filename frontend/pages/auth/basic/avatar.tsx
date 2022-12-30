@@ -6,6 +6,8 @@ import { Avatar, Text, Flex, Input, Image, Box, Button } from '@chakra-ui/react'
 import { useRouter } from 'next/router';
 import { SERVER_URL } from '@/utils/variables';
 import useLoginStore from '@/store/useLoginStore';
+import { customFetch } from '@/utils/customFetch';
+import { getJwtToken } from '@/utils/getJwtToken';
 
 const styles = {
   MenualText: {
@@ -58,94 +60,29 @@ export default function BasicAvatarPage() {
   const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files !== null) {
       if (event.currentTarget.files.length === 0) return;
-      // console.log(imageFile);
-      // console.log(event.currentTarget.files[0]);
-      // setImageFile(event.currentTarget.files[0]);
-      // console.log(imageFile);
       setImageFile(event.currentTarget.files[0]);
       FileToImg(event.currentTarget.files[0]);
     }
   };
 
-  const urlToObject = async (imageUrl: string) => {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const file = new File([blob], 'image.jpg', { type: blob.type });
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    if (selectFile.current) selectFile.current.files = dataTransfer.files;
-    FileToImg(file);
-  };
-
   const onClickNext = async (event: React.MouseEvent<HTMLElement>) => {
-    const cookies = Object.fromEntries(
-      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
-    );
-    const jwtToken: string = `Bearer ${cookies['accessToken']}`;
+    const jwtToken: string = `Bearer ${getJwtToken()}`;
     const formData = new FormData();
     if (imageFile) {
       formData.append('file', imageFile);
-      console.log(formData.getAll);
     }
-    fetch(SERVER_URL + '/user/avatar/me', {
+    const response = await fetch(SERVER_URL + '/user/avatar/me', {
       method: 'PUT',
-      body: formData,
       headers: { Authorization: jwtToken },
-    })
-      .then((response) => {
-        if (response.ok === true) {
-          return response.json();
-        }
-        throw new Error('에러 발생!');
-      })
-      .catch((error) => {
-        alert(error);
-      })
-      .then((data) => {
-        console.log(data);
-      });
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('에러 발생');
+    }
+    const json = await response.json();
+    console.log(json);
     router.push('/');
-  };
-
-  const onClickCheck = async (event: React.MouseEvent<HTMLElement>) => {
-    const cookies = Object.fromEntries(
-      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
-    );
-    const jwtToken: string = `Bearer ${cookies['accessToken']}`;
-
-    fetch(SERVER_URL + '/user/avatar/me', {
-      headers: {
-        Authorization: jwtToken,
-        'Content-Type': 'image/*',
-      },
-    })
-      .then((response) => {
-        const reader = response.body?.getReader();
-        return new ReadableStream({
-          start(controller) {
-            function pump() {
-              return reader?.read().then(({ done, value }) => {
-                if (done) {
-                  controller.close();
-                  return;
-                }
-                controller.enqueue(value);
-                pump();
-                return;
-              });
-            }
-            return pump();
-          },
-        });
-      })
-      .then((stream) => new Response(stream))
-      .then((response) => response.blob())
-      .then((blob) => URL.createObjectURL(blob))
-      .then((url) => {
-        setAvatarImg(url);
-        console.log(url);
-      })
-      .catch((err) => console.error(err));
   };
 
   return (
@@ -176,9 +113,9 @@ export default function BasicAvatarPage() {
               UPLOAD
             </Button>
 
-            <Button style={styles.ThemaButton} onClick={onClickCheck}>
+            {/* <Button style={styles.ThemaButton} onClick={onClickCheck}>
               Avatar ME TEST
-            </Button>
+            </Button> */}
             <form
               name="accountFrm"
               method="put"
