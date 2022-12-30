@@ -12,6 +12,8 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
 import { JoinedDmUser } from './entity/JoinedDmUser.entity';
 import { ChatController } from './chat.controller';
+import { ChatLog } from './entity/chatLog.entity';
+import { ChatDmLog } from './entity/chatDmLog.entity';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ChatController } from './chat.controller';
       JoinedUser,
       MutedUser,
       JoinedDmUser,
+      ChatLog,
+      ChatDmLog,
     ]),
     AuthModule,
     UserModule,
