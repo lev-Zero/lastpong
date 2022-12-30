@@ -1,6 +1,6 @@
 import { UserProps } from '@/interfaces/UserProps';
 
-interface ChatRoomItemProps {
+export interface ChatRoomItemProps {
   id: number;
   title: string;
   owner: UserProps;

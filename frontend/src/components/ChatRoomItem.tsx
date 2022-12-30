@@ -1,13 +1,7 @@
+import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { UserProps } from '@/interfaces/UserProps';
 import { Box, Flex, HStack, Image, Spacer, Text, VStack } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
-
-export interface ChatRoomItemProps {
-  title: string;
-  owner: UserProps;
-  isPrivate: boolean;
-  password?: string;
-}
 
 export function ChatRoomItem({ title, owner, isPrivate, password = '' }: ChatRoomItemProps) {
   return (

@@ -1,4 +1,4 @@
-import { ChatRoomItem, ChatRoomItemProps } from '@/components/ChatRoomItem';
+import { ChatRoomItem } from '@/components/ChatRoomItem';
 import { CustomButton } from '@/components/CustomButton';
 import UserItem from '@/components/UserItem';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
@@ -32,6 +32,7 @@ import Link from 'next/link';
 import RawUserItem from '@/components/RawUserItem';
 import io, { Socket } from 'socket.io-client';
 import { getJwtToken } from '@/utils/getJwtToken';
+import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
@@ -105,6 +106,7 @@ export default function ChatPage() {
               {chatRoomList.map((chatRoom, idx) => (
                 <ChatRoomItem
                   key={idx}
+                  id={chatRoom.id}
                   title={chatRoom.title}
                   owner={chatRoom.owner}
                   isPrivate={chatRoom.isPrivate}
