@@ -101,7 +101,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.data.user = user;
       socket_username[user.username] = socket;
 
-      console.log('emit connection');
       socket.emit('connection', {
         message: `${user.username} 연결`,
         user,
@@ -180,7 +179,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
       socket.join(body.name);
 
-      console.log('emit createChatRoom');
       socket.emit('createChatRoom', {
         message: '채팅룸이 생성되었습니다',
         chatRoom,
@@ -220,7 +218,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chatRoom = await this.chatService.findChatRoomAll();
 
-      console.log('emit chatRoomAll');
       socket.emit('chatRoomAll', { message: '모든 채팅 방 목록', chatRoom });
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -343,27 +340,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const targetUser = await this.userService.findUserById(body.targetUserId);
       const chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
-        ['joinedUser'],
-      );
-
-      await this.chatService.leaveChatRoom(
-        targetUser.id,
-        body.chatRoomId,
-        offerUser.id,
+        ['joinedUser', 'owner'],
       );
 
       if (chatRoom.owner.id == offerUser.id) {
-        const clients = this.server.sockets.clients(chatRoom.name);
-        for (const clientId of clients) {
-          const clientSocket = this.server.sockets.sockets.get(clientId);
-          // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-          await this.userService.updateStatus(clientId, userStatus.INGAME);
-          clientSocket.emit('leave', {
+        const sockets = await this.server.in(chatRoom.name).fetchSockets();
+        for (const so of sockets) {
+          // await this.userService.updateStatus(
+          //   targetUser.id,
+          //   userStatus.CHATCHANNEL,
+          // );
+          await this.userService.updateStatus(so.data.id, userStatus.INGAME);
+          so.emit('leave', {
             message: `owner가 ${chatRoom.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoom,
             targetUser,
           });
-          clientSocket.leave(chatRoom.name);
+          so.leave(chatRoom.name);
         }
       } else {
         socket.to(chatRoom.name).emit('leave', {
@@ -383,6 +376,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoom.name);
       }
+
+      await this.chatService.leaveChatRoom(
+        targetUser.id,
+        body.chatRoomId,
+        offerUser.id,
+      );
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -422,6 +421,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         user: { id: user.id, username: user.username },
         message: body.message,
       });
+      const log = {
+        userId: user.id,
+        chatRoomId: body.chatRoomId,
+        message: body.message,
+        createdAt: new Date(),
+      };
+      await this.chatService.addChatLog(log);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -771,27 +777,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
-        ['joinedDmUser'],
-      );
-
-      await this.chatService.leaveChatRoomDm(
-        targetUser.id,
-        body.chatRoomId,
-        offerUser.id,
+        ['joinedDmUser', 'owner'],
       );
 
       if (chatRoomDm.owner.id == offerUser.id) {
-        const clients = this.server.sockets.clients(chatRoomDm.name);
-        for (const clientId of clients) {
-          const clientSocket = this.server.sockets.sockets.get(clientId);
-          // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-          await this.userService.updateStatus(clientId, userStatus.INGAME);
-          clientSocket.emit('leave', {
+        const sockets = await this.server.in(chatRoomDm.name).fetchSockets();
+        for (const so of sockets) {
+          // await this.userService.updateStatus(
+          //   targetUser.id,
+          //   userStatus.CHATCHANNEL,
+          // );
+          await this.userService.updateStatus(so.data.id, userStatus.INGAME);
+          so.emit('leave', {
             message: `owner가 ${chatRoomDm.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoomDm,
             targetUser,
           });
-          clientSocket.leave(chatRoomDm.name);
+          so.leave(chatRoomDm.name);
         }
       } else {
         socket.to(chatRoomDm.name).emit('leave', {
@@ -811,6 +813,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoomDm.name);
       }
+
+      await this.chatService.leaveChatRoomDm(
+        targetUser.id,
+        body.chatRoomId,
+        offerUser.id,
+      );
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -859,6 +867,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message: body.message,
         chatRoomId: chatRoomDm.id,
       });
+      const log = {
+        userId: me.id,
+        chatRoomDmId: body.chatRoomId,
+        message: body.message,
+        createdAt: new Date(),
+      };
+
+      await this.chatService.addChatDmLog(log);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
