@@ -15,32 +15,56 @@ export default function ChatPracticePage() {
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
   const { me, fetchMe } = userStore();
 
-  let socket: Socket;
+  const [socket, setSocket] = useState<Socket>();
+  const [lastChatRoomId, setLastChatRoomId] = useState<number>(0);
 
   useEffect(() => fetchMe, []);
 
   function makeSocket() {
-    socket = io('ws://localhost:3000/chat', {
+    const newSocket = io('ws://localhost:3000/chat', {
       extraHeaders: {
         authorization: getJwtToken(),
       },
     });
-    socket.on('connection', console.log);
+    setSocket(newSocket);
+    newSocket.on('connection', console.log);
+    newSocket.on('chatRoomAll', (res) => {
+      console.log(res);
+      const cnt = res.chatRoom.length;
+      if (cnt === 0) {
+        return;
+      }
+      if (lastChatRoomId !== res.chatRoom[cnt - 1].id) {
+        console.log(`${res.chatRoom[cnt - 1].id}로 지정`);
+      }
+      setLastChatRoomId(res.chatRoom[cnt - 1].id);
+    });
+    newSocket.on('join', console.log);
   }
 
-  // function onChatRoomAll() {
-  //   socket.on('chatRoomAll', console.log);
-  //   console.log('on chatRoomAll');
-  // }
-
-  // function emitChatRoomAll() {
-  //   socket.emit('chatRoomAll');
-  //   console.log('emit chatRoomAll');
-  // }
+  function emitChatRoomAll() {
+    if (socket === undefined) {
+      console.log('socket is undefined!');
+      return;
+    }
+    socket.emit('chatRoomAll');
+    console.log('emit chatRoomAll');
+  }
 
   function createChatRoom() {
-    socket.emit('createChatRoom', { name: '안녕하세요', status: 2, password: '1234' });
-    console.log('emit createChatRoom');
+    if (socket === undefined) {
+      console.log('socket is undefined!');
+      return;
+    }
+    socket.emit('createChatRoom', { name: '뭐야??', status: 2, password: '1234' });
+  }
+
+  function joinChatRoom() {
+    if (socket === undefined) {
+      console.log('socket is undefined!');
+      return;
+    }
+    socket.emit('join', { id: lastChatRoomId, password: '1234' });
   }
 
   return (
@@ -50,14 +74,14 @@ export default function ChatPracticePage() {
       <Button size="md" onClick={makeSocket}>
         SOCKET
       </Button>
-      {/* <Button size="md" onClick={onChatRoomAll}>
-        ON CHATROOMALL
-      </Button>
       <Button size="md" onClick={emitChatRoomAll}>
         EMIT CHATROOMALL
-      </Button> */}
+      </Button>
       <Button size="md" onClick={createChatRoom}>
         EMIT CREATE CHATROOM
+      </Button>
+      <Button size="md" onClick={joinChatRoom}>
+        JOIN
       </Button>
     </VStack>
   );
