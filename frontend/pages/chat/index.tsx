@@ -24,6 +24,7 @@ import {
   InputGroup,
   InputRightElement,
   Checkbox,
+  ModalCloseButton,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { ReactElement, ReactEventHandler, ReactNode, useEffect, useRef, useState } from 'react';
@@ -33,42 +34,11 @@ import RawUserItem from '@/components/RawUserItem';
 import io, { Socket } from 'socket.io-client';
 import { getJwtToken } from '@/utils/getJwtToken';
 import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
+import { chatStore } from '@/stores/chatStore';
+import { useRouter } from 'next/router';
 
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
-  const [chatRoomList, setChatRoomList] = useState<ChatRoomItemProps[]>([]);
-
-  const [socket, setSocket] = useState<Socket>();
-
-  useEffect(() => {
-    getAllUsers();
-    const newSocket = io('ws://localhost:3000/chat', {
-      extraHeaders: {
-        authorization: getJwtToken(),
-      },
-    });
-    setSocket(newSocket);
-    newSocket.on('connection', (res) => {
-      const allChatRoom = res.allChatRooms;
-      setChatRoomList(
-        allChatRoom.map((chatRoom: any) => {
-          return {
-            id: chatRoom.id,
-            title: chatRoom.name,
-            owner: {
-              name: chatRoom.owner.username,
-              imgUrl: '',
-              status: chatRoom.owner.status,
-              rating: chatRoom.owner.rating,
-            },
-            isPrivate: chatRoom.status === 2,
-            password: '',
-          };
-        })
-      );
-    });
-    newSocket.on('join', console.log);
-  }, []);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [show, setShow] = useState(false);
@@ -84,13 +54,45 @@ export default function ChatPage() {
   const handleRoomPrivate = (event: React.ChangeEvent<HTMLInputElement>) =>
     setRoomPrivate(event.target.checked);
 
-  const sendAndClose = () => {
-    console.log('title : ', valueTitle);
-    console.log('password : ', valuePassword);
-    console.log('roomPrivate : ', roomPrivate);
-    if (valueTitle && valuePassword) {
-      onClose();
+  const { socket, makeSocket, refreshChatRoomList, chatRoomList } = chatStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    getAllUsers();
+    if (socket === undefined) {
+      makeSocket();
     }
+    refreshChatRoomList();
+  }, []);
+
+  const createChatRoom = () => {
+    if (valueTitle === '') {
+      alert('방 제목을 입력해주십시오.');
+      return;
+    }
+    if (roomPrivate && valuePassword === '') {
+      alert('비밀번호를 입력해주십시오.');
+      return;
+    }
+    if (socket === undefined) {
+      alert('socket is undefined!');
+      return;
+    }
+
+    socket.emit('createChatRoom', {
+      name: valueTitle,
+      status: roomPrivate ? 2 : 0,
+      password: valuePassword,
+    });
+    socket.on('createChatRoom', (res) => {
+      console.log(res.message);
+      router.push(`/chat/${res.chatRoom.id}`);
+    });
+    onClose();
+  };
+
+  const joinChatRoom = (id: number) => {
+    socket?.emit('join', { id, password: '' });
   };
 
   return (
@@ -105,13 +107,18 @@ export default function ChatPage() {
           <Box overflowY="scroll" mb={10}>
             <SimpleGrid columns={2} spacing={5}>
               {chatRoomList.map((chatRoom, idx) => (
-                <ChatRoomItem
+                <Link
                   key={idx}
-                  id={chatRoom.id}
-                  title={chatRoom.title}
-                  owner={chatRoom.owner}
-                  isPrivate={chatRoom.isPrivate}
-                />
+                  href={`/chat/${chatRoom.id}`}
+                  onClick={() => joinChatRoom(chatRoom.id)}
+                >
+                  <ChatRoomItem
+                    id={chatRoom.id}
+                    title={chatRoom.title}
+                    owner={chatRoom.owner}
+                    isPrivate={chatRoom.isPrivate}
+                  />
+                </Link>
               ))}
             </SimpleGrid>
           </Box>
@@ -144,7 +151,9 @@ export default function ChatPage() {
           <Center>
             <HStack>
               <VStack>
-                <ModalHeader></ModalHeader>
+                <ModalHeader>
+                  <ModalCloseButton />
+                </ModalHeader>
                 <ModalBody>
                   <HStack spacing={3}>
                     <VStack spacing={6}>
@@ -177,7 +186,7 @@ export default function ChatPage() {
                   <VStack mb={'7'}>
                     {/* TODO:onclick 핸들러로 매치 잡는 기능 연결해야함 현재는 콘솔에 정보만 띄움 */}
 
-                    <CustomButton size="lg" onClick={sendAndClose}>
+                    <CustomButton size="lg" onClick={createChatRoom}>
                       CREATE
                     </CustomButton>
                   </VStack>
