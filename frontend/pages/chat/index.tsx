@@ -51,8 +51,11 @@ export default function ChatPage() {
     setValueTitle(event.target.value);
   const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValuePassword(event.target.value);
-  const handleRoomPrivate = (event: React.ChangeEvent<HTMLInputElement>) =>
+
+  const handleRoomPrivate = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRoomPrivate(event.target.checked);
+    setValuePassword('');
+  };
 
   const { socket, makeSocket, refreshChatRoomList, chatRoomList } = chatStore();
   const router = useRouter();
@@ -172,6 +175,9 @@ export default function ChatPage() {
                           type={show ? 'text' : 'password'}
                           placeholder="enter password"
                           onChange={handlePassword}
+                          disabled={roomPrivate ? true : false}
+                          bg={roomPrivate ? 'gray.200' : 'white'}
+                          value={valuePassword}
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
