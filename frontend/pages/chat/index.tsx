@@ -175,8 +175,8 @@ export default function ChatPage() {
                           type={show ? 'text' : 'password'}
                           placeholder="enter password"
                           onChange={handlePassword}
-                          disabled={roomPrivate ? true : false}
-                          bg={roomPrivate ? 'gray.200' : 'white'}
+                          disabled={!roomPrivate}
+                          bg={!roomPrivate ? 'gray.200' : 'white'}
                           value={valuePassword}
                         />
                         <InputRightElement width="4.5rem">
