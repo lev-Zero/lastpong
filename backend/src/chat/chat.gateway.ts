@@ -229,7 +229,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
-        ['mutedUser', 'bannedUser', 'joinedUser', 'adminUser', 'owner'],
+        [
+          'mutedUser',
+          'bannedUser',
+          'joinedUser',
+          'adminUser',
+          'owner',
+          'chatLog',
+        ],
       );
 
       socket.emit('chatRoomById', {
@@ -249,7 +256,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chatRoom = await this.chatService.findChatRoomByName(
         body.chatRoomName,
-        ['mutedUser', 'bannedUser', 'joinedUser', 'adminUser', 'owner'],
+        [
+          'mutedUser',
+          'bannedUser',
+          'joinedUser',
+          'adminUser',
+          'owner',
+          'chatLog',
+        ],
       );
 
       socket.emit('chatRoomByName', {
@@ -715,7 +729,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
-        ['joinedDmUser'],
+        ['joinedDmUser', 'chatDmLog'],
       );
       socket.emit('chatRoomDmById', {
         message: `${chatRoomDm.name} 방 정보`,
