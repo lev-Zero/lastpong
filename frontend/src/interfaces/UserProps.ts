@@ -5,6 +5,7 @@ export enum UserStatus {
 }
 
 export interface UserProps {
+  id?: number;
   name: string;
   imgUrl: string;
   status?: UserStatus;
