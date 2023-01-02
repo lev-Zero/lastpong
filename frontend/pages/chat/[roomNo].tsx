@@ -102,17 +102,10 @@ export default function ChatRoomPage() {
       async function convertToChatUserList(chatRoom: ChatRoomProps) {
         const ret: ChatUserItemProps[] = [];
         const usedIds: number[] = [];
-        console.log(chatRoom);
-        if (chatRoom.owner.id) {
-          // TODO: UserProps에 id를 Optional로 해놔서 발생하는 문제. 나중에 id를 다 추가해서 이 조건문 없앨 것
-          chatRoom.owner.imgUrl = await avatarFetch('GET', `/user/id/${chatRoom.owner.id}`);
-          ret.push({ user: chatRoom.owner, role: ChatUserStatus.OWNER });
-          usedIds.push(chatRoom.owner.id);
-        }
+        chatRoom.owner.imgUrl = await avatarFetch('GET', `/user/id/${chatRoom.owner.id}`);
+        ret.push({ user: chatRoom.owner, role: ChatUserStatus.OWNER });
+        usedIds.push(chatRoom.owner.id);
         chatRoom.adminUsers.forEach(async (user: UserProps) => {
-          if (!user.id) {
-            return;
-          }
           if (!usedIds.includes(user.id)) {
             user.imgUrl = await avatarFetch('GET', `/user/id/${user.id}`);
             ret.push({ user, role: ChatUserStatus.ADMINISTRATOR });
@@ -120,9 +113,6 @@ export default function ChatRoomPage() {
           }
         });
         chatRoom.joinedUsers.forEach(async (user: any) => {
-          if (!user.id) {
-            return;
-          }
           if (!usedIds.includes(user.id)) {
             user.imgUrl = await avatarFetch('GET', `/user/id/${user.id}`);
             ret.push({ user, role: ChatUserStatus.COMMON });
@@ -138,17 +128,7 @@ export default function ChatRoomPage() {
     f();
   }, [chatRoom]);
 
-  useEffect(() => {
-    // console.log(chatUserList, chatUserList.length);
-    chatUserList.map((chatUserItem, idx) => {
-      // console.log('!', chatUserItem, idx);
-    });
-  }, [chatUserList]);
-
   function exitChatRoom() {
-    if (roomNo === -1) {
-      return;
-    }
     socket?.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
     socket?.off('chatRoomById');
     socket?.off('join');
