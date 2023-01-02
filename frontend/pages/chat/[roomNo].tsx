@@ -10,8 +10,7 @@ import { chatStore } from '@/stores/chatStore';
 import { ChatRoomProps } from '@/interfaces/ChatRoomProps';
 import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import ChatUserItem from '@/components/ChatUserItem';
-import { avatarFetch } from '@/utils/avatarFetch';
-import { customFetch } from '@/utils/customFetch';
+import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 
 export default function ChatRoomPage() {
   const router = useRouter();
@@ -26,156 +25,113 @@ export default function ChatRoomPage() {
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
 
-  socket?.on('message', (res) => {
-    setMsgList((prev) => {
-      return [
-        ...prev,
-        {
-          username: res.user.id,
-          text: res.message,
-        },
-      ];
-    });
-  });
-  //  //   { username: 'tmp', text: 'hello hello1' },
-
-  socket?.on('chatRoomById', (res) => {
-    const newChatRoom = res.chatRoom;
-    const mutedUsers: UserProps[] = newChatRoom.mutedUser.map((rawMutedUser: any) => {
-      const user = rawMutedUser.user;
-      return {
-        id: user.id,
-        name: user.username,
-        imgUrl: '',
-        status: user.status,
-        rating: user.rating,
-      };
-    });
-    const bannedUsers: UserProps[] = newChatRoom.bannedUser.map((rawBannedUser: any) => {
-      const user = rawBannedUser.user;
-      return {
-        id: user.id,
-        name: user.username,
-        imgUrl: '',
-        status: user.status,
-        rating: user.rating,
-      };
-    });
-    const joinedUsers: UserProps[] = newChatRoom.joinedUser.map((rawJoinedUser: any) => {
-      const user = rawJoinedUser.user;
-      return {
-        id: user.id,
-        name: user.username,
-        imgUrl: '',
-        status: user.status,
-        rating: user.rating,
-      };
-    });
-    const adminUsers: UserProps[] = newChatRoom.adminUser.map((rawAdminUser: any) => {
-      const user = rawAdminUser.user;
-      return {
-        id: user.id,
-        name: user.username,
-        imgUrl: '',
-        status: user.status,
-        rating: user.rating,
-      };
-    });
-    const owner: UserProps = {
-      id: newChatRoom.owner.id,
-      name: newChatRoom.owner.username,
-      imgUrl: '',
-      status: newChatRoom.owner.status,
-      rating: newChatRoom.owner.rating,
-    };
-
-    setChatRoom({
-      name: newChatRoom.name,
-      status: newChatRoom.status,
-      mutedUsers,
-      bannedUsers,
-      joinedUsers,
-      adminUsers,
-      owner,
-    });
-  });
   useEffect(() => {
-    socket?.emit('chatRoomById', { chatRoomId: roomNo });
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    socket.on('message', (res) => {
+      setMsgList((prev) => {
+        return [
+          ...prev,
+          {
+            username: res.user.id,
+            text: res.message,
+          },
+        ];
+      });
+    });
+
+    socket.on('chatRoomById', async (res) => {
+      const newChatRoom = res.chatRoom;
+      const mutedUsers: UserProps[] = await Promise.all(
+        newChatRoom.mutedUser.map((rawMutedUser: any) => convertRawUserToUser(rawMutedUser.user))
+      );
+      const bannedUsers: UserProps[] = await Promise.all(
+        newChatRoom.bannedUser.map((rawBannedUser: any) => convertRawUserToUser(rawBannedUser.user))
+      );
+      const joinedUsers: UserProps[] = await Promise.all(
+        newChatRoom.joinedUser.map((rawJoinedUser: any) => convertRawUserToUser(rawJoinedUser.user))
+      );
+      const adminUsers: UserProps[] = await Promise.all(
+        newChatRoom.adminUser.map((rawAdminUser: any) => convertRawUserToUser(rawAdminUser.user))
+      );
+      const owner: UserProps = await convertRawUserToUser(newChatRoom.owner);
+
+      setChatRoom({
+        name: newChatRoom.name,
+        status: newChatRoom.status,
+        mutedUsers,
+        bannedUsers,
+        joinedUsers,
+        adminUsers,
+        owner,
+      });
+    });
   }, []);
 
-  // useEffect(() => {
-  //   socket?.on('join', (res) => {
-  //     console.log(res);
-  //     socket?.emit('chatRoomById');
-  //   }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
-  //   socket?.on('leave', (res) => {
-  //     console.log(res);
-  //     socket?.emit('chatRoomById');
-  //   }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
-  // }, []);
+  useEffect(() => {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    socket.emit('chatRoomById', { chatRoomId: roomNo });
+  }, []);
 
   useEffect(() => {
-    async function f() {
-      async function convertToChatUserList(chatRoom: ChatRoomProps) {
-        const ret: ChatUserItemProps[] = [];
-        const usedIds: number[] = [];
-        chatRoom.owner.imgUrl = await avatarFetch('GET', `/user/id/${chatRoom.owner.id}`);
-        ret.push({ user: chatRoom.owner, role: ChatUserStatus.OWNER });
-        usedIds.push(chatRoom.owner.id);
-        chatRoom.adminUsers.forEach(async (user: UserProps) => {
-          if (!usedIds.includes(user.id)) {
-            user.imgUrl = await avatarFetch('GET', `/user/id/${user.id}`);
-            ret.push({ user, role: ChatUserStatus.ADMINISTRATOR });
-            usedIds.push(user.id);
-          }
-        });
-        chatRoom.joinedUsers.forEach(async (user: any) => {
-          if (!usedIds.includes(user.id)) {
-            user.imgUrl = await avatarFetch('GET', `/user/id/${user.id}`);
-            ret.push({ user, role: ChatUserStatus.COMMON });
-            usedIds.push(user.id);
-          }
-        });
-        return ret;
-      }
-      if (chatRoom) {
-        setChatUserList(await convertToChatUserList(chatRoom));
-      }
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
     }
-    f();
+    socket.on('join', (res) => {
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름 -> 'join'에서는 joinedUser를 안 줌
+    socket.on('leave', (res) => {
+      setChatUserList(
+        chatUserList.filter((chatUserItem) => {
+          console.log(chatUserItem.user.id, res.targetUser.id);
+          return chatUserItem.user.id !== res.targetUser.id;
+        })
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    function convertToChatUserList(chatRoom: ChatRoomProps) {
+      const ret: ChatUserItemProps[] = [];
+      const usedIds: number[] = [];
+      ret.push({ user: chatRoom.owner, role: ChatUserStatus.OWNER });
+      usedIds.push(chatRoom.owner.id);
+      chatRoom.adminUsers.forEach((user: UserProps) => {
+        if (!usedIds.includes(user.id)) {
+          ret.push({ user, role: ChatUserStatus.ADMINISTRATOR });
+          usedIds.push(user.id);
+        }
+      });
+      chatRoom.joinedUsers.forEach((user: UserProps) => {
+        if (!usedIds.includes(user.id)) {
+          ret.push({ user, role: ChatUserStatus.COMMON });
+          usedIds.push(user.id);
+        }
+      });
+      return ret;
+    }
+    if (chatRoom) {
+      setChatUserList(convertToChatUserList(chatRoom));
+    }
   }, [chatRoom]);
 
   function exitChatRoom() {
-    socket?.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
-    socket?.off('chatRoomById');
-    socket?.off('join');
-    socket?.off('leave');
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
+    socket.off('chatRoomById');
+    socket.off('join');
+    socket.off('leave');
     router.push('/chat');
   }
-
-  //이부분은 채팅 주고받은 로그 기록 전반이다. 백엔드에서 실시간으로 갱신하는 부분으로 바꾸어야함
-  // const msgList: MsgProps[] = [
-  //   { username: 'tmp', text: 'hello hello1' },
-  //   { username: me.name, text: 'hello hello2' },
-  //   { username: 'tmp', text: 'hello hello3' },
-  //   { username: me.name, text: 'hello hello4' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello1' },
-  //   { username: me.name, text: 'hello hello2' },
-  //   { username: 'tmp', text: 'hello hello3' },
-  //   { username: me.name, text: 'hello hello4' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  //   { username: 'tmp', text: 'helo hello5' },
-  //   { username: 'tmp', text: 'hello hello5' },
-  // ];
 
   //이부분은 백엔드 서버에 메세지를 보내주는 것으로 바뀌어야함.
   function msgSubmit() {
@@ -191,16 +147,6 @@ export default function ChatRoomPage() {
       setMsg('');
       socket?.emit('message', { chatRoomId: roomNo, message: msg });
     }
-  }
-
-  function makeUsersPan() {
-    let uList = chatUserList;
-    let arr: any = [];
-    for (let i = 0; i < uList.length; i++) {
-      console.log(i, uList.length, 2);
-      arr.push(<ChatUserItem key={i} user={uList[i].user} role={uList[i].role} />);
-    }
-    return arr;
   }
 
   return (
@@ -280,10 +226,9 @@ export default function ChatRoomPage() {
               borderRadius="20px"
               overflow="scroll"
             >
-              {/* {chatUserList.map((chatUserItem, idx) => (
+              {chatUserList.map((chatUserItem, idx) => (
                 <ChatUserItem key={idx} user={chatUserItem.user} role={chatUserItem.role} />
-              ))} */}
-              {makeUsersPan()}
+              ))}
             </VStack>
           </Flex>
         </>

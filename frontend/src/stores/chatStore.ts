@@ -25,7 +25,11 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       },
     });
     newSocket.on('connection', console.log);
-    newSocket.on('chatRoomAll', (res) => {
+    get().setSocket(newSocket);
+  },
+  chatRoomList: [],
+  refreshChatRoomList: () => {
+    get().socket?.once('chatRoomAll', (res) => {
       const allChatRoom = res.chatRoom;
       get().setChatRoomList(
         allChatRoom.map((chatRoom: any) => {
@@ -44,10 +48,8 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
         })
       );
     });
-    get().setSocket(newSocket);
+    get().socket?.emit('chatRoomAll');
   },
-  chatRoomList: [],
-  refreshChatRoomList: () => get().socket?.emit('chatRoomAll'),
   setChatRoomList: (chatRoomList: ChatRoomItemProps[]) => {
     set((state) => ({ ...state, chatRoomList }));
   },
