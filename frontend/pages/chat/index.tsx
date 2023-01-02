@@ -82,7 +82,7 @@ export default function ChatPage() {
 
     socket.emit('createChatRoom', {
       name: valueTitle,
-      status: roomPrivate ? ChatRoomStatus.PRIVATE : ChatRoomStatus.PUBLIC,
+      status: roomPrivate ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
       password: valuePassword,
     });
     socket.once('createChatRoom', (res) => {
@@ -107,10 +107,16 @@ export default function ChatPage() {
           <Box overflowY="scroll" mb={10}>
             <SimpleGrid columns={2} spacing={5}>
               {chatRoomList.map((chatRoom, idx) => (
-                <Link
+                <Box
                   key={idx}
-                  href={`/chat/${chatRoom.id}`}
-                  onClick={() => joinChatRoom(chatRoom.id)}
+                  onClick={() => {
+                    if (!chatRoom.isPrivate) {
+                      joinChatRoom(chatRoom.id);
+                      router.push(`/chat/${chatRoom.id}`);
+                    } else {
+                      // TODO:  비밀번호 입력 모달 제작하기
+                    }
+                  }}
                 >
                   <ChatRoomItem
                     id={chatRoom.id}
@@ -118,7 +124,7 @@ export default function ChatPage() {
                     owner={chatRoom.owner}
                     isPrivate={chatRoom.isPrivate}
                   />
-                </Link>
+                </Box>
               ))}
             </SimpleGrid>
           </Box>

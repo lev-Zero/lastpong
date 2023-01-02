@@ -87,11 +87,9 @@ export default function ChatRoomPage() {
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름 -> 'join'에서는 joinedUser를 안 줌
     socket.on('leave', (res) => {
+      console.log(chatUserList); // 왠지 모르지만 이 console.log를 없애면 chatUserList가 아예 []가 된다.
       setChatUserList(
-        chatUserList.filter((chatUserItem) => {
-          console.log(chatUserItem.user.id, res.targetUser.id);
-          return chatUserItem.user.id !== res.targetUser.id;
-        })
+        chatUserList.filter((chatUserItem) => chatUserItem.user.id !== res.targetUser.id)
       );
     });
   }, []);
