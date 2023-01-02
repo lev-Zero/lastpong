@@ -31,11 +31,9 @@ import { ReactElement, ReactEventHandler, ReactNode, useEffect, useRef, useState
 import { allUserStore } from '@/stores/allUserStore';
 import Link from 'next/link';
 import RawUserItem from '@/components/RawUserItem';
-import io, { Socket } from 'socket.io-client';
-import { getJwtToken } from '@/utils/getJwtToken';
-import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { chatStore } from '@/stores/chatStore';
 import { useRouter } from 'next/router';
+import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
@@ -78,13 +76,13 @@ export default function ChatPage() {
       return;
     }
     if (socket === undefined) {
-      alert('socket is undefined!');
+      console.log('socket is undefined!');
       return;
     }
 
     socket.emit('createChatRoom', {
       name: valueTitle,
-      status: roomPrivate ? 2 : 0,
+      status: roomPrivate ? ChatRoomStatus.PRIVATE : ChatRoomStatus.PUBLIC,
       password: valuePassword,
     });
     socket.once('createChatRoom', (res) => {

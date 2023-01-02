@@ -25,7 +25,6 @@ import {
 import { CustomButton } from '@/components/CustomButton';
 import CustomAvatar from '@/components/CustomAvatar';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
-import { chatStore } from '@/stores/chatStore';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -99,9 +98,6 @@ function InviteModal() {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
-  const { makeSocket } = chatStore();
-
-  useEffect(() => {}, []);
 
   return (
     <ChakraProvider theme={theme}>
