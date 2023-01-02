@@ -87,8 +87,7 @@ export default function ChatPage() {
       status: roomPrivate ? 2 : 0,
       password: valuePassword,
     });
-    socket.on('createChatRoom', (res) => {
-      console.log(res.message);
+    socket.once('createChatRoom', (res) => {
       router.push(`/chat/${res.chatRoom.id}`);
     });
     onClose();

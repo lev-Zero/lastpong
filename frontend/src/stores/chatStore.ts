@@ -44,7 +44,6 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
         })
       );
     });
-    newSocket.on('join', console.log);
     get().setSocket(newSocket);
   },
   chatRoomList: [],
