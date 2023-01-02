@@ -288,6 +288,11 @@ export class ChatService {
         for (const joinedUser of chatRoom.joinedUser)
           delete joinedUser.user.token;
       }
+      if (chatRoom.chatLog) {
+        for (const chatLog of chatRoom.chatLog) {
+          delete chatLog.user.token;
+        }
+      }
       return chatRoom;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -326,6 +331,11 @@ export class ChatService {
       if (chatRoom.joinedUser) {
         for (const joinedUser of chatRoom.joinedUser)
           delete joinedUser.user.token;
+      }
+      if (chatRoom.chatLog) {
+        for (const chatLog of chatRoom.chatLog) {
+          delete chatLog.user.token;
+        }
       }
       return chatRoom;
     } catch (e) {
@@ -394,6 +404,11 @@ export class ChatService {
       if (chatRoom.joinedDmUser) {
         for (const joinedDmUser of chatRoom.joinedDmUser)
           delete joinedDmUser.user.token;
+      }
+      if (chatRoom.chatDmLog) {
+        for (const chatDmLog of chatRoom.chatDmLog) {
+          delete chatDmLog.user.token;
+        }
       }
       return chatRoom;
     } catch (e) {
