@@ -12,7 +12,7 @@ export default function BasicIdPage() {
   const { fetchMe } = userStore();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setUsername(e.currentTarget.value.toUpperCase());
+    setUsername(e.currentTarget.value.toLowerCase());
   }
   async function submitUsername() {
     if (username.search(/\W|\s/g) > -1) {

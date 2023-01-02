@@ -60,7 +60,7 @@ export default function Header() {
         </Link>
       </Box>
       <Box mx={5}>
-        <Link href={`/user/${me.name}`}>{me.name}</Link>
+        <Link href={`/user/${me.name}`}>{me.name.toUpperCase()}</Link>
       </Box>
       <Box mx={5}>
         <HStack onClick={toggleUseOtp}>
