@@ -11,6 +11,7 @@ import { ChatRoomProps } from '@/interfaces/ChatRoomProps';
 import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import ChatUserItem from '@/components/ChatUserItem';
 import { avatarFetch } from '@/utils/avatarFetch';
+import { customFetch } from '@/utils/customFetch';
 
 export default function ChatRoomPage() {
   const router = useRouter();
@@ -22,80 +23,96 @@ export default function ChatRoomPage() {
   const [chatRoom, setChatRoom] = useState<ChatRoomProps>();
   const [chatUserList, setChatUserList] = useState<ChatUserItemProps[]>([]);
   const { socket } = chatStore();
-  useEffect(() => {
-    socket?.on('chatRoomById', (res) => {
-      const newChatRoom = res.chatRoom;
-      const mutedUsers: UserProps[] = newChatRoom.mutedUser.map((rawMutedUser: any) => {
-        const user = rawMutedUser.user;
-        return {
-          id: user.id,
-          name: user.username,
-          imgUrl: '',
-          status: user.status,
-          rating: user.rating,
-        };
-      });
-      const bannedUsers: UserProps[] = newChatRoom.bannedUser.map((rawBannedUser: any) => {
-        const user = rawBannedUser.user;
-        return {
-          id: user.id,
-          name: user.username,
-          imgUrl: '',
-          status: user.status,
-          rating: user.rating,
-        };
-      });
-      const joinedUsers: UserProps[] = newChatRoom.joinedUser.map((rawJoinedUser: any) => {
-        const user = rawJoinedUser.user;
-        return {
-          id: user.id,
-          name: user.username,
-          imgUrl: '',
-          status: user.status,
-          rating: user.rating,
-        };
-      });
-      const adminUsers: UserProps[] = newChatRoom.adminUser.map((rawAdminUser: any) => {
-        const user = rawAdminUser.user;
-        return {
-          id: user.id,
-          name: user.username,
-          imgUrl: '',
-          status: user.status,
-          rating: user.rating,
-        };
-      });
-      const owner: UserProps = {
-        id: newChatRoom.owner.id,
-        name: newChatRoom.owner.username,
-        imgUrl: '',
-        status: newChatRoom.owner.status,
-        rating: newChatRoom.owner.rating,
-      };
 
-      setChatRoom({
-        name: newChatRoom.name,
-        status: newChatRoom.status,
-        mutedUsers,
-        bannedUsers,
-        joinedUsers,
-        adminUsers,
-        owner,
-      });
+  const [msgList, setMsgList] = useState<MsgProps[]>([]);
+
+  socket?.on('message', (res) => {
+    setMsgList((prev) => {
+      return [
+        ...prev,
+        {
+          username: res.user.id,
+          text: res.message,
+        },
+      ];
     });
+  });
+  //  //   { username: 'tmp', text: 'hello hello1' },
+
+  socket?.on('chatRoomById', (res) => {
+    const newChatRoom = res.chatRoom;
+    const mutedUsers: UserProps[] = newChatRoom.mutedUser.map((rawMutedUser: any) => {
+      const user = rawMutedUser.user;
+      return {
+        id: user.id,
+        name: user.username,
+        imgUrl: '',
+        status: user.status,
+        rating: user.rating,
+      };
+    });
+    const bannedUsers: UserProps[] = newChatRoom.bannedUser.map((rawBannedUser: any) => {
+      const user = rawBannedUser.user;
+      return {
+        id: user.id,
+        name: user.username,
+        imgUrl: '',
+        status: user.status,
+        rating: user.rating,
+      };
+    });
+    const joinedUsers: UserProps[] = newChatRoom.joinedUser.map((rawJoinedUser: any) => {
+      const user = rawJoinedUser.user;
+      return {
+        id: user.id,
+        name: user.username,
+        imgUrl: '',
+        status: user.status,
+        rating: user.rating,
+      };
+    });
+    const adminUsers: UserProps[] = newChatRoom.adminUser.map((rawAdminUser: any) => {
+      const user = rawAdminUser.user;
+      return {
+        id: user.id,
+        name: user.username,
+        imgUrl: '',
+        status: user.status,
+        rating: user.rating,
+      };
+    });
+    const owner: UserProps = {
+      id: newChatRoom.owner.id,
+      name: newChatRoom.owner.username,
+      imgUrl: '',
+      status: newChatRoom.owner.status,
+      rating: newChatRoom.owner.rating,
+    };
+
+    setChatRoom({
+      name: newChatRoom.name,
+      status: newChatRoom.status,
+      mutedUsers,
+      bannedUsers,
+      joinedUsers,
+      adminUsers,
+      owner,
+    });
+  });
+  useEffect(() => {
     socket?.emit('chatRoomById', { chatRoomId: roomNo });
   }, []);
 
-  useEffect(() => {
-    socket?.on('join', (res) => {
-      console.log(res);
-      socket?.emit('chatRoomById');
-    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
-    socket?.on('leave', (res) => {
-      console.log(res);
-      socket?.emit('chatRoomById');
-    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
-  }, []);
+  // useEffect(() => {
+  //   socket?.on('join', (res) => {
+  //     console.log(res);
+  //     socket?.emit('chatRoomById');
+  //   }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
+  //   socket?.on('leave', (res) => {
+  //     console.log(res);
+  //     socket?.emit('chatRoomById');
+  //   }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
+  // }, []);
 
   useEffect(() => {
     async function f() {
@@ -137,42 +154,55 @@ export default function ChatRoomPage() {
   }
 
   //이부분은 채팅 주고받은 로그 기록 전반이다. 백엔드에서 실시간으로 갱신하는 부분으로 바꾸어야함
-  const msgList: MsgProps[] = [
-    { username: 'tmp', text: 'hello hello1' },
-    { username: me.name, text: 'hello hello2' },
-    { username: 'tmp', text: 'hello hello3' },
-    { username: me.name, text: 'hello hello4' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello1' },
-    { username: me.name, text: 'hello hello2' },
-    { username: 'tmp', text: 'hello hello3' },
-    { username: me.name, text: 'hello hello4' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-    { username: 'tmp', text: 'helo hello5' },
-    { username: 'tmp', text: 'hello hello5' },
-  ];
+  // const msgList: MsgProps[] = [
+  //   { username: 'tmp', text: 'hello hello1' },
+  //   { username: me.name, text: 'hello hello2' },
+  //   { username: 'tmp', text: 'hello hello3' },
+  //   { username: me.name, text: 'hello hello4' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello1' },
+  //   { username: me.name, text: 'hello hello2' },
+  //   { username: 'tmp', text: 'hello hello3' },
+  //   { username: me.name, text: 'hello hello4' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  //   { username: 'tmp', text: 'helo hello5' },
+  //   { username: 'tmp', text: 'hello hello5' },
+  // ];
 
   //이부분은 백엔드 서버에 메세지를 보내주는 것으로 바뀌어야함.
   function msgSubmit() {
     console.log(msg);
     setMsg('');
     if (inputRef.current !== null) inputRef.current.focus();
+    socket?.emit('message', { chatRoomId: roomNo, message: msg });
   }
 
   function msgKeySubmit(e: React.KeyboardEvent<HTMLElement>) {
     if (e.key === 'Enter') {
       console.log(msg);
       setMsg('');
+      socket?.emit('message', { chatRoomId: roomNo, message: msg });
     }
   }
+
+  function makeUsersPan() {
+    let uList = chatUserList;
+    let arr: any = [];
+    for (let i = 0; i < uList.length; i++) {
+      console.log(i, uList.length, 2);
+      arr.push(<ChatUserItem key={i} user={uList[i].user} role={uList[i].role} />);
+    }
+    return arr;
+  }
+
   return (
     <>
       {chatRoom === undefined ? (
@@ -250,9 +280,10 @@ export default function ChatRoomPage() {
               borderRadius="20px"
               overflow="scroll"
             >
-              {chatUserList.map((chatUserItem, idx) => (
+              {/* {chatUserList.map((chatUserItem, idx) => (
                 <ChatUserItem key={idx} user={chatUserItem.user} role={chatUserItem.role} />
-              ))}
+              ))} */}
+              {makeUsersPan()}
             </VStack>
           </Flex>
         </>
