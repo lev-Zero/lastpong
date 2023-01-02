@@ -1,4 +1,4 @@
-import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { UserProps } from '@/interfaces/UserProps';
 import { userStore } from '@/stores/userStore';
 import {
   VStack,
@@ -21,7 +21,6 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
-import { customFetch } from '@/utils/customFetch';
 import RawUserItem from './RawUserItem';
 import { allUserStore } from '@/stores/allUserStore';
 

@@ -7,15 +7,17 @@ import { ReactElement } from 'react';
 
 export default function WatchPage() {
   const me: UserProps = {
+    id: 1,
     name: 'yopark',
     imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.inGame,
+    status: UserStatus.INGAME,
     rating: 1028,
   };
   const opp: UserProps = {
+    id: 1,
     name: 'pongmaster',
     imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.inGame,
+    status: UserStatus.INGAME,
     rating: 2510,
   };
 

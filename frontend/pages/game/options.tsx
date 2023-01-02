@@ -17,15 +17,17 @@ import { ReactElement } from 'react';
 
 export default function GameOptionsPage() {
   const me: UserProps = {
+    id: 42,
     name: 'yopark',
     imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.inGame,
+    status: UserStatus.INGAME,
     rating: 1028,
   };
   const opp: UserProps = {
+    id: 42,
     name: 'pongmaster',
     imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.inGame,
+    status: UserStatus.INGAME,
     rating: 2510,
   };
   const isMyTurn: boolean = true;

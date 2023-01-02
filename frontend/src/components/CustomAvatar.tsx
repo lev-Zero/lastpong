@@ -10,10 +10,10 @@ interface CustomAvatarProps {
 
 function getBg(status: UserStatus) {
   switch (status) {
-    case UserStatus.online:
+    case UserStatus.ONLINE:
       return 'online';
-    case UserStatus.inGame:
-      return 'inGame';
+    case UserStatus.INGAME:
+      return 'main';
     default:
       return 'offline';
   }

@@ -41,10 +41,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
 
   const getLayout = Component.getLayout ?? ((page) => page);
-  const user: UserProps = {
+  const invitingDummyUser: UserProps = {
+    id: 1,
     name: 'yopark',
     imgUrl: '',
-    // status: UserStatus.inGame,
+    status: UserStatus.INGAME,
     rating: 1028,
   };
 
@@ -61,13 +62,17 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                 <VStack>
                   <Flex w="100%" justifyContent="space-around" alignItems="center" bg="Win">
                     <Box mr={5}>
-                      <CustomAvatar url={user.imgUrl} size="xl" status={user.status} />
+                      <CustomAvatar
+                        url={invitingDummyUser.imgUrl}
+                        size="xl"
+                        status={invitingDummyUser.status}
+                      />
                     </Box>
                     <VStack>
-                      <Text fontSize="4xl">{user.name.toUpperCase()}</Text>
+                      <Text fontSize="4xl">{invitingDummyUser.name.toUpperCase()}</Text>
                       <HStack>
                         <Text>RATING</Text>
-                        <Text color={'opponent'}>{user.rating}</Text>
+                        <Text color={'opponent'}>{invitingDummyUser.rating}</Text>
                       </HStack>
                     </VStack>
                   </Flex>

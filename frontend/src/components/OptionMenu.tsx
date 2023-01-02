@@ -17,7 +17,7 @@ export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
       <MenuItem as={Link} href={`/user/${user.name}`}>
         VIEW PROFILE
       </MenuItem>
-      {user.status === UserStatus.online ? (
+      {user.status === UserStatus.ONLINE ? (
         <MenuItem>INVITE TO GAME</MenuItem>
       ) : (
         <MenuItem>

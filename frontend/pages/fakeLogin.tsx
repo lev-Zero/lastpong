@@ -28,6 +28,7 @@ export default function FakeLogin() {
       setCookie('accessToken', json.token);
 
       const user: UserProps = {
+        id: json.id,
         name: json.username,
         imgUrl: json.avatar.profileUrl,
         status: json.status,

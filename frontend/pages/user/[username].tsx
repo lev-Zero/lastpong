@@ -16,7 +16,7 @@ import { ReactElement, useEffect, useState } from 'react';
 export default function UserProfilePage() {
   const router = useRouter();
   let rawUsername: string | string[] | undefined = router.query.username;
-  const [user, setUser] = useState<UserProps | null>(null);
+  const [user, setUser] = useState<UserProps>();
   const { addFriend } = userStore();
 
   useEffect(() => {
@@ -36,6 +36,7 @@ export default function UserProfilePage() {
         const json = await customFetch('GET', `/user/name/${username}`);
         const imgUrl = await avatarFetch('GET', `/user/avatar/name/${username}`);
         const fetchedUser = {
+          id: json.id,
           name: json.username,
           imgUrl: imgUrl,
           status: json.status,
@@ -65,7 +66,7 @@ export default function UserProfilePage() {
 
   return (
     <>
-      {user === null ? null : (
+      {user === undefined ? null : (
         <VStack>
           <Head>
             <title>{`${user.name} | LastPong`}</title>

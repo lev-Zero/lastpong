@@ -1,11 +1,11 @@
 export enum UserStatus {
-  offline,
-  online,
-  inGame,
+  OFFLINE,
+  ONLINE,
+  INGAME,
 }
 
 export interface UserProps {
-  id?: number;
+  id: number;
   name: string;
   imgUrl: string;
   status?: UserStatus;
