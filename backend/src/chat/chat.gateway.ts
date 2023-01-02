@@ -65,6 +65,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
       await this.userService.updateStatus(user.id, userStatus.INGAME);
 
+      await this.chatService.deleteChatRoomIfOwner(user.id);
       const initChatRooms = await this.chatService
         .findChatRoomByUserId(user.id)
         .catch(() => null);
@@ -79,6 +80,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
 
+      await this.chatService.deleteChatRoomDmIfOwner(user.id);
       const initChatRoomDms = await this.chatService
         .findChatRoomDmByUserId(user.id, ['joinedDmUser', 'owner'])
         .catch(() => null);
@@ -124,29 +126,41 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const disconnectUser = await this.userService.findUserById(user.id);
 
+      await this.chatService.deleteChatRoomIfOwner(user.id);
       const chatRooms = await this.chatService
         .findChatRoomByUserId(disconnectUser.id)
         .catch(() => null);
       if (chatRooms) {
         for (const chatRoom of chatRooms) {
-          await this.chatService.leaveChatRoom(
-            disconnectUser.id,
-            chatRoom.id,
-            disconnectUser.id,
-          );
+          const leaveUser = {
+            targetUserId: disconnectUser.id,
+            chatRoomId: chatRoom.id,
+          };
+          await this.leaveChatRoom(socket, leaveUser);
+          // await this.chatService.leaveChatRoom(
+          //   disconnectUser.id,
+          //   chatRoom.id,
+          //   disconnectUser.id,
+          // );
         }
       }
 
+      await this.chatService.deleteChatRoomDmIfOwner(user.id);
       const chatRoomDms = await this.chatService
         .findChatRoomDmByUserId(disconnectUser.id)
         .catch(() => null);
       if (chatRoomDms) {
         for (const chatRoomDm of chatRoomDms) {
-          await this.chatService.leaveChatRoomDm(
-            disconnectUser.id,
-            chatRoomDm.id,
-            disconnectUser.id,
-          );
+          const leaveUser = {
+            targetUserId: disconnectUser.id,
+            chatRoomId: chatRoomDm.id,
+          };
+          await this.leaveChatRoom(socket, leaveUser);
+          // await this.chatService.leaveChatRoomDm(
+          //   disconnectUser.id,
+          //   chatRoomDm.id,
+          //   disconnectUser.id,
+          // );
         }
       }
 
