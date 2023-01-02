@@ -15,24 +15,13 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function UserProfilePage() {
   const router = useRouter();
-  let rawUsername: string | string[] | undefined = router.query.username;
+  const username: string = router.query.username as string;
   const [user, setUser] = useState<UserProps>();
   const { addFriend } = userStore();
 
   useEffect(() => {
     async function setUserInfo() {
       try {
-        console.log(rawUsername);
-        let username: string = '';
-        if (rawUsername === undefined) {
-          username = '';
-          return;
-        } else if (Array.isArray(rawUsername)) {
-          username = rawUsername.join('');
-          return;
-        } else {
-          username = rawUsername;
-        }
         const json = await customFetch('GET', `/user/name/${username}`);
         const imgUrl = await avatarFetch('GET', `/user/avatar/name/${username}`);
         const fetchedUser = {
@@ -42,7 +31,6 @@ export default function UserProfilePage() {
           status: json.status,
           rating: json.rating,
         };
-        console.log('fetchedUser', fetchedUser);
         setUser(fetchedUser);
       } catch (e) {
         if (e instanceof Error) {
@@ -52,7 +40,7 @@ export default function UserProfilePage() {
       }
     }
     setUserInfo();
-  }, [rawUsername]);
+  }, []);
 
   const winCnt = 42;
   const loseCnt = 42;

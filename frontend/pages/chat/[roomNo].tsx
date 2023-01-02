@@ -1,21 +1,9 @@
 import MainLayout from '@/layouts/MainLayout';
-import {
-  Center,
-  Flex,
-  HStack,
-  Spacer,
-  VStack,
-  Image,
-  Input,
-  Spinner,
-  useRangeSliderStyles,
-  Text,
-} from '@chakra-ui/react';
+import { Center, Flex, HStack, Spacer, VStack, Image, Input, Spinner } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { ReactElement, useState, useRef, useEffect } from 'react';
 import { userStore } from '@/stores/userStore';
-import UserItem from '@/components/UserItem';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { MsgProps } from '@/interfaces/MsgProps';
 import { chatStore } from '@/stores/chatStore';
@@ -26,7 +14,7 @@ import { avatarFetch } from '@/utils/avatarFetch';
 
 export default function ChatRoomPage() {
   const router = useRouter();
-  const { roomNo } = router.query;
+  const roomNo: number = parseInt(router.query.roomNo as string);
   const [msg, setMsg] = useState<string>('');
   const { me } = userStore();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -99,10 +87,22 @@ export default function ChatRoomPage() {
   }, []);
 
   useEffect(() => {
+    socket?.on('join', (res) => {
+      console.log(res);
+      socket?.emit('chatRoomById');
+    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
+    socket?.on('leave', (res) => {
+      console.log(res);
+      socket?.emit('chatRoomById');
+    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름
+  }, []);
+
+  useEffect(() => {
     async function f() {
       async function convertToChatUserList(chatRoom: ChatRoomProps) {
         const ret: ChatUserItemProps[] = [];
         const usedIds: number[] = [];
+        console.log(chatRoom);
         if (chatRoom.owner.id) {
           // TODO: UserProps에 id를 Optional로 해놔서 발생하는 문제. 나중에 id를 다 추가해서 이 조건문 없앨 것
           chatRoom.owner.imgUrl = await avatarFetch('GET', `/user/id/${chatRoom.owner.id}`);
@@ -139,13 +139,20 @@ export default function ChatRoomPage() {
   }, [chatRoom]);
 
   useEffect(() => {
-    console.log(chatUserList, chatUserList.length);
+    // console.log(chatUserList, chatUserList.length);
     chatUserList.map((chatUserItem, idx) => {
-      console.log('!', chatUserItem, idx);
+      // console.log('!', chatUserItem, idx);
     });
   }, [chatUserList]);
 
-  function roomOut() {
+  function exitChatRoom() {
+    if (roomNo === -1) {
+      return;
+    }
+    socket?.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
+    socket?.off('chatRoomById');
+    socket?.off('join');
+    socket?.off('leave');
     router.push('/chat');
   }
 
@@ -205,7 +212,7 @@ export default function ChatRoomPage() {
                 <Center ml={20}>{chatRoom.name}</Center>
                 <Spacer />
                 <Image w="40px" src="/chatroom-setting.svg" />
-                <Image w="30px" mx={10} src="/exit.svg" />
+                <Image w="30px" mx={10} src="/exit.svg" onClick={exitChatRoom} />
               </Flex>
               {/* Chat Part */}
               <VStack p={5} w="full" mt={10} bg="white" overflow="scroll">
