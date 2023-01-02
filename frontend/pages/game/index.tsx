@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
-import useGameStore from '@/store/useGameStore';
+import { gameStore } from '@/stores/gameStore';
 import {
   Button,
   Center,
@@ -78,7 +78,7 @@ export default function GamePage() {
     paddle1PosY,
     paddle2PosY,
     setPaddle1PosY,
-  } = useGameStore();
+  } = gameStore();
 
   let paddle1 = {
     width: 25,

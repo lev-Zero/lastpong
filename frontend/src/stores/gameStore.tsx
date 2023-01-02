@@ -1,6 +1,6 @@
-import create from "zustand";
+import create from 'zustand';
 
-interface GameState {
+interface GameStoreProps {
   p1Name: any;
   setP1Name: (p1Name: any) => void;
 
@@ -25,15 +25,15 @@ interface GameState {
   setPaddle2PosY: (paddle2PosY: number) => void;
 }
 
-const useGameStore = create<GameState>((set) => ({
-  p1Name: "Player1",
+export const gameStore = create<GameStoreProps>((set) => ({
+  p1Name: 'Player1',
   setP1Name: (p1Name) =>
     set((state) => ({
       ...state,
       p1Name,
     })),
 
-  p2Name: "Player2",
+  p2Name: 'Player2',
   setP2Name: (p2Name) =>
     set((state) => ({
       ...state,
@@ -82,5 +82,3 @@ const useGameStore = create<GameState>((set) => ({
       paddle2PosY,
     })),
 }));
-
-export default useGameStore;
