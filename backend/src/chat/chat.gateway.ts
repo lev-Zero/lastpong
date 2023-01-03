@@ -915,7 +915,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createInviteRoom')
-  async createInviteRoom(socket: Socket, body: InviteUserDto) {
+  async createInviteRoom(socket: Socket, body: InviteUserDto): Promise<void> {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -957,7 +957,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('responseInvite')
-  async responseInvite(socket: Socket, body: ResponseInviteDto) {
+  async responseInvite(socket: Socket, body: ResponseInviteDto): Promise<void> {
     try {
       socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
@@ -982,7 +982,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
   //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
   @SubscribeMessage('inviteGameRoomInfo')
-  async inviteGameRoomInfo(socket: Socket, body: InviteGameRoomInfoDto) {
+  async inviteGameRoomInfo(
+    socket: Socket,
+    body: InviteGameRoomInfoDto,
+  ): Promise<void> {
     try {
       socket.to(body.inviteGameRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',

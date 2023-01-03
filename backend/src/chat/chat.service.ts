@@ -1207,7 +1207,7 @@ export class ChatService {
     }
   }
 
-  async deleteChatRoomIfOwner(userId: number) {
+  async deleteChatRoomIfOwner(userId: number): Promise<void> {
     try {
       await this.chatRoomRepository
         .createQueryBuilder('chatRoom')
@@ -1220,7 +1220,7 @@ export class ChatService {
     }
   }
 
-  async deleteChatRoomDmIfOwner(userId: number) {
+  async deleteChatRoomDmIfOwner(userId: number): Promise<void> {
     try {
       await this.chatRoomDmRepository
         .createQueryBuilder('chatRoomdm')

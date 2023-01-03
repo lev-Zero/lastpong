@@ -7,13 +7,13 @@ export enum gameStatus {
 }
 
 export enum BackgroundColor {
-  DEFAULT = 0,
+  DEFAULT,
   BLUE,
   ORANGE,
 }
 
 export enum Mode {
-  NONE = 0,
+  NONE,
   SPEEDUPBALL,
   SPEEDDOWNBALL,
   SIZEUPBALL,

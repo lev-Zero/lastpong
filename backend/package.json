@@ -36,6 +36,7 @@
     "@types/socket.io": "^3.0.2",
     "axios": "^1.2.1",
     "bcryptjs": "^2.4.3",
+    "class-sanitizer": "^1.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "fetch": "^1.1.0",

@@ -18,6 +18,7 @@ import { JwtAuthGuard } from './security/jwt.guard';
 import { Auth42Service } from 'src/auth/service/auth42.service';
 import { UserService } from 'src/user/service/user.service';
 import { userStatus } from 'src/user/enum/status.enum';
+import { Sanitizer } from 'class-sanitizer';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +34,7 @@ export class AuthController {
 	----------------------------------*/
 
   @Get('/')
-  viaPath(@Res({ passthrough: true }) res: Response) {
+  viaPath(@Res({ passthrough: true }) res: Response): void {
     try {
       res.status(301).redirect('http://localhost:3000/auth/42/callback');
     } catch (e) {
@@ -49,7 +50,7 @@ export class AuthController {
   async redirect(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<void> {
     try {
       if (req.user) {
         const data = await this.auth42Service.login(req.user);
@@ -203,7 +204,9 @@ export class AuthController {
         );
 
       if (payload.auth42Status) {
-        const newToken = await this.auth42Service.loginOTP(payload, code);
+        const codeData = this.authSanitizer(code);
+        const newToken = await this.auth42Service.loginOTP(payload, codeData);
+
         res.cookie('accessToken', newToken);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
         res.send({ token: newToken });
@@ -220,7 +223,7 @@ export class AuthController {
 
   @Patch('/otp/on')
   @UseGuards(JwtAuthGuard)
-  updateOtpOn(@Req() req: Request) {
+  updateOtpOn(@Req() req: Request): Promise<object> {
     try {
       return this.auth42Service.updateOtpOn(req.user.userId);
     } catch (e) {
@@ -230,7 +233,7 @@ export class AuthController {
 
   @Patch('/otp/off')
   @UseGuards(JwtAuthGuard)
-  updateOtpOff(@Req() req: Request) {
+  updateOtpOff(@Req() req: Request): Promise<object> {
     try {
       return this.auth42Service.updateOtpOff(req.user.userId);
     } catch (e) {
@@ -239,11 +242,26 @@ export class AuthController {
   }
   @Get('/otp')
   @UseGuards(JwtAuthGuard)
-  async findOtpOn(@Req() req: Request) {
+  async findOtpOn(@Req() req: Request): Promise<string> {
     try {
       return JSON.stringify({
         otpOn: await this.auth42Service.findOtpOn(req.user.userId),
       });
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  private authSanitizer(data: string): string {
+    try {
+      const data0 = Sanitizer.blacklist(data, '\n');
+      const data1 = Sanitizer.blacklist(data0, ' ');
+      const data2 = Sanitizer.blacklist(data1, ',');
+      const data3 = Sanitizer.escape(data2);
+      const data4 = Sanitizer.stripLow(data3, true);
+      // const data4 = Sanitizer.toString(data3);
+      const data5 = Sanitizer.trim(data4, ' ');
+      return data5;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

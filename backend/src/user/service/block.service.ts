@@ -132,7 +132,10 @@ export class BlockService {
     }
   }
 
-  async removeBlockByName(removeOfferUser: number, blockedName: string) {
+  async removeBlockByName(
+    removeOfferUser: number,
+    blockedName: string,
+  ): Promise<void> {
     try {
       const foundBlock = await this.userService.findUserByName(blockedName);
       const blockedUser = foundBlock.id;
@@ -148,7 +151,10 @@ export class BlockService {
     }
   }
 
-  async removeBlockById(removeOfferUser: number, blockedUser: number) {
+  async removeBlockById(
+    removeOfferUser: number,
+    blockedUser: number,
+  ): Promise<void> {
     try {
       await this.blockRepository
         .createQueryBuilder('blockedUser')

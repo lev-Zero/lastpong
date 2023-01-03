@@ -44,7 +44,7 @@ export class GameService {
     }
   }
 
-  findGameRooms() {
+  findGameRooms(): Map<string, GameRoomDto> {
     try {
       return this.gameRooms;
     } catch (e) {
@@ -88,7 +88,7 @@ export class GameService {
     return null;
   }
 
-  findGameRoomOfUser(userId: number) {
+  findGameRoomOfUser(userId: number): any {
     try {
       for (const gameRoom of this.gameRooms) {
         for (const player of gameRoom[1].players) {
@@ -311,7 +311,7 @@ export class GameService {
     }
   }
 
-  updateScore(gameRoom: GameRoomDto): number[] {
+  updateScore(gameRoom: GameRoomDto): number[] | null {
     try {
       const nextBallPositionX =
         gameRoom.playing.ball.position.x + gameRoom.playing.ball.velocity.x;
@@ -343,7 +343,7 @@ export class GameService {
     }
   }
 
-  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto) {
+  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto): PositionDto | null {
     try {
       const nextBallPositionX =
         gameRoom.playing.ball.position.x + gameRoom.playing.ball.velocity.x;
@@ -409,7 +409,9 @@ export class GameService {
     }
   }
 
-  updateBallPositionAferTouchTopOrBottom(gameRoom: GameRoomDto) {
+  updateBallPositionAferTouchTopOrBottom(
+    gameRoom: GameRoomDto,
+  ): PositionDto | null {
     try {
       const nextBallPositionX =
         gameRoom.playing.ball.position.x + gameRoom.playing.ball.velocity.x;
@@ -447,7 +449,7 @@ export class GameService {
 |			exitGameRoom|
 ---------------------------*/
 
-  isGameOver(gameRoom: GameRoomDto, server: any, socket: Socket) {
+  isGameOver(gameRoom: GameRoomDto, server: any, socket: Socket): null {
     try {
       for (const player of gameRoom.players) {
         if (player.score == gameRoom.facts.score.max) {
@@ -466,7 +468,7 @@ export class GameService {
     win: GamePlayerDto,
     server: any,
     socket: Socket,
-  ) {
+  ): Promise<any> {
     try {
       let winner;
       let loser;

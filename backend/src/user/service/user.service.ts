@@ -186,7 +186,7 @@ export class UserService {
     }
   }
 
-  async updateUserToken(userId: number, token: string) {
+  async updateUserToken(userId: number, token: string): Promise<void> {
     try {
       this.userRepository.update(userId, { token: token });
     } catch (e) {
