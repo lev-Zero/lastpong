@@ -13,9 +13,9 @@ export class Auth42Service {
   constructor(
     @InjectRepository(Auth42)
     private readonly auth42Repository: Repository<Auth42>,
-    private userService: UserService,
-    private authService: AuthService,
-    private avatarService: AvatarService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly avatarService: AvatarService,
   ) {}
 
   /*----------------------------------
