@@ -9,9 +9,9 @@ import { UserService } from './user.service';
 export class BlockService {
   constructor(
     @InjectRepository(Block)
-    private blockRepository: Repository<Block>,
-    private userService: UserService,
-    private friendService: FriendService,
+    private readonly blockRepository: Repository<Block>,
+    private readonly userService: UserService,
+    private readonly friendService: FriendService,
   ) {}
 
   async addBlockByName(

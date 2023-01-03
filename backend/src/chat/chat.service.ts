@@ -9,7 +9,7 @@ import { ChatRoom } from './entity/chatRoom.entity';
 import { ChatRoomDm } from './entity/chatRoomDm.entity';
 import { JoinedUser } from './entity/JoinedUser.entity';
 import { MutedUser } from './entity/MutedUser.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { JoinedDmUser } from './entity/JoinedDmUser.entity';
 import {
   ChatDmLogDto,

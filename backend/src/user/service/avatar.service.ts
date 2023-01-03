@@ -9,8 +9,8 @@ import { UserService } from './user.service';
 export class AvatarService {
   constructor(
     @InjectRepository(Avatar)
-    private avatarRepository: Repository<Avatar>,
-    private userService: UserService,
+    private readonly avatarRepository: Repository<Avatar>,
+    private readonly userService: UserService,
   ) {}
 
   /*----------------------------------

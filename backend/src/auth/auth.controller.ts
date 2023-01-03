@@ -22,9 +22,9 @@ import { userStatus } from 'src/user/enum/status.enum';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private auth42Service: Auth42Service,
-    private userService: UserService,
+    private readonly authService: AuthService,
+    private readonly auth42Service: Auth42Service,
+    private readonly userService: UserService,
   ) {}
 
   /*----------------------------------

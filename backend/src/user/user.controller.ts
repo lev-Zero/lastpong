@@ -41,12 +41,12 @@ import { Auth42Service } from 'src/auth/service/auth42.service';
 @Controller('user')
 export class UserController {
   constructor(
-    private userService: UserService,
-    private avatarService: AvatarService,
-    private blockService: BlockService,
-    private friendService: FriendService,
-    private matchService: MatchService,
-    private auth42Service: Auth42Service,
+    private readonly userService: UserService,
+    private readonly avatarService: AvatarService,
+    private readonly blockService: BlockService,
+    private readonly friendService: FriendService,
+    private readonly matchService: MatchService,
+    private readonly auth42Service: Auth42Service,
   ) {}
 
   /*----------------------------------

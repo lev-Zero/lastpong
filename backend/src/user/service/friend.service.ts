@@ -8,8 +8,8 @@ import { UserService } from './user.service';
 export class FriendService {
   constructor(
     @InjectRepository(Friend)
-    private friendRepository: Repository<Friend>,
-    private userService: UserService,
+    private readonly friendRepository: Repository<Friend>,
+    private readonly userService: UserService,
   ) {}
 
   async addFriendByName(
