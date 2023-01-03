@@ -337,7 +337,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('exitGameRoom')
-  async exitGameRoom(socket: Socket, body: GameRoomNameDto) {
+  async exitGameRoom(socket: Socket, body: GameRoomNameDto): Promise<void> {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -420,7 +420,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('touchBar')
-  updatetouchBar(socket: Socket, body: TouchBarDto): void {
+  async updatetouchBar(socket: Socket, body: TouchBarDto): Promise<void> {
     try {
       const user: User = socket.data.user;
       if (!user)
@@ -429,14 +429,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           HttpStatus.BAD_REQUEST,
         );
 
-      const gameRoom = this.gameService.findGameRoom(body.gameRoomName);
+      const gameRoom = await this.gameService.findGameRoom(body.gameRoomName);
       if (!gameRoom)
         throw new HttpException(
           '존재하지 않는 게임룸 입니다',
           HttpStatus.BAD_REQUEST,
         );
 
-      const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(
+      const player: GamePlayerDto = await this.gameService.findPlayerInGameRoom(
         socket.data.user.id,
         body.gameRoomName,
       );

@@ -243,7 +243,7 @@ export class Auth42Service {
     }
   }
 
-  async updateOtpOn(userId: number) {
+  async updateOtpOn(userId: number): Promise<object> {
     try {
       const user = await this.userService.findUserById(userId, ['auth42']);
       const auth42User = await this.auth42Repository.findOne({
@@ -258,7 +258,7 @@ export class Auth42Service {
     }
   }
 
-  async updateOtpOff(userId: number) {
+  async updateOtpOff(userId: number): Promise<object> {
     try {
       const user = await this.userService.findUserById(userId, ['auth42']);
       const auth42User = await this.auth42Repository.findOne({
