@@ -166,7 +166,7 @@ export default function Sidebar() {
               </Flex>
             </HStack>
           </ModalHeader>
-          <ModalBody>
+          <ModalBody overflow={'scroll'}>
             <Box overflowY="scroll" mb={10}>
               <SimpleGrid columns={2} spacing={1}>
                 {searchId
