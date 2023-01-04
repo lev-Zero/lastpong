@@ -17,21 +17,72 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
+import { io, Socket } from 'socket.io-client';
+import { gameStore } from '@/stores/gameStore';
 
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
+  const { socket, setSocket, makeSocket, disconnectSocket } = gameStore();
+  const [flag, setFlag] = useState<number>(0);
+
+  // async function cancelQueue() {
+  //   console.log('Disconnect Queue');
+  //   disconnectSocket();
+  //   setFlag(0);
+  // }
+
+  // async function searchPlayer() {
+  //   await makeSocket();
+  //   if (socket === undefined) {
+  //     console.log('socket is undefined');
+  //     return;
+  //   }
+  //   socket.on('randomGameMatch', (res) => {
+  //     console.log(res);
+  //   });
+  //   socket.emit('randomGameMatch');
+  // }
 
   useEffect(() => {
     const interval = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     setTimeSpent(1);
+  //     searchPlayer();
+  //     console.log('ON');
+  //   } else {
+  //     cancelQueue();
+  //     console.log('OFF');
+  //   }
+  // }, [isOpen]);
+
+  function handleMatchBtnClicked() {
+    setTimeSpent(1);
+    makeSocket();
+    onOpen();
+  }
+
+  function handleMatchCancelBtnClicked() {
+    disconnectSocket();
+    console.log('socket is disconnected');
+    onClose();
+  }
+
   useEffect(() => {
-    if (isOpen) {
-      setTimeSpent(1);
+    if (socket === undefined) {
+      return;
     }
-  }, [isOpen]);
+    socket.on('randomGameMatch', (res) => {
+      console.log(res);
+    });
+    socket.emit('randomGameMatch');
+    console.log('socket is connected');
+  }, [socket]);
+
   return (
     <>
       <Head>
@@ -44,7 +95,7 @@ export default function HomePage() {
         <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
         <CustomButton
           size="2xl"
-          onClick={onOpen}
+          onClick={handleMatchBtnClicked}
           btnStyle={{ position: 'absolute', bottom: '13%', right: '52%' }}
         >
           MATCH
@@ -58,7 +109,7 @@ export default function HomePage() {
               <ModalHeader>LOOKING FOR AN OPPONENT...</ModalHeader>
               <ModalBody fontSize="6xl">{timeSpent}</ModalBody>
               <ModalFooter>
-                <CustomButton size="md" onClick={onClose}>
+                <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
                   CANCEL
                 </CustomButton>
               </ModalFooter>
