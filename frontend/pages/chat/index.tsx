@@ -46,14 +46,14 @@ export default function ChatPage() {
   const [valueTitle, setValueTitle] = useState('');
   const [valuePassword, setValuePassword] = useState('');
   const [valuePasswordPriv, setValuePasswordPriv] = useState('');
-  const [roomPrivate, setRoomPrivate] = useState(false);
+  const [roomProtected, setRoomProtected] = useState(false);
   const handleTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValueTitle(event.target.value);
   const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValuePassword(event.target.value);
 
-  const handleRoomPrivate = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRoomPrivate(event.target.checked);
+  const handleRoomProtected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRoomProtected(event.target.checked);
     setValuePassword('');
   };
 
@@ -84,7 +84,7 @@ export default function ChatPage() {
       alert('방 제목을 입력해주십시오.');
       return;
     }
-    if (roomPrivate && valuePassword === '') {
+    if (roomProtected && valuePassword === '') {
       alert('비밀번호를 입력해주십시오.');
       return;
     }
@@ -95,7 +95,7 @@ export default function ChatPage() {
 
     socket.emit('createChatRoom', {
       name: valueTitle,
-      status: roomPrivate ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
+      status: roomProtected ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
       password: valuePassword,
     });
     socket.once('createChatRoom', (res) => {
@@ -115,12 +115,29 @@ export default function ChatPage() {
       alert('비밀번호를 입력해주십시오.');
       return;
     }
-    // if (valuePa  ~~~~~ !== ~~~~ )
-    socket?.emit('join', { id, password: valuePasswordPriv });
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    socket.emit('join', { id, password: valuePasswordPriv }, (err: any) => console.log(err));
+    // } catch (e) {
+    //   console.log(e);
+    //   privOnClose();
+    //   setValuePasswordPriv('');
+    //   return;
+    // }
+    // socket.once('join', console.log);
+    // , (res: any) => {
+    //   if (!res.ok) {
+    //     console.log(res);
+    //     return;
+    //   }
+    //   console.log(res);
+    // });
 
     privOnClose();
     setValuePasswordPriv('');
-    router.push(`/chat/${id}`);
+    // router.push(`/chat/${id}`);
   };
 
   const privChatRoomID = useRef(0);
@@ -140,7 +157,7 @@ export default function ChatPage() {
                 <Box
                   key={idx}
                   onClick={() => {
-                    if (!chatRoom.isPrivate) {
+                    if (!chatRoom.isProtected) {
                       joinChatRoom(chatRoom.id);
                       router.push(`/chat/${chatRoom.id}`);
                     } else {
@@ -154,7 +171,7 @@ export default function ChatPage() {
                     id={chatRoom.id}
                     title={chatRoom.title}
                     owner={chatRoom.owner}
-                    isPrivate={chatRoom.isPrivate}
+                    isProtected={chatRoom.isProtected}
                   />
                 </Box>
               ))}
@@ -198,7 +215,7 @@ export default function ChatPage() {
                       <Text>TITLE</Text>
                       <HStack>
                         <Text>PASSWORD</Text>
-                        <Checkbox onChange={handleRoomPrivate} />
+                        <Checkbox onChange={handleRoomProtected} />
                       </HStack>
                     </VStack>
                     <VStack>
@@ -210,8 +227,8 @@ export default function ChatPage() {
                           type={show ? 'text' : 'password'}
                           placeholder="enter password"
                           onChange={handlePassword}
-                          disabled={!roomPrivate}
-                          bg={!roomPrivate ? 'gray.200' : 'white'}
+                          disabled={!roomProtected}
+                          bg={!roomProtected ? 'gray.200' : 'white'}
                           value={valuePassword}
                         />
                         <InputRightElement width="4.5rem">

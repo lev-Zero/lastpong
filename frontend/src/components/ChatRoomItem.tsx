@@ -2,7 +2,7 @@ import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { Box, Flex, HStack, Image, Spacer, Text, VStack } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
 
-export function ChatRoomItem({ title, owner, isPrivate, password = '' }: ChatRoomItemProps) {
+export function ChatRoomItem({ title, owner, isProtected, password = '' }: ChatRoomItemProps) {
   return (
     <Box bg="white" borderRadius={20} border="2px" p={5}>
       <Flex flexDirection="column">
@@ -13,7 +13,7 @@ export function ChatRoomItem({ title, owner, isPrivate, password = '' }: ChatRoo
         <Flex>
           <Text fontSize="2xl">{title}</Text>
           <Spacer />
-          {!isPrivate ? null : <Image src="/lock.svg" />}
+          {!isProtected ? null : <Image src="/lock.svg" />}
         </Flex>
       </Flex>
     </Box>
