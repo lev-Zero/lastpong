@@ -2,7 +2,7 @@ import MainLayout from '@/layouts/MainLayout';
 import { Center, Flex, HStack, Spacer, VStack, Image, Input, Spinner } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { ReactElement, useState, useRef, useEffect } from 'react';
+import React, { ReactElement, useState, useRef, useEffect } from 'react';
 import { userStore } from '@/stores/userStore';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { MsgProps } from '@/interfaces/MsgProps';
@@ -40,8 +40,8 @@ export default function ChatRoomPage() {
     if (roomNo === undefined) {
       return;
     }
+
     socket.on('message', (res) => {
-      console.log(res);
       setMsgList((prev) => {
         return [
           ...prev,
@@ -147,19 +147,29 @@ export default function ChatRoomPage() {
     router.push('/chat');
   }
 
-  //이부분은 백엔드 서버에 메세지를 보내주는 것으로 바뀌어야함.
-  function msgSubmit() {
+  function handleSendButtonClicked() {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
     console.log(msg);
     setMsg('');
     if (inputRef.current !== null) inputRef.current.focus();
-    socket?.emit('message', { chatRoomId: roomNo, message: msg });
+    socket.emit('message', { chatRoomId: roomNo, message: msg });
   }
 
-  function msgKeySubmit(e: React.KeyboardEvent<HTMLElement>) {
+  function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
     if (e.key === 'Enter') {
       console.log(msg);
       setMsg('');
-      socket?.emit('message', { chatRoomId: roomNo, message: msg });
+      socket.emit('message', { chatRoomId: roomNo, message: msg });
     }
   }
 
@@ -218,15 +228,12 @@ export default function ChatRoomPage() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setMsg(e.target.value);
                   }}
-                  // onKeyDown={(e: KeyboardEvent<HTMLImageElement>) => {
-                  //   if (e.key === 'Enter') console.log(msg);
-                  // }}
-                  onKeyDown={msgKeySubmit}
+                  onKeyDown={handleEnterKeyDown}
                   value={msg}
                   autoFocus
                   ref={inputRef}
                 />
-                <Image w="50px" src="/send-button.svg" />
+                <Image w="50px" src="/send-button.svg" onClick={handleSendButtonClicked} />
               </HStack>
             </VStack>
             <VStack
