@@ -159,7 +159,8 @@ export class UserController {
     @Body() body: UserUpdateNameDto,
   ): Promise<User> {
     try {
-      return this.userService.updateUserName(req.user.userId, body.newUserName);
+      const data = this.userSanitizer(body.newUserName);
+      return this.userService.updateUserName(req.user.userId, data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -184,7 +185,6 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
@@ -210,7 +210,6 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
@@ -236,7 +235,6 @@ export class UserController {
         return { profilePhoto: 'empty', profileUrl: avatar.profileUrl };
       else {
         res.set({
-          // 'Content-Disposition': `inline; filename="${avatar.filename}"`,
           'Content-Type': 'image/*',
         });
         return new StreamableFile(Readable.from(avatar.photoData));
@@ -306,7 +304,8 @@ export class UserController {
     @Body() body: UserNameDto,
   ): Promise<Friend> {
     try {
-      return this.friendService.addFriendByName(req.user.userId, body.username);
+      const data = this.userSanitizer(body.username);
+      return this.friendService.addFriendByName(req.user.userId, data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -342,10 +341,8 @@ export class UserController {
     @Body() body: UserNameDto,
   ): Promise<void> {
     try {
-      return this.friendService.removeFriendByName(
-        req.user.userId,
-        body.username,
-      );
+      const data = this.userSanitizer(body.username);
+      return this.friendService.removeFriendByName(req.user.userId, data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -375,7 +372,8 @@ export class UserController {
     @Body() body: UserNameDto,
   ): Promise<Block> {
     try {
-      return this.blockService.addBlockByName(req.user.userId, body.username);
+      const data = this.userSanitizer(body.username);
+      return this.blockService.addBlockByName(req.user.userId, data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -429,10 +427,8 @@ export class UserController {
     @Body() body: UserNameDto,
   ): Promise<void> {
     try {
-      return this.blockService.removeBlockByName(
-        req.user.userId,
-        body.username,
-      );
+      const data = this.userSanitizer(body.username);
+      return this.blockService.removeBlockByName(req.user.userId, data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
