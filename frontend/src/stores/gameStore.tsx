@@ -1,84 +1,37 @@
 import create from 'zustand';
+import { io, Socket } from 'socket.io-client';
+import { GameRoomProps } from '@/interfaces/GameRoomProps';
+import { getJwtToken } from '@/utils/getJwtToken';
 
 interface GameStoreProps {
-  p1Name: any;
-  setP1Name: (p1Name: any) => void;
+  socket?: Socket;
+  setSocket: (socket: Socket) => void;
+  makeSocket: () => void;
+  disconnectSocket: () => void;
 
-  p1Score: number;
-  setP1Score: (p2Score: number) => void;
-
-  p2Name: any;
-  setP2Name: (p2Name: any) => void;
-  p2Score: number;
-  setP2Score: (p2Score: number) => void;
-
-  ballPosX: number;
-  setBallPosX: (ballPosX: number) => void;
-
-  ballPosY: number;
-  setBallPosY: (ballPosY: number) => void;
-
-  paddle1PosY: number;
-  setPaddle1PosY: (paddle1PosY: number) => void;
-
-  paddle2PosY: number;
-  setPaddle2PosY: (paddle2PosY: number) => void;
+  room: GameRoomProps[];
+  setRoom: (gameRoomList: GameRoomProps[]) => void;
 }
 
-export const gameStore = create<GameStoreProps>((set) => ({
-  p1Name: 'Player1',
-  setP1Name: (p1Name) =>
-    set((state) => ({
-      ...state,
-      p1Name,
-    })),
-
-  p2Name: 'Player2',
-  setP2Name: (p2Name) =>
-    set((state) => ({
-      ...state,
-      p2Name,
-    })),
-
-  p1Score: 0,
-  setP1Score: (p1Score) =>
-    set((state) => ({
-      ...state,
-      p1Score,
-    })),
-
-  p2Score: 0,
-  setP2Score: (p2Score) =>
-    set((state) => ({
-      ...state,
-      p2Score,
-    })),
-
-  ballPosX: 700,
-  setBallPosX: (ballPosX) =>
-    set((state) => ({
-      ...state,
-      ballPosX,
-    })),
-
-  ballPosY: 400,
-  setBallPosY: (ballPosY) =>
-    set((state) => ({
-      ...state,
-      ballPosY,
-    })),
-
-  paddle1PosY: 800 / 2 - 50,
-  setPaddle1PosY: (paddle1PosY) =>
-    set((state) => ({
-      ...state,
-      paddle1PosY,
-    })),
-
-  paddle2PosY: 800 / 2 - 50,
-  setPaddle2PosY: (paddle2PosY) =>
-    set((state) => ({
-      ...state,
-      paddle2PosY,
-    })),
+export const gameStore = create<GameStoreProps>((set, get) => ({
+  socket: undefined,
+  setSocket: (socket: Socket) => {
+    set((state) => ({ ...state, socket }));
+  },
+  room: [],
+  setRoom: (gameRoomList: GameRoomProps[]) => {
+    set((state) => ({ ...state, gameRoomList }));
+  },
+  makeSocket: () => {
+    const newSocket = io('ws://localhost:3000/game', {
+      extraHeaders: {
+        authorization: getJwtToken(),
+      },
+    });
+    newSocket.on('connection', console.log);
+    get().setSocket(newSocket);
+  },
+  disconnectSocket: () => {
+    get().socket?.disconnect();
+  },
 }));
