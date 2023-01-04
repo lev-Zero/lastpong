@@ -14,7 +14,7 @@ import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser
 
 export default function ChatRoomPage() {
   const router = useRouter();
-  const roomNo: number = parseInt(router.query.roomNo as string);
+  const [roomNo, setRoomNo] = useState<number>();
   const [msg, setMsg] = useState<string>('');
   const { me } = userStore();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,8 +26,18 @@ export default function ChatRoomPage() {
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
 
   useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+    setRoomNo(parseInt(router.query.roomNo as string));
+  }, [router.isReady]);
+
+  useEffect(() => {
     if (socket === undefined) {
       console.log('socket is undefined');
+      return;
+    }
+    if (roomNo === undefined) {
       return;
     }
     socket.on('message', (res) => {
@@ -68,31 +78,36 @@ export default function ChatRoomPage() {
         owner,
       });
     });
-  }, []);
+  }, [roomNo]);
 
   useEffect(() => {
     if (socket === undefined) {
       console.log('socket is undefined');
+      return;
+    }
+    if (roomNo === undefined) {
       return;
     }
     socket.emit('chatRoomById', { chatRoomId: roomNo });
-  }, []);
+  }, [roomNo]);
 
   useEffect(() => {
     if (socket === undefined) {
       console.log('socket is undefined');
       return;
     }
+    if (roomNo === undefined) {
+      return;
+    }
     socket.on('join', (res) => {
+      console.log(res);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
-    }); // FIXME: join한 유저만 새로 불러야되는데, 계속 새로 부름 -> 'join'에서는 joinedUser를 안 줌
-    socket.on('leave', (res) => {
-      console.log(chatUserList); // 왠지 모르지만 이 console.log를 없애면 chatUserList가 아예 []가 된다.
-      setChatUserList(
-        chatUserList.filter((chatUserItem) => chatUserItem.user.id !== res.targetUser.id)
-      );
     });
-  }, []);
+    socket.on('leave', async (res) => {
+      console.log(res.message);
+      socket.emit('chatRoomById', { chatRoomId: roomNo }); // FIXME: 아직은 바로 chatRoomById를 했을 때 적용되지 않습니다
+    });
+  }, [roomNo]);
 
   useEffect(() => {
     function convertToChatUserList(chatRoom: ChatRoomProps) {
