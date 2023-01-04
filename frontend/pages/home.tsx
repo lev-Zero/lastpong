@@ -23,42 +23,13 @@ import { gameStore } from '@/stores/gameStore';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, setSocket, makeSocket, disconnectSocket } = gameStore();
+  const { socket, gameRoomName, makeSocket, disconnectSocket } = gameStore();
   const [flag, setFlag] = useState<number>(0);
-
-  // async function cancelQueue() {
-  //   console.log('Disconnect Queue');
-  //   disconnectSocket();
-  //   setFlag(0);
-  // }
-
-  // async function searchPlayer() {
-  //   await makeSocket();
-  //   if (socket === undefined) {
-  //     console.log('socket is undefined');
-  //     return;
-  //   }
-  //   socket.on('randomGameMatch', (res) => {
-  //     console.log(res);
-  //   });
-  //   socket.emit('randomGameMatch');
-  // }
 
   useEffect(() => {
     const interval = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     setTimeSpent(1);
-  //     searchPlayer();
-  //     console.log('ON');
-  //   } else {
-  //     cancelQueue();
-  //     console.log('OFF');
-  //   }
-  // }, [isOpen]);
 
   function handleMatchBtnClicked() {
     setTimeSpent(1);
@@ -72,15 +43,27 @@ export default function HomePage() {
     onClose();
   }
 
+  gameRoomName;
+
   useEffect(() => {
     if (socket === undefined) {
       return;
     }
-    socket.on('randomGameMatch', (res) => {
-      console.log(res);
+    if (gameRoomName !== 'none') console.log('Ready to play game');
+  }, [gameRoomName]);
+
+  useEffect(() => {
+    if (socket === undefined) {
+      return;
+    }
+    function sleep(ms: number) {
+      return new Promise((r) => setTimeout(r, ms));
+    }
+    sleep(3000).then(() => {
+      console.log('EMIT : Random Game Match');
+      socket.emit('randomGameMatch');
     });
-    socket.emit('randomGameMatch');
-    console.log('socket is connected');
+    // socket.emit('randomGameMatch');
   }, [socket]);
 
   return (
