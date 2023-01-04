@@ -39,11 +39,13 @@ export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: privIsOpen, onOpen: privOnOpen, onClose: privOnClose } = useDisclosure();
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
 
   const [valueTitle, setValueTitle] = useState('');
   const [valuePassword, setValuePassword] = useState('');
+  const [valuePasswordPriv, setValuePasswordPriv] = useState('');
   const [roomPrivate, setRoomPrivate] = useState(false);
   const handleTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValueTitle(event.target.value);
@@ -54,6 +56,9 @@ export default function ChatPage() {
     setRoomPrivate(event.target.checked);
     setValuePassword('');
   };
+
+  const handlePrivPassword = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setValuePasswordPriv(event.target.value);
 
   const { socket, makeSocket, refreshChatRoomList, chatRoomList } = chatStore();
   const router = useRouter();
@@ -103,6 +108,23 @@ export default function ChatPage() {
     socket?.emit('join', { id, password: '' });
   };
 
+  //TODO: 비밀번호 맞춰보는 로직 필요한 부분
+  const joinPrivChatRoom = (id: number) => {
+    console.log(valuePasswordPriv);
+    if (valuePasswordPriv === '') {
+      alert('비밀번호를 입력해주십시오.');
+      return;
+    }
+    // if (valuePa  ~~~~~ !== ~~~~ )
+    socket?.emit('join', { id, password: valuePasswordPriv });
+
+    privOnClose();
+    setValuePasswordPriv('');
+    router.push(`/chat/${id}`);
+  };
+
+  const privChatRoomID = useRef(0);
+
   return (
     <>
       <Head>
@@ -123,6 +145,8 @@ export default function ChatPage() {
                       router.push(`/chat/${chatRoom.id}`);
                     } else {
                       // TODO:  비밀번호 입력 모달 제작하기
+                      privChatRoomID.current = chatRoom.id;
+                      privOnOpen();
                     }
                   }}
                 >
@@ -205,6 +229,76 @@ export default function ChatPage() {
 
                     <CustomButton size="lg" onClick={createChatRoom}>
                       CREATE
+                    </CustomButton>
+                  </VStack>
+                </ModalFooter>
+              </VStack>
+            </HStack>
+          </Center>
+        </ModalContent>
+      </Modal>
+
+      {/* Private Room Password Insert Modal */}
+      <Modal
+        isOpen={privIsOpen}
+        onClose={() => {
+          setValuePasswordPriv('');
+          privOnClose();
+        }}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent bg="white" color="black" borderRadius={30}>
+          <Center>
+            <HStack>
+              <VStack>
+                <ModalHeader>
+                  <ModalCloseButton />
+                </ModalHeader>
+                <ModalBody>
+                  <HStack spacing={3}>
+                    <VStack spacing={6}>
+                      {/* <Text>TITLE</Text> */}
+                      <HStack>
+                        <Text>PASSWORD</Text>
+                        {/* <Checkbox onChange={handleRoomPrivate} /> */}
+                      </HStack>
+                    </VStack>
+                    <VStack>
+                      {/* <Input
+                        variant="outline"
+                        placeholder="enter title"
+                        onChange={handlePrivPassword}
+                      /> */}
+
+                      <InputGroup size="md">
+                        <Input
+                          pr="4.5rem"
+                          type={show ? 'text' : 'password'}
+                          placeholder="enter password"
+                          onChange={handlePrivPassword}
+                          // disabled={!roomPrivate}
+                          // bg={!roomPrivate ? 'gray.200' : 'white'}
+                          value={valuePasswordPriv}
+                        />
+                        <InputRightElement width="4.5rem">
+                          <Button h="1.75rem" size="sm" onClick={handleClick}>
+                            {show ? 'hide' : 'Show'}
+                          </Button>
+                        </InputRightElement>
+                      </InputGroup>
+                    </VStack>
+                  </HStack>
+                </ModalBody>
+                <ModalFooter>
+                  <VStack mb={'7'}>
+                    <CustomButton
+                      size="lg"
+                      onClick={() => {
+                        joinPrivChatRoom(privChatRoomID.current);
+                      }}
+                    >
+                      SUBMIT
                     </CustomButton>
                   </VStack>
                 </ModalFooter>
