@@ -17,7 +17,7 @@ export async function convertRawUserToUser({
   username,
   username42,
 }: RawUserProps): Promise<UserProps> {
-  const imgUrl: string = await avatarFetch('GET', `/user/id/${id}`);
+  const imgUrl: string = await avatarFetch('GET', `/user/avatar/id/${id}`);
 
   return {
     id,
