@@ -41,11 +41,12 @@ export default function ChatRoomPage() {
       return;
     }
     socket.on('message', (res) => {
+      console.log(res);
       setMsgList((prev) => {
         return [
           ...prev,
           {
-            username: res.user.id,
+            username: res.user.username,
             text: res.message,
           },
         ];
