@@ -66,6 +66,14 @@ export default function ChatPage() {
     refreshChatRoomList();
   }, []);
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      console.log('refreshed');
+      refreshChatRoomList();
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const createChatRoom = () => {
     if (valueTitle === '') {
       alert('방 제목을 입력해주십시오.');
