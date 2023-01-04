@@ -1,5 +1,7 @@
 import MainLayout from '@/layouts/MainLayout';
 import Head from 'next/head';
+import Link from 'next/link';
+
 import { ReactElement, useEffect, useState } from 'react';
 import {
   Button,
@@ -18,11 +20,13 @@ import {
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { gameStore } from '@/stores/gameStore';
+import { useRouter } from 'next/router';
 
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
   const { socket, gameRoomName, makeSocket, disconnectSocket } = gameStore();
+  const router = useRouter();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -36,18 +40,19 @@ export default function HomePage() {
   }
 
   function handleMatchCancelBtnClicked() {
-    disconnectSocket();
-    console.log('socket is disconnected');
+    // disconnectSocket();
+    console.log('socket is disconnected1234');
     onClose();
   }
-
-  gameRoomName;
 
   useEffect(() => {
     if (socket === undefined) {
       return;
     }
-    if (gameRoomName !== 'none') console.log('Ready to play game');
+    if (gameRoomName !== 'none') {
+      router.push('/game/options');
+      console.log('Ready to play game');
+    }
   }, [gameRoomName]);
 
   useEffect(() => {
@@ -61,7 +66,6 @@ export default function HomePage() {
       console.log('EMIT : Random Game Match');
       socket.emit('randomGameMatch');
     });
-    // socket.emit('randomGameMatch');
   }, [socket]);
 
   return (
