@@ -106,7 +106,7 @@ export default function ChatRoomPage() {
     });
     socket.on('leave', async (res) => {
       console.log(res.message);
-      socket.emit('chatRoomById', { chatRoomId: roomNo }); // FIXME: 아직은 바로 chatRoomById를 했을 때 적용되지 않습니다
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
   }, [roomNo]);
 
@@ -229,8 +229,6 @@ export default function ChatRoomPage() {
                 <Image w="50px" src="/send-button.svg" />
               </HStack>
             </VStack>
-            {/* Chat room join user Part */}
-            {/* 유저 친구 받아오는기능 구현되면 수정  */}
             <VStack
               w="25%"
               h="90%"
