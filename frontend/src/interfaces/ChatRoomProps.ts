@@ -2,8 +2,8 @@ import { UserProps } from '@/interfaces/UserProps';
 
 export enum ChatRoomStatus {
   PUBLIC,
-  PRIVATE, // DM
   PROTECTED,
+  PRIVATE, // DM
 }
 
 export interface ChatRoomProps {

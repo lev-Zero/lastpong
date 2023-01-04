@@ -1,4 +1,5 @@
 import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
+import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { getJwtToken } from '@/utils/getJwtToken';
 import { useRouter } from 'next/router';
 import { io, Socket } from 'socket.io-client';
@@ -42,8 +43,7 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
               status: chatRoom.owner.status,
               rating: chatRoom.owner.rating,
             },
-            isPrivate: chatRoom.status === 2,
-            password: '',
+            isPrivate: chatRoom.status === ChatRoomStatus.PROTECTED,
           };
         })
       );

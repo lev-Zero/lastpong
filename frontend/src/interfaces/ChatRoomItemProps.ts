@@ -4,6 +4,6 @@ export interface ChatRoomItemProps {
   id: number;
   title: string;
   owner: UserProps;
-  isPrivate: boolean;
-  password?: string;
+  isProtected: boolean;
+  password?: string; // TODO: 삭제 예정
 }

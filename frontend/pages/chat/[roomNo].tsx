@@ -7,7 +7,7 @@ import { userStore } from '@/stores/userStore';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { MsgProps } from '@/interfaces/MsgProps';
 import { chatStore } from '@/stores/chatStore';
-import { ChatRoomProps } from '@/interfaces/ChatRoomProps';
+import { ChatRoomProps, ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import ChatUserItem from '@/components/ChatUserItem';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
@@ -190,6 +190,9 @@ export default function ChatRoomPage() {
             <VStack w="70%" h="90%" my={10} bg="white" borderRadius="42px" border="2px">
               <Flex w="full" py={5} bg="main" color="white" borderTopRadius="40px" fontSize="3xl">
                 <Center ml={20}>{chatRoom.name}</Center>
+                {chatRoom.status === ChatRoomStatus.PROTECTED ? (
+                  <Image ml={4} src="/lock-white.svg" />
+                ) : null}
                 <Spacer />
                 <Image w="40px" src="/chatroom-setting.svg" />
                 <Image w="30px" mx={10} src="/exit.svg" onClick={exitChatRoom} />
