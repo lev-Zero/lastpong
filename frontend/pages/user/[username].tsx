@@ -6,7 +6,7 @@ import { MatchHistoryProps } from '@/interfaces/MatchProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
 import { userStore } from '@/stores/userStore';
-import { avatarFetch } from '@/utils/avatarFetch';
+import { convertRawUserToUser } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
 import { Box, Center, Divider, Flex, HStack, Text, VStack } from '@chakra-ui/react';
 import Head from 'next/head';
@@ -15,23 +15,22 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function UserProfilePage() {
   const router = useRouter();
-  const username: string = router.query.username as string;
+  const [username, setUsername] = useState<string>();
   const [user, setUser] = useState<UserProps>();
   const { addFriend } = userStore();
 
   useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+    setUsername(router.query.username as string);
+  }, [router.isReady]);
+
+  useEffect(() => {
     async function setUserInfo() {
       try {
-        const json = await customFetch('GET', `/user/name/${username}`);
-        const imgUrl = await avatarFetch('GET', `/user/avatar/name/${username}`);
-        const fetchedUser = {
-          id: json.id,
-          name: json.username,
-          imgUrl: imgUrl,
-          status: json.status,
-          rating: json.rating,
-        };
-        setUser(fetchedUser);
+        const rawUser = await customFetch('GET', `/user/name/${username}`);
+        setUser(await convertRawUserToUser(rawUser));
       } catch (e) {
         if (e instanceof Error) {
           console.log(e.message);
@@ -39,8 +38,11 @@ export default function UserProfilePage() {
         }
       }
     }
+    if (username === undefined) {
+      return;
+    }
     setUserInfo();
-  }, []);
+  }, [username]);
 
   const winCnt = 42;
   const loseCnt = 42;
