@@ -1,6 +1,8 @@
+import React from 'react';
 import { CustomButton } from '@/components/CustomButton';
 import MatchInfo from '@/components/MatchInfo';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
+import { SwitchProps } from '@chakra-ui/react';
 import MainLayout from '@/layouts/MainLayout';
 import {
   Box,
@@ -13,9 +15,18 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import Head from 'next/head';
+import { useState } from 'react';
 import { ReactElement } from 'react';
+import { Socket } from 'socket.io-client';
+import { gameStore } from '@/stores/gameStore';
+import { useRouter } from 'next/router';
 
 export default function GameOptionsPage() {
+  const router = useRouter();
+  const [valueOpt1, setValueOpt1] = React.useState(false);
+  const [valueOpt2, setValueOpt2] = React.useState(false);
+  const { socket, gameRoomName } = gameStore();
+
   const me: UserProps = {
     id: 42,
     name: 'yopark',
@@ -31,6 +42,21 @@ export default function GameOptionsPage() {
     rating: 2510,
   };
   const isMyTurn: boolean = true;
+
+  function OnclickReady() {
+    // if (socket === undefined) {
+    //   console.log('socket is undefined');
+    //   alert('Sockect is not working Critical ERROR!!');
+    //   disconnectSocket();
+    //   router.push('/');
+    // } else {
+    console.log(`${valueOpt1} OPTION1`);
+    console.log(`${valueOpt2} OPTION2`);
+    console.log(socket);
+    console.log(gameRoomName);
+    // socket.emit('readyGame');
+    // }
+  }
 
   // TODO : Form 요청 보내는 로직 추가
   // TODO : READY 했을 때 구역 disabled 되도록 변경
@@ -61,17 +87,17 @@ export default function GameOptionsPage() {
             <FormLabel htmlFor="dark-mode" mb="0">
               <Text fontSize="xl">DARK MODE?</Text>
             </FormLabel>
-            <Switch size="lg" id="dark-mode" />
+            <Switch size="lg" id="dark-mode" onChange={(e) => setValueOpt1(!valueOpt1)} />
           </FormControl>
           <FormControl display="flex" alignItems="center">
             <FormLabel htmlFor="fast-mode" mb="0">
               <Text fontSize="xl">FAST MODE?</Text>
             </FormLabel>
-            <Switch size="lg" id="dark-mode" />
+            <Switch size="lg" id="dark-mode" onChange={(e) => setValueOpt2(!valueOpt2)} />
           </FormControl>
         </Box>
         <Box py={10}>
-          <CustomButton size="lg" onClick={() => {}}>
+          <CustomButton size="lg" onClick={OnclickReady}>
             READY
           </CustomButton>
         </Box>
