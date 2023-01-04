@@ -4,6 +4,7 @@ import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
+import { GameRoomProps } from '@/interfaces/GameRoomProps';
 import {
   Button,
   Center,
@@ -68,18 +69,11 @@ const styles = {
 };
 
 export default function GamePage() {
-  const {
-    p1Name,
-    p1Score,
-    p2Name,
-    p2Score,
-    ballPosX,
-    ballPosY,
-    paddle1PosY,
-    paddle2PosY,
-    setPaddle1PosY,
-  } = gameStore();
+  const { room, setRoom } = gameStore();
 
+  let curRoom: GameRoomProps;
+
+  curRoom = room;
   let paddle1 = {
     width: 25,
     height: 100,
