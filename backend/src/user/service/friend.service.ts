@@ -8,8 +8,8 @@ import { UserService } from './user.service';
 export class FriendService {
   constructor(
     @InjectRepository(Friend)
-    private friendRepository: Repository<Friend>,
-    private userService: UserService,
+    private readonly friendRepository: Repository<Friend>,
+    private readonly userService: UserService,
   ) {}
 
   async addFriendByName(
@@ -94,7 +94,10 @@ export class FriendService {
     }
   }
 
-  async removeFriendByName(removeOfferUser: number, friendName: string) {
+  async removeFriendByName(
+    removeOfferUser: number,
+    friendName: string,
+  ): Promise<void> {
     try {
       const foundFriend = await this.userService
         .findUserByName(friendName)
@@ -112,7 +115,10 @@ export class FriendService {
     }
   }
 
-  async removeFriendById(removeOfferUser: number, friend: number) {
+  async removeFriendById(
+    removeOfferUser: number,
+    friend: number,
+  ): Promise<void> {
     try {
       await this.friendRepository
         .createQueryBuilder('friend') //alias = select Friend as friend

@@ -11,8 +11,8 @@ import { Socket } from 'socket.io';
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
     @InjectRepository(Auth42)
     private readonly auth42Repository: Repository<Auth42>,
   ) {}

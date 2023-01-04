@@ -33,20 +33,22 @@ import { FriendService } from './service/friend.service';
 import { MatchService } from './service/match.service';
 import { Friend } from './entity/friend.entity';
 import { Block } from './entity/block.entity';
-import { UserMatchDto, UserNameDto } from './dto/user.dto';
+import { UserMatchDto, UserNameDto, UserUpdateNameDto } from './dto/user.dto';
 import { Avatar } from './entity/avatar.entity';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { Auth42Service } from 'src/auth/service/auth42.service';
 
+import { Sanitizer } from 'class-sanitizer';
+
 @Controller('user')
 export class UserController {
   constructor(
-    private userService: UserService,
-    private avatarService: AvatarService,
-    private blockService: BlockService,
-    private friendService: FriendService,
-    private matchService: MatchService,
-    private auth42Service: Auth42Service,
+    private readonly userService: UserService,
+    private readonly avatarService: AvatarService,
+    private readonly blockService: BlockService,
+    private readonly friendService: FriendService,
+    private readonly matchService: MatchService,
+    private readonly auth42Service: Auth42Service,
   ) {}
 
   /*----------------------------------
@@ -133,7 +135,8 @@ export class UserController {
   @Get('/name/:name')
   findUserByName(@Param('name') name: string): Promise<User> {
     try {
-      const user = this.userService.findUserByName(name);
+      const data = this.userSanitizer(name);
+      const user = this.userService.findUserByName(data);
       return user;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -151,7 +154,10 @@ export class UserController {
   }
   @Patch('/me')
   @UseGuards(JwtAuthGuard)
-  updateUserName(@Req() req: Request, @Body() body): Promise<User> {
+  updateUserName(
+    @Req() req: Request,
+    @Body() body: UserUpdateNameDto,
+  ): Promise<User> {
     try {
       return this.userService.updateUserName(req.user.userId, body.newUserName);
     } catch (e) {
@@ -167,7 +173,7 @@ export class UserController {
   async findAvatarById(
     @Param('userId', ParseIntPipe) userId: number,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<any> {
     try {
       const avatar = await this.avatarService
         .findAvatarById(userId)
@@ -192,10 +198,11 @@ export class UserController {
   async findAvatarByName(
     @Param('name') name: string,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<any> {
     try {
+      const data = this.userSanitizer(name);
       const avatar = await this.avatarService
-        .findAvatarByName(name)
+        .findAvatarByName(data)
         .catch(() => null);
       if (!avatar.photoData && !avatar.profileUrl)
         return { profilePhoto: 'empty', profileUrl: 'empty' };
@@ -218,7 +225,7 @@ export class UserController {
   async findAvatarMe(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<any> {
     try {
       const avatar = await this.avatarService
         .findAvatarById(req.user.userId)
@@ -273,7 +280,8 @@ export class UserController {
   @Get('/match/name/:name')
   findMatcheByName(@Param('name') username: string): Promise<Match[]> {
     try {
-      return this.matchService.findMatcheByName(username);
+      const data = this.userSanitizer(username);
+      return this.matchService.findMatcheByName(data);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -291,7 +299,7 @@ export class UserController {
   /*----------------------------------
 	|								friend						 |
 	----------------------------------*/
-  @Post('/friend/name/:name')
+  @Post('/friend/name')
   @UseGuards(JwtAuthGuard)
   addFriendByName(
     @Req() req: Request,
@@ -327,7 +335,7 @@ export class UserController {
     }
   }
 
-  @Delete('/friend/name/:name')
+  @Delete('/friend/name')
   @UseGuards(JwtAuthGuard)
   removeFriendByName(
     @Req() req: Request,
@@ -360,7 +368,7 @@ export class UserController {
 	|								block						 |
 	----------------------------------*/
 
-  @Post('/block/name/:name')
+  @Post('/block/name')
   @UseGuards(JwtAuthGuard)
   addBlockByName(
     @Req() req: Request,
@@ -407,13 +415,14 @@ export class UserController {
   @Get('/block/name/:name')
   async findBlockByName(
     @Req() req: Request,
-    @Body() body: UserNameDto,
+    @Param('name') name: string,
   ): Promise<Block[]> {
-    const user = await this.findUserByName(body.username);
+    const data = this.userSanitizer(name);
+    const user = await this.findUserByName(data);
     return await this.blockService.findBlock(user.id);
   }
 
-  @Delete('/block/name/:name')
+  @Delete('/block/name')
   @UseGuards(JwtAuthGuard)
   removeBlockByName(
     @Req() req: Request,
@@ -437,6 +446,21 @@ export class UserController {
   ): Promise<void> {
     try {
       return this.blockService.removeBlockById(req.user.userId, id);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  private userSanitizer(data: string): string {
+    try {
+      const data0 = Sanitizer.blacklist(data, '\n');
+      const data1 = Sanitizer.blacklist(data0, ' ');
+      const data2 = Sanitizer.blacklist(data1, ',');
+      const data3 = Sanitizer.escape(data2);
+      const data4 = Sanitizer.stripLow(data3, true);
+      // const data4 = Sanitizer.toString(data3);
+      const data5 = Sanitizer.trim(data4, ' ');
+      return data5;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

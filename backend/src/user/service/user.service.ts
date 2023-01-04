@@ -11,8 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private jwtService: JwtService,
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   /*----------------------------------
@@ -186,7 +186,7 @@ export class UserService {
     }
   }
 
-  async updateUserToken(userId: number, token: string) {
+  async updateUserToken(userId: number, token: string): Promise<void> {
     try {
       this.userRepository.update(userId, { token: token });
     } catch (e) {

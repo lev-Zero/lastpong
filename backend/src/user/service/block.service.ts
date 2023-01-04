@@ -9,9 +9,9 @@ import { UserService } from './user.service';
 export class BlockService {
   constructor(
     @InjectRepository(Block)
-    private blockRepository: Repository<Block>,
-    private userService: UserService,
-    private friendService: FriendService,
+    private readonly blockRepository: Repository<Block>,
+    private readonly userService: UserService,
+    private readonly friendService: FriendService,
   ) {}
 
   async addBlockByName(
@@ -132,7 +132,10 @@ export class BlockService {
     }
   }
 
-  async removeBlockByName(removeOfferUser: number, blockedName: string) {
+  async removeBlockByName(
+    removeOfferUser: number,
+    blockedName: string,
+  ): Promise<void> {
     try {
       const foundBlock = await this.userService.findUserByName(blockedName);
       const blockedUser = foundBlock.id;
@@ -148,7 +151,10 @@ export class BlockService {
     }
   }
 
-  async removeBlockById(removeOfferUser: number, blockedUser: number) {
+  async removeBlockById(
+    removeOfferUser: number,
+    blockedUser: number,
+  ): Promise<void> {
     try {
       await this.blockRepository
         .createQueryBuilder('blockedUser')

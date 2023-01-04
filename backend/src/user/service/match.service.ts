@@ -10,10 +10,10 @@ import { UserService } from './user.service';
 export class MatchService {
   constructor(
     @InjectRepository(Match)
-    private matchRepository: Repository<Match>,
+    private readonly matchRepository: Repository<Match>,
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private userService: UserService,
+    private readonly userRepository: Repository<User>,
+    private readonly userService: UserService,
   ) {}
 
   async findMatcheById(userId: number): Promise<Match[]> {

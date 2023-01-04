@@ -9,7 +9,7 @@ import { ChatRoom } from './entity/chatRoom.entity';
 import { ChatRoomDm } from './entity/chatRoomDm.entity';
 import { JoinedUser } from './entity/JoinedUser.entity';
 import { MutedUser } from './entity/MutedUser.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { JoinedDmUser } from './entity/JoinedDmUser.entity';
 import {
   ChatDmLogDto,
@@ -1207,7 +1207,7 @@ export class ChatService {
     }
   }
 
-  async deleteChatRoomIfOwner(userId: number) {
+  async deleteChatRoomIfOwner(userId: number): Promise<void> {
     try {
       await this.chatRoomRepository
         .createQueryBuilder('chatRoom')
@@ -1220,7 +1220,7 @@ export class ChatService {
     }
   }
 
-  async deleteChatRoomDmIfOwner(userId: number) {
+  async deleteChatRoomDmIfOwner(userId: number): Promise<void> {
     try {
       await this.chatRoomDmRepository
         .createQueryBuilder('chatRoomdm')

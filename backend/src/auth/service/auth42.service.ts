@@ -13,9 +13,9 @@ export class Auth42Service {
   constructor(
     @InjectRepository(Auth42)
     private readonly auth42Repository: Repository<Auth42>,
-    private userService: UserService,
-    private authService: AuthService,
-    private avatarService: AvatarService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly avatarService: AvatarService,
   ) {}
 
   /*----------------------------------
@@ -243,7 +243,7 @@ export class Auth42Service {
     }
   }
 
-  async updateOtpOn(userId: number) {
+  async updateOtpOn(userId: number): Promise<object> {
     try {
       const user = await this.userService.findUserById(userId, ['auth42']);
       const auth42User = await this.auth42Repository.findOne({
@@ -258,7 +258,7 @@ export class Auth42Service {
     }
   }
 
-  async updateOtpOff(userId: number) {
+  async updateOtpOff(userId: number): Promise<object> {
     try {
       const user = await this.userService.findUserById(userId, ['auth42']);
       const auth42User = await this.auth42Repository.findOne({
