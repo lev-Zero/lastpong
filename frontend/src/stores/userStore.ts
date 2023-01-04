@@ -1,6 +1,7 @@
 import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
 import { avatarFetch } from '@/utils/avatarFetch';
+import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
 import create from 'zustand';
 
@@ -44,7 +45,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
         rating: json.rating,
       };
       get().setMe(user);
-      console.log('fetchMe', user);
     } catch (e) {
       if (e instanceof Error) {
         throw Error(e.message);
@@ -57,7 +57,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
       const json = await customFetch('GET', '/auth/otp');
       const useOtp = json.otpOn;
       get().setUseOtp(useOtp);
-      console.log('fetchUseOtp', useOtp);
     } catch (e) {
       if (e instanceof Error) {
         throw Error(e.message);
@@ -89,21 +88,11 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   fetchFriends: async () => {
     try {
-      const arr = await customFetch('GET', '/user/friend');
+      const rawFriends = await customFetch('GET', '/user/friend');
       const friends: UserProps[] = await Promise.all(
-        arr.map(async (json: any) => {
-          const friend = json.friend;
-          const imgUrl = await avatarFetch('GET', `/user/avatar/name/${friend.username}`);
-          return {
-            name: friend.username,
-            imgUrl: imgUrl,
-            status: friend.status,
-            rating: friend.rating,
-          };
-        })
+        rawFriends.map(async ({ friend: rawFriend }: any) => convertRawUserToUser(rawFriend))
       );
       get().setFriends(friends);
-      console.log('fetchFriends', friends);
     } catch (e) {
       if (e instanceof Error) {
         console.log(e.message);

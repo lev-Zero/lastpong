@@ -1,5 +1,5 @@
 import { UserProps } from '@/interfaces/UserProps';
-import { avatarFetch } from '@/utils/avatarFetch';
+import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
 import create from 'zustand';
 
@@ -16,18 +16,9 @@ export const allUserStore = create<allUserStoreProps>((set, get) => ({
   },
   getAllUsers: async (): Promise<UserProps[]> => {
     try {
-      let users = await customFetch('GET', '/user');
-      let userList: UserProps[] = await Promise.all(
-        users.map(async (json: any) => {
-          // console.log(json);
-          let imgUrl = await avatarFetch('GET', `/user/avatar/name/${json.username}`);
-          return {
-            name: json.username,
-            imgUrl: imgUrl,
-            status: json.status,
-            rating: json.rating,
-          };
-        })
+      const rawUsers = await customFetch('GET', '/user');
+      const userList: UserProps[] = await Promise.all(
+        rawUsers.map(async (rawUser: RawUserProps) => await convertRawUserToUser(rawUser))
       );
       get().setAllUsers(userList);
     } catch (e) {
