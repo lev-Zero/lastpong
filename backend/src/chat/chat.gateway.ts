@@ -6,6 +6,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { sanitize } from 'class-sanitizer';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
@@ -189,6 +190,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createChatRoom')
   async createChatRoom(socket: Socket, body: ChatRoomDto): Promise<void> {
     try {
+      //TEST
+      const data = sanitize(body);
+      console.log({ body });
+      console.log({ data });
+
+      //END TEST
       const user = await this.authService.findUserByRequestToken(socket);
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
       socket.join(body.name);
@@ -366,10 +373,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const offerUser = socket.data.user;
       const targetUser = await this.userService.findUserById(body.targetUserId);
-      const chatRoom = await this.chatService.findChatRoomById(
-        body.chatRoomId,
-        ['joinedUser', 'owner'],
-      );
+      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+        'joinedUser',
+        'owner',
+      ]);
 
       if (chatRoom.owner.id == offerUser.id) {
         const sockets = await this.server.in(chatRoom.name).fetchSockets();
@@ -386,7 +393,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           });
           so.leave(chatRoom.name);
         }
+        await this.chatService.leaveChatRoom(
+          targetUser.id,
+          body.chatRoomId,
+          offerUser.id,
+        );
       } else {
+        await this.chatService.leaveChatRoom(
+          targetUser.id,
+          body.chatRoomId,
+          offerUser.id,
+        );
+        chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+          'joinedUser',
+          'owner',
+        ]);
+
         socket.to(chatRoom.name).emit('leave', {
           message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`,
           chatRoom,
@@ -404,12 +426,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoom.name);
       }
-
-      await this.chatService.leaveChatRoom(
-        targetUser.id,
-        body.chatRoomId,
-        offerUser.id,
-      );
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -803,7 +819,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const offerUser = socket.data.user;
       const targetUser = await this.userService.findUserById(body.targetUserId);
 
-      const chatRoomDm = await this.chatService.findChatRoomDmById(
+      let chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
         ['joinedDmUser', 'owner'],
       );
@@ -823,7 +839,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           });
           so.leave(chatRoomDm.name);
         }
+        await this.chatService.leaveChatRoomDm(
+          targetUser.id,
+          body.chatRoomId,
+          offerUser.id,
+        );
       } else {
+        await this.chatService.leaveChatRoomDm(
+          targetUser.id,
+          body.chatRoomId,
+          offerUser.id,
+        );
+        chatRoomDm = await this.chatService.findChatRoomDmById(
+          body.chatRoomId,
+          ['joinedDmUser', 'owner'],
+        );
+
         socket.to(chatRoomDm.name).emit('leave', {
           message: `${chatRoomDm.name}방에 ${targetUser.username}이/가 나갔습니다.`,
           chatRoomDm,
@@ -841,12 +872,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoomDm.name);
       }
-
-      await this.chatService.leaveChatRoomDm(
-        targetUser.id,
-        body.chatRoomId,
-        offerUser.id,
-      );
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
