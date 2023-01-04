@@ -102,7 +102,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   addFriend: async (name: string) => {
     try {
-      const json = await customFetch('POST', 'user/friend/name/' + name, { username: name });
+      const json = await customFetch('POST', 'user/friend/name', { username: name });
       get().fetchFriends();
     } catch (e) {
       if (e instanceof Error) {
@@ -112,7 +112,7 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   deleteFriend: async (name: string) => {
     try {
-      const text = await customFetch('DELETE', 'user/friend/name/' + name, { username: name });
+      const text = await customFetch('DELETE', 'user/friend/name', { username: name });
       console.log(text);
       get().fetchFriends();
     } catch (e) {
