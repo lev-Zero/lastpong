@@ -36,7 +36,7 @@ export class AuthController {
   @Get('/')
   viaPath(@Res({ passthrough: true }) res: Response): void {
     try {
-      res.status(301).redirect('http://localhost:3000/auth/42/callback');
+      res.status(301).redirect(process.env.CALLBACK_URI);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
@@ -60,9 +60,9 @@ export class AuthController {
         res.cookie('otpStatus', data.otpStatus);
         res.cookie('accessToken42', data.accessToken42);
 
-        res.status(301).redirect('http://localhost:8080/auth/login/otp');
+        res.status(301).redirect(`${process.env.FRONTEND_URL}/auth/login/otp`);
       } else {
-        res.status(301).redirect('http://localhost:8080/');
+        res.status(301).redirect(process.env.FRONTEND_URL);
       }
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { GameRoomProps } from '@/interfaces/GameRoomProps';
 import { GameOptionsProps } from '@/interfaces/GameOptionsProps';
 import { getJwtToken } from '@/utils/getJwtToken';
+import { WS_SERVER_URL } from '@/utils/variables';
 
 interface GameStoreProps {
   socket?: Socket;
@@ -65,7 +66,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   },
 
   makeSocket: () => {
-    const newSocket = io('ws://localhost:3000/game', {
+    const newSocket = io(`${WS_SERVER_URL}/game`, {
       extraHeaders: {
         authorization: getJwtToken(),
       },

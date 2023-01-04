@@ -1,6 +1,7 @@
 import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { getJwtToken } from '@/utils/getJwtToken';
+import { WS_SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
 import { io, Socket } from 'socket.io-client';
 import create from 'zustand';
@@ -20,7 +21,7 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
     set((state) => ({ ...state, socket }));
   },
   makeSocket: () => {
-    const newSocket = io('ws://localhost:3000/chat', {
+    const newSocket = io(`${WS_SERVER_URL}/chat`, {
       extraHeaders: {
         authorization: getJwtToken(),
       },
