@@ -24,7 +24,6 @@ export default function LandingPage() {
     async function fetchData() {
       try {
         await fetchMe();
-        console.log('me', me);
         if (me.name === ' ') {
           return;
         }

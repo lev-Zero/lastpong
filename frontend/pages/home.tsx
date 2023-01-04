@@ -17,18 +17,16 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
-import { io, Socket } from 'socket.io-client';
 import { gameStore } from '@/stores/gameStore';
 
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
   const { socket, gameRoomName, makeSocket, disconnectSocket } = gameStore();
-  const [flag, setFlag] = useState<number>(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
+    return () => clearInterval(id);
   }, []);
 
   function handleMatchBtnClicked() {
