@@ -557,7 +557,7 @@ export class GameService {
 |				isPlayerInAnyGameRoom			|
 ---------------------------*/
 
-  randomGameMatching(socket: Socket): string {
+  randomGameMatching(socket: Socket): any {
     try {
       if (this.queue.find((playerSockets) => playerSockets == socket)) {
         throw new HttpException(
@@ -590,7 +590,7 @@ export class GameService {
         this.joinGameRoom(seletedSocket, gameRoom);
         seletedSocket.join(randomRoomName);
       }
-      return gameRoom.gameRoomName;
+      return gameRoom;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
