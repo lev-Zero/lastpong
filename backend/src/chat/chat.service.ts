@@ -16,7 +16,7 @@ import {
   ChatLogDto,
   ChatRoomDto,
   ChatRoomJoinDto,
-  ChatRoomPwdDto,
+  UpdatePwdDto,
 } from './dto/chat.dto';
 import { ChatLog } from './entity/chatLog.entity';
 import { ChatDmLog } from './entity/chatDmLog.entity';
@@ -178,14 +178,10 @@ export class ChatService {
   // |					checkPwd					 |
   // ----------------------------------*/
 
-  async updatePwd(
-    userId: number,
-    pass: ChatRoomPwdDto,
-    chatRoomId: number,
-  ): Promise<void> {
+  async updatePwd(userId: number, body: UpdatePwdDto): Promise<void> {
     try {
       const user = await this.userService.findUserById(userId);
-      const chatRoom = await this.findChatRoomById(chatRoomId, ['owner']);
+      const chatRoom = await this.findChatRoomById(body.chatRoomId, ['owner']);
 
       if (chatRoom.status == chatRoomStatus.PUBLIC)
         throw new HttpException(
@@ -197,20 +193,20 @@ export class ChatService {
           '방 주인만 방 비밀번호 수정 가능합니다.',
           HttpStatus.BAD_REQUEST,
         );
-      if (!pass.newPwd)
+      if (!body.newPwd)
         throw new HttpException(
           '새 비밀번호를 입력해주세요.',
           HttpStatus.BAD_REQUEST,
         );
 
-      const isCorrectPwd = await this.checkPwd(chatRoom.id, pass.oldPwd);
+      const isCorrectPwd = await this.checkPwd(chatRoom.id, body.oldPwd);
       if (!isCorrectPwd)
         throw new HttpException(
           '입력하신 이전 비밀번호가 현재 방 비밀번호와 일치하지 않습니다.',
           HttpStatus.BAD_REQUEST,
         );
 
-      const password = await bcrypt.hash(pass.newPwd, 10);
+      const password = await bcrypt.hash(body.newPwd, 10);
       await this.chatRoomRepository.update(chatRoom.id, { password });
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
