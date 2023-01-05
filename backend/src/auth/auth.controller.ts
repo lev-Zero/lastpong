@@ -254,14 +254,11 @@ export class AuthController {
 
   private authSanitizer(data: string): string {
     try {
-      const data0 = Sanitizer.blacklist(data, '\n');
-      const data1 = Sanitizer.blacklist(data0, ' ');
-      const data2 = Sanitizer.blacklist(data1, ',');
-      const data3 = Sanitizer.escape(data2);
-      const data4 = Sanitizer.stripLow(data3, true);
-      // const data4 = Sanitizer.toString(data3);
-      const data5 = Sanitizer.trim(data4, ' ');
-      return data5;
+      const data1 = Sanitizer.blacklist(data, ' ');
+      const data2 = Sanitizer.escape(data1);
+      const data3 = Sanitizer.stripLow(data2, true);
+      const data4 = Sanitizer.trim(data3, ' ');
+      return data4;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

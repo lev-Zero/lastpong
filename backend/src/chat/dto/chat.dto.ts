@@ -29,15 +29,11 @@ export class ChatRoomDto {
   password: any;
 }
 
-export class updatePwdDto {
+export class UpdatePwdDto {
   @IsNumber()
   @IsNotEmpty()
   chatRoomId: number;
 
-  password: ChatRoomPwdDto;
-}
-
-export class ChatRoomPwdDto {
   @IsNotEmpty()
   @IsString()
   oldPwd: string;

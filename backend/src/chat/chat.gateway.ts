@@ -9,7 +9,8 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { sanitize } from 'class-sanitizer';
+import { Sanitizer } from 'class-sanitizer';
+import { validate } from 'class-validator';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
@@ -33,7 +34,7 @@ import {
   InviteGameRoomInfoDto,
   InviteUserDto,
   ResponseInviteDto,
-  updatePwdDto,
+  UpdatePwdDto,
 } from './dto/chat.dto';
 
 const socket_username = {};
@@ -193,17 +194,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(body, ChatRoomDto);
+      let data = this.chatParameterSanitizer(validBody.name);
+      validBody.name = data;
+      data = this.chatParameterSanitizer(validBody.password);
+      validBody.password = data;
+
       const user = await this.authService.findUserByRequestToken(socket);
-      const chatRoom = await this.chatService.createChatRoom(user.id, body);
-      socket.join(body.name);
+      const chatRoom = await this.chatService.createChatRoom(
+        user.id,
+        validBody,
+      );
+      socket.join(validBody.name);
 
       socket.emit('createChatRoom', {
         message: '채팅룸이 생성되었습니다',
         chatRoom,
       });
       this.server
-        .to(body.name)
-        .emit('join', `${body.name}방에 ${user.username}이/가 들어왔습니다`);
+        .to(validBody.name)
+        .emit(
+          'join',
+          `${validBody.name}방에 ${user.username}이/가 들어왔습니다`,
+        );
     } catch (e) {
       return new WsException(e.message);
     }
@@ -215,11 +228,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('updatePwd')
   async updatePwd(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() body: updatePwdDto,
+    @MessageBody() body: UpdatePwdDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(body, UpdatePwdDto);
+      let data = this.chatParameterSanitizer(validBody.oldPwd);
+      validBody.oldPwd = data;
+      data = this.chatParameterSanitizer(validBody.newPwd);
+      validBody.newPwd = data;
+
       const user = await this.authService.findUserByRequestToken(socket);
-      await this.chatService.updatePwd(user.id, body.password, body.chatRoomId);
+      await this.chatService.updatePwd(user.id, body);
       socket.emit('updatePwd', { message: `채팅방 비밀번호 변경 완료` });
     } catch (e) {
       return new WsException(e.message);
@@ -253,8 +272,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomIdDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(body, ChatRoomIdDto);
+
       const chatRoom = await this.chatService.findChatRoomById(
-        body.chatRoomId,
+        validBody.chatRoomId,
         [
           'mutedUser',
           'bannedUser',
@@ -280,8 +301,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomNameDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomNameDto,
+      );
+      const data = this.chatParameterSanitizer(validBody.chatRoomName);
+      validBody.chatRoomName = data;
+
       const chatRoom = await this.chatService.findChatRoomByName(
-        body.chatRoomName,
+        validBody.chatRoomName,
         [
           'mutedUser',
           'bannedUser',
@@ -307,7 +335,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomUserIdDto,
   ): Promise<WsException | void> {
     try {
-      const user = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomUserIdDto,
+      );
+
+      const user = await this.userService.findUserById(validBody.userId);
       const chatRoom = await this.chatService.findChatRoomByUserId(user.id);
 
       socket.emit('chatRoomByUserId', {
@@ -347,8 +380,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomJoinDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomJoinDto,
+      );
+      const data = this.chatParameterSanitizer(validBody.password);
+      validBody.password = data;
+
       let chatRoom = await this.chatService.findChatRoomById(
-        body.chatRoomId,
+        validBody.chatRoomId,
         [],
         true,
       );
@@ -384,12 +424,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomleaveDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomleaveDto,
+      );
+
       const offerUser = socket.data.user;
-      const targetUser = await this.userService.findUserById(body.targetUserId);
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-        'owner',
-      ]);
+      const targetUser = await this.userService.findUserById(
+        validBody.targetUserId,
+      );
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser', 'owner'],
+      );
 
       if (chatRoom.owner.id == offerUser.id) {
         const sockets = await this.server.in(chatRoom.name).fetchSockets();
@@ -408,19 +455,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         await this.chatService.leaveChatRoom(
           targetUser.id,
-          body.chatRoomId,
+          validBody.chatRoomId,
           offerUser.id,
         );
       } else {
         await this.chatService.leaveChatRoom(
           targetUser.id,
-          body.chatRoomId,
+          validBody.chatRoomId,
           offerUser.id,
         );
-        chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-          'joinedUser',
-          'owner',
-        ]);
+        chatRoom = await this.chatService.findChatRoomById(
+          validBody.chatRoomId,
+          ['joinedUser', 'owner'],
+        );
 
         socket.to(chatRoom.name).emit('leave', {
           message: `${chatRoom.name}방에 ${targetUser.username}이/가 나갔습니다.`,
@@ -455,9 +502,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomMessageDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomMessageDto,
+      );
+
       const user = socket.data.user;
       const chatRoom = await this.chatService
-        .findChatRoomById(body.chatRoomId, ['joinedUser', 'mutedUser'])
+        .findChatRoomById(validBody.chatRoomId, ['joinedUser', 'mutedUser'])
         .catch(() => null);
 
       for (const mutedUser of chatRoom.mutedUser) {
@@ -476,12 +528,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(chatRoom.name).emit('message', {
         user: { id: user.id, username: user.username },
-        message: body.message,
+        message: validBody.message,
       });
       const log = {
         userId: user.id,
-        chatRoomId: body.chatRoomId,
-        message: body.message,
+        chatRoomId: validBody.chatRoomId,
+        message: validBody.message,
         createdAt: new Date(),
       };
       await this.chatService.addChatLog(log);
@@ -501,15 +553,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-      ]);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser'],
+      );
       const me = socket.data.user;
-      const targetUser = await this.userService.findUserById(body.userId);
+      const targetUser = await this.userService.findUserById(validBody.userId);
 
       await this.chatService.addAdminUser(me.id, targetUser.id, chatRoom.id);
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'adminUser',
       ]);
@@ -534,15 +592,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-      ]);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser'],
+      );
       const me = socket.data.user;
-      const targetUser = await this.userService.findUserById(body.userId);
+      const targetUser = await this.userService.findUserById(validBody.userId);
 
       await this.chatService.removeAdminUser(me.id, targetUser.id, chatRoom.id);
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'adminUser',
       ]);
@@ -572,16 +636,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-        'mutedUser',
-      ]);
-      const targetUser = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser', 'mutedUser'],
+      );
+      const targetUser = await this.userService.findUserById(validBody.userId);
       const me = socket.data.user;
 
       await this.chatService.addMuteUser(targetUser.id, chatRoom.id, me.id);
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'mutedUser',
       ]);
@@ -607,16 +676,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-        'mutedUser',
-      ]);
-      const targetUser = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser', 'mutedUser'],
+      );
+      const targetUser = await this.userService.findUserById(validBody.userId);
       const me = socket.data.user;
 
       await this.chatService.removeMuteUser(targetUser.id, chatRoom.id, me.id);
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'mutedUser',
       ]);
@@ -646,11 +720,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-        'bannedUser',
-      ]);
-      const targetUser = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser', 'bannedUser'],
+      );
+      const targetUser = await this.userService.findUserById(validBody.userId);
       const me = socket.data.user;
 
       await this.chatService.addBannedUser(targetUser.id, chatRoom.id, me.id);
@@ -660,7 +739,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
       await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'bannedUser',
       ]);
@@ -686,11 +765,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
-      let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
-        'joinedUser',
-        'bannedUser',
-      ]);
-      const targetUser = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdUserIdDto,
+      );
+
+      let chatRoom = await this.chatService.findChatRoomById(
+        validBody.chatRoomId,
+        ['joinedUser', 'bannedUser'],
+      );
+      const targetUser = await this.userService.findUserById(validBody.userId);
       const me = socket.data.user;
 
       await this.chatService.removeBannedUser(
@@ -699,7 +783,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         me.id,
       );
 
-      chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
+      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'bannedUser',
       ]);
@@ -728,8 +812,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomDmDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(body, ChatRoomDmDto);
+
       const user = await this.authService.findUserByRequestToken(socket);
-      const target = await this.userService.findUserById(body.targetId);
+      const target = await this.userService.findUserById(validBody.targetId);
 
       const targetSocket: Socket = socket_username[target.username];
       if (!targetSocket) {
@@ -738,7 +824,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const chatRoomDm = await this.chatService.createChatRoomDm(
         user.id,
-        body.targetId,
+        validBody.targetId,
       );
       socket.join(chatRoomDm.name);
 
@@ -776,8 +862,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomIdDmDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomIdDmDto,
+      );
+
       const chatRoomDm = await this.chatService.findChatRoomDmById(
-        body.chatRoomId,
+        validBody.chatRoomId,
         ['joinedDmUser', 'chatDmLog'],
       );
       socket.emit('chatRoomDmById', {
@@ -814,7 +905,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomDmUserIdDto,
   ): Promise<WsException | void> {
     try {
-      const user = await this.userService.findUserById(body.userId);
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomDmUserIdDto,
+      );
+      const user = await this.userService.findUserById(validBody.userId);
       const chatRoomDm = await this.chatService.findChatRoomDmByUserId(user.id);
 
       socket.emit('chatRoomDmByUserId', {
@@ -837,11 +932,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomleaveDmDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomleaveDmDto,
+      );
       const offerUser = socket.data.user;
-      const targetUser = await this.userService.findUserById(body.targetUserId);
+      const targetUser = await this.userService.findUserById(
+        validBody.targetUserId,
+      );
 
       let chatRoomDm = await this.chatService.findChatRoomDmById(
-        body.chatRoomId,
+        validBody.chatRoomId,
         ['joinedDmUser', 'owner'],
       );
 
@@ -862,17 +963,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         await this.chatService.leaveChatRoomDm(
           targetUser.id,
-          body.chatRoomId,
+          validBody.chatRoomId,
           offerUser.id,
         );
       } else {
         await this.chatService.leaveChatRoomDm(
           targetUser.id,
-          body.chatRoomId,
+          validBody.chatRoomId,
           offerUser.id,
         );
         chatRoomDm = await this.chatService.findChatRoomDmById(
-          body.chatRoomId,
+          validBody.chatRoomId,
           ['joinedDmUser', 'owner'],
         );
 
@@ -908,8 +1009,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: ChatRoomDmMessageDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ChatRoomDmMessageDto,
+      );
+
       const chatRoomDm = await this.chatService.findChatRoomDmById(
-        body.chatRoomId,
+        validBody.chatRoomId,
         ['joinedDmUser'],
       );
 
@@ -935,13 +1041,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(chatRoomDm.name).emit('directMessage', {
         user: socket.data.user,
         targetUser: targetUser,
-        message: body.message,
+        message: validBody.message,
         chatRoomId: chatRoomDm.id,
       });
       const log = {
         userId: me.id,
-        chatRoomDmId: body.chatRoomId,
-        message: body.message,
+        chatRoomDmId: validBody.chatRoomId,
+        message: validBody.message,
         createdAt: new Date(),
       };
 
@@ -963,11 +1069,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: InviteUserDto,
   ): Promise<WsException | void> {
     try {
+      const validBody = await this.chatParameterValidation(body, InviteUserDto);
+
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const target = await this.userService
-        .findUserById(body.userId)
+        .findUserById(validBody.userId)
         .catch(() => null);
       if (!target) throw new WsException('해당 타겟 유저는 존재하지 않습니다.');
 
@@ -997,20 +1105,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ResponseInviteDto,
   ): Promise<WsException | void> {
     try {
-      socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
+      const validBody = await this.chatParameterValidation(
+        body,
+        ResponseInviteDto,
+      );
+
+      socket.to(validBody.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
-        randomInviteRoomName: body.randomInviteRoomName,
-        hostId: body.hostId,
-        targetId: body.targetId,
-        response: body.response,
+        randomInviteRoomName: validBody.randomInviteRoomName,
+        hostId: validBody.hostId,
+        targetId: validBody.targetId,
+        response: validBody.response,
       });
-      if (body.response == false) {
-        const host = await this.userService.findUserById(body.hostId);
-        const target = await this.userService.findUserById(body.targetId);
+      if (validBody.response == false) {
+        const host = await this.userService.findUserById(validBody.hostId);
+        const target = await this.userService.findUserById(validBody.targetId);
         const hostSocket: Socket = socket_username[host.username];
         const targetSocket: Socket = socket_username[target.username];
-        hostSocket.leave(body.randomInviteRoomName);
-        targetSocket.leave(body.randomInviteRoomName);
+        hostSocket.leave(validBody.randomInviteRoomName);
+        targetSocket.leave(validBody.randomInviteRoomName);
       }
     } catch (e) {
       return new WsException(e.message);
@@ -1025,22 +1138,61 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     body: InviteGameRoomInfoDto,
   ): Promise<WsException | void> {
     try {
-      socket.to(body.inviteGameRoomName).emit('inviteGameRoomInfo', {
+      const validBody = await this.chatParameterValidation(
+        body,
+        InviteGameRoomInfoDto,
+      );
+
+      socket.to(validBody.inviteGameRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
-        randomInviteRoomName: body.randomInviteRoomName,
-        hostId: body.hostId,
-        targetId: body.targetId,
-        gameRoomName: body.inviteGameRoomName,
+        randomInviteRoomName: validBody.randomInviteRoomName,
+        hostId: validBody.hostId,
+        targetId: validBody.targetId,
+        gameRoomName: validBody.inviteGameRoomName,
       });
 
-      const host = await this.userService.findUserById(body.hostId);
-      const target = await this.userService.findUserById(body.targetId);
+      const host = await this.userService.findUserById(validBody.hostId);
+      const target = await this.userService.findUserById(validBody.targetId);
       const hostSocket: Socket = socket_username[host.username];
       const targetSocket: Socket = socket_username[target.username];
-      hostSocket.leave(body.randomInviteRoomName);
-      targetSocket.leave(body.randomInviteRoomName);
+      hostSocket.leave(validBody.randomInviteRoomName);
+      targetSocket.leave(validBody.randomInviteRoomName);
     } catch (e) {
       return new WsException(e.message);
+    }
+  }
+  private chatParameterSanitizer(data: string) {
+    try {
+      const data1 = Sanitizer.blacklist(data, ' ');
+      const data2 = Sanitizer.escape(data1);
+      const data3 = Sanitizer.stripLow(data2, true);
+      const data4 = Sanitizer.trim(data3, ' ');
+      return data4;
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  private async chatParameterValidation(body: any, type: any) {
+    try {
+      const data = new type();
+      for (const key of Object.keys(body)) {
+        data[key] = body[key];
+      }
+
+      const res = await validate(data);
+      if (res.length > 0) {
+        const errorArray = { error: [] };
+        for (const e of res) {
+          errorArray.error.push(e.constraints);
+        }
+        throw new WsException(JSON.stringify(errorArray));
+      } else {
+        console.log('validation succeed');
+      }
+      return data;
+    } catch (e) {
+      throw new WsException(e.message);
     }
   }
 }
