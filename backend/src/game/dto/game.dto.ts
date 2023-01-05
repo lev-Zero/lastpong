@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { User } from 'src/user/entity/user.entity';
 import { gameStatus, Mode, BackgroundColor } from '../enum/game.enum';
 
@@ -8,9 +8,19 @@ export class GameRoomDto {
   @IsNotEmpty()
   @Transform(({ value }) => value.trim())
   gameRoomName: string;
-  gameStatus: gameStatus;
-  players;
-  spectators;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsIn([
+    gameStatus.COUNTDOWN,
+    gameStatus.GAMEOVER,
+    gameStatus.GAMEPLAYING,
+    gameStatus.GAMESTART,
+    gameStatus.WAITINGPLAYER,
+  ])
+  gameStatus: number;
+  players: Array<GamePlayerDto>;
+  spectators: Array<number>;
   facts: FactsDto;
   playing: PlayingDto;
 }
@@ -38,10 +48,23 @@ export class GamePlayerDto {
 }
 
 export class gameOptionDto {
+  @IsNumber()
   @IsNotEmpty()
-  backgroundColor: BackgroundColor;
+  @IsIn([BackgroundColor.DEFAULT, BackgroundColor.BLUE, BackgroundColor.ORANGE])
+  backgroundColor: number;
+
+  @IsNumber()
   @IsNotEmpty()
-  mode: Mode;
+  @IsIn([
+    Mode.NONE,
+    Mode.SIZEUPBALL,
+    Mode.SIZEDOWNBALL,
+    Mode.SIZEUPTOUCHBAR,
+    Mode.SIZEDOWNTOUCHBAR,
+    Mode.SPEEDUPBALL,
+    Mode.SPEEDDOWNBALL,
+  ])
+  mode: number;
 }
 
 export class PositionDto {
@@ -124,12 +147,28 @@ export class GameRoomNameDto {
 }
 
 export class ReadyGameOptionDto {
-  gameOption: gameOptionDto;
-
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value.trim())
   gameRoomName: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsIn([BackgroundColor.DEFAULT, BackgroundColor.BLUE, BackgroundColor.ORANGE])
+  backgroundColor: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsIn([
+    Mode.NONE,
+    Mode.SIZEUPBALL,
+    Mode.SIZEDOWNBALL,
+    Mode.SIZEUPTOUCHBAR,
+    Mode.SIZEDOWNTOUCHBAR,
+    Mode.SPEEDUPBALL,
+    Mode.SPEEDDOWNBALL,
+  ])
+  mode: number;
 }
 
 export class TouchBarDto {

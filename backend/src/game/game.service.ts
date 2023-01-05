@@ -1,12 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
-import {
-  GamePlayerDto,
-  GameRoomDto,
-  gameOptionDto,
-  PositionDto,
-} from './dto/game.dto';
+import { GamePlayerDto, GameRoomDto, PositionDto } from './dto/game.dto';
 import {
   gameStatus,
   Mode,
@@ -14,6 +9,7 @@ import {
   PlayerType,
 } from './enum/game.enum';
 import { MatchService } from 'src/user/service/match.service';
+import { ConnectedSocket } from '@nestjs/websockets';
 
 @Injectable()
 export class GameService {
@@ -72,10 +68,7 @@ export class GameService {
     }
   }
 
-  findSpectatorInGameRoom(
-    userId: number,
-    gameRoomName: string,
-  ): GamePlayerDto | null {
+  findSpectatorInGameRoom(userId: number, gameRoomName: string): number | null {
     const gameRoom = this.gameRooms.get(gameRoomName);
     if (!gameRoom)
       throw new HttpException(
@@ -96,8 +89,8 @@ export class GameService {
         }
       }
       for (const gameRoom of this.gameRooms) {
-        for (const spectators of gameRoom[1].spectators) {
-          if (spectators.user.id == userId) return gameRoom[0];
+        for (const spectatorId of gameRoom[1].spectators) {
+          if (spectatorId == userId) return gameRoom[0];
         }
       }
       return null;
@@ -146,7 +139,7 @@ export class GameService {
   }
 
   joinGameRoom(
-    socket: Socket,
+    @ConnectedSocket() socket: Socket,
     gameRoom: GameRoomDto,
   ): { gameRoom: GameRoomDto; user: PlayerType } {
     try {
@@ -186,9 +179,13 @@ export class GameService {
   readyGame(
     gameRoomName: string,
     player: GamePlayerDto,
-    gameOption: gameOptionDto,
+    backgroundColor: number,
+    mode: number,
   ): GameRoomDto | null {
     try {
+      let gameOption;
+      gameOption['backgroundColor'] = backgroundColor;
+      gameOption['mode'] = mode;
       const gameRoom = this.gameRooms.get(gameRoomName);
       if (!gameRoom)
         throw new HttpException(
@@ -467,7 +464,7 @@ export class GameService {
     gameRoom: GameRoomDto,
     win: GamePlayerDto,
     server: any,
-    socket: Socket,
+    @ConnectedSocket() socket: Socket,
   ): Promise<any> {
     try {
       let winner;

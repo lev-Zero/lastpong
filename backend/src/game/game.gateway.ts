@@ -1,5 +1,7 @@
 import { Body, HttpException, HttpStatus } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
@@ -7,6 +9,8 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
+import { Sanitizer } from 'class-sanitizer';
+import { validate } from 'class-validator';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
@@ -39,7 +43,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				handleDisconnect		|
 	---------------------------*/
 
-  async handleConnection(socket: Socket): Promise<void | WsException> {
+  async handleConnection(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void | WsException> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       if (!user) {
@@ -58,7 +64,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return new WsException(e.message);
     }
   }
-  async handleDisconnect(socket: Socket): Promise<void | WsException> {
+  async handleDisconnect(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void | WsException> {
     try {
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
@@ -79,7 +87,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('findGameRooms')
-  findGameRooms(socket: Socket): void | WsException {
+  findGameRooms(@ConnectedSocket() socket: Socket): void | WsException {
     try {
       const gameRooms = this.gameService.findGameRooms();
 
@@ -104,7 +112,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createGameRoom')
-  createGameRoom(socket: Socket): void | WsException {
+  createGameRoom(@ConnectedSocket() socket: Socket): void | WsException {
     try {
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
@@ -128,14 +136,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('joinGameRoom')
   async joinGameRoom(
-    socket: Socket,
-    body: GameRoomNameDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: GameRoomNameDto,
   ): Promise<void | WsException> {
     try {
+      const validBody = await this.gameParameterValidation(
+        body,
+        GameRoomNameDto,
+      );
+      const data = this.gameParameterSanitizer(validBody.gameRoomName);
+      validBody.gameRoomName = data;
+
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
-      const gameRoom = this.gameService.findGameRoom(body.gameRoomName);
+      const gameRoom = this.gameService.findGameRoom(validBody.gameRoomName);
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       for (const player of gameRoom.players) {
@@ -148,12 +163,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (result.user == PlayerType.PLAYER) {
         this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', {
-          message: `${body.gameRoomName} 게임룸에 ${user.username} 플레이어가 들어왔습니다.`,
+          message: `${validBody.gameRoomName} 게임룸에 ${user.username} 플레이어가 들어왔습니다.`,
           gameRoom,
         });
       } else if (result.user == PlayerType.SPECTATOR) {
         this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', {
-          message: `${body.gameRoomName} 게임룸에 ${user.username} 관찰자가 들어왔습니다.`,
+          message: `${validBody.gameRoomName} 게임룸에 ${user.username} 관찰자가 들어왔습니다.`,
           gameRoom,
         });
       } else {
@@ -168,28 +183,39 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('readyGame')
-  readyGame(socket: Socket, body: ReadyGameOptionDto): void | WsException {
+  async readyGame(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ReadyGameOptionDto,
+  ): Promise<void | WsException> {
     try {
+      const validBody = await this.gameParameterValidation(
+        body,
+        ReadyGameOptionDto,
+      );
+      const data = this.gameParameterSanitizer(validBody.gameRoomName);
+      validBody.gameRoomName = data;
+
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
       const player = this.gameService.findPlayerInGameRoom(
         user.id,
-        body.gameRoomName,
+        validBody.gameRoomName,
       );
       if (!player)
         throw new WsException(
-          `${body.gameRoomName}에 해당 플레이어가 없습니다.`,
+          `${validBody.gameRoomName}에 해당 플레이어가 없습니다.`,
         );
 
       const gameRoom = this.gameService.readyGame(
-        body.gameRoomName,
+        validBody.gameRoomName,
         player,
-        body.gameOption,
+        validBody.backgroundColor,
+        validBody.mode,
       );
 
       if (!gameRoom) {
         this.server
-          .to(body.gameRoomName)
+          .to(validBody.gameRoomName)
           .emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
       } else {
         this.server.to(gameRoom.gameRoomName).emit('readyGame', {
@@ -205,20 +231,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('startGame')
   async startGame(
-    socket: Socket,
-    body: GameRoomNameDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: GameRoomNameDto,
   ): Promise<void | WsException> {
     try {
+      const validBody = await this.gameParameterValidation(
+        body,
+        GameRoomNameDto,
+      );
+      const data = this.gameParameterSanitizer(validBody.gameRoomName);
+      validBody.gameRoomName = data;
+
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const player = this.gameService.findPlayerInGameRoom(
         user.id,
-        body.gameRoomName,
+        validBody.gameRoomName,
       );
       if (!player)
         throw new WsException(
-          `${body.gameRoomName}에 해당 플레이어는 없습니다.`,
+          `${validBody.gameRoomName}에 해당 플레이어는 없습니다.`,
         );
 
       const gameRoom = this.gameService.findGameRoom(player.gameRoomName);
@@ -292,24 +325,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('exitGameRoom')
   async exitGameRoom(
-    socket: Socket,
-    body: GameRoomNameDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: GameRoomNameDto,
   ): Promise<void | WsException> {
     try {
+      const validBody = await this.gameParameterValidation(
+        body,
+        GameRoomNameDto,
+      );
+      const data = this.gameParameterSanitizer(validBody.gameRoomName);
+      validBody.gameRoomName = data;
+
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
-      const gameRoom = this.gameService.findGameRoom(body.gameRoomName);
+      const gameRoom = this.gameService.findGameRoom(validBody.gameRoomName);
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(
         user.id,
-        body.gameRoomName,
+        validBody.gameRoomName,
       );
 
-      const spectator: GamePlayerDto = this.gameService.findSpectatorInGameRoom(
+      const spectator: number = this.gameService.findSpectatorInGameRoom(
         user.id,
-        body.gameRoomName,
+        validBody.gameRoomName,
       );
 
       if (player || spectator) {
@@ -339,7 +379,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('randomGameMatch')
-  randomGameMatching(socket: Socket): void | WsException {
+  randomGameMatching(@ConnectedSocket() socket: Socket): void | WsException {
     try {
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
@@ -363,31 +403,71 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('touchBar')
   async updatetouchBar(
-    socket: Socket,
-    body: TouchBarDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: TouchBarDto,
   ): Promise<void | WsException> {
     try {
+      const validBody = await this.gameParameterValidation(body, TouchBarDto);
+      const data = this.gameParameterSanitizer(validBody.gameRoomName);
+      validBody.gameRoomName = data;
+
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
-      const gameRoom = await this.gameService.findGameRoom(body.gameRoomName);
+      const gameRoom = await this.gameService.findGameRoom(
+        validBody.gameRoomName,
+      );
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const player: GamePlayerDto = await this.gameService.findPlayerInGameRoom(
         socket.data.user.id,
-        body.gameRoomName,
+        validBody.gameRoomName,
       );
       if (!player)
         throw new WsException('해당룸에 플레이어는 존재하지 않습니다.');
 
-      player.touchBar = body.touchBar * gameRoom.facts.display.height;
+      player.touchBar = validBody.touchBar * gameRoom.facts.display.height;
       this.server.to(gameRoom.gameRoomName).emit('touchBar', {
         message: 'touchBar',
         player: player.user.id,
-        touchBar: body.touchBar,
+        touchBar: validBody.touchBar,
       });
     } catch (e) {
       return new WsException(e.message);
+    }
+  }
+  private gameParameterSanitizer(data: string) {
+    try {
+      const data1 = Sanitizer.blacklist(data, ' ');
+      const data2 = Sanitizer.escape(data1);
+      const data3 = Sanitizer.stripLow(data2, true);
+      const data4 = Sanitizer.trim(data3, ' ');
+      return data4;
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  private async gameParameterValidation(body: any, type: any) {
+    try {
+      const data = new type();
+      for (const key of Object.keys(body)) {
+        data[key] = body[key];
+      }
+
+      const res = await validate(data);
+      if (res.length > 0) {
+        const errorArray = { error: [] };
+        for (const e of res) {
+          errorArray.error.push(e.constraints);
+        }
+        throw new WsException(JSON.stringify(errorArray));
+      } else {
+        console.log('validation succeed');
+      }
+      return data;
+    } catch (e) {
+      throw new WsException(e.message);
     }
   }
 }
