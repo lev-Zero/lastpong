@@ -5,6 +5,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
@@ -38,15 +39,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				handleDisconnect		|
 	---------------------------*/
 
-  async handleConnection(socket: Socket) {
+  async handleConnection(socket: Socket): Promise<void | WsException> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       if (!user) {
         socket.disconnect();
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('소켓 연결 유저 없습니다.');
       }
 
       // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
@@ -57,17 +55,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       socket.emit('connection', { message: `${user.username} 연결`, user });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
-  async handleDisconnect(socket: Socket) {
+  async handleDisconnect(socket: Socket): Promise<void | WsException> {
     try {
       const user = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const gameRoomName = this.gameService.findGameRoomOfUser(user.id);
       if (gameRoomName) await this.exitGameRoom(socket, { gameRoomName });
@@ -76,7 +70,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       socket.emit('disconnection', { message: `${user.username} 연결해제` });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -85,7 +79,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('findGameRooms')
-  findGameRooms(socket: Socket): void {
+  findGameRooms(socket: Socket): void | WsException {
     try {
       const gameRooms = this.gameService.findGameRooms();
 
@@ -97,7 +91,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       socket.emit('findGameRooms', { gameRoom: result });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -110,63 +104,43 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createGameRoom')
-  createGameRoom(socket: Socket): void {
+  createGameRoom(socket: Socket): void | WsException {
     try {
       const user = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const randomRoomName = String(Math.floor(Math.random() * 1e9));
 
       let gameRoom = this.gameService.findGameRoom(randomRoomName);
-      if (gameRoom)
-        throw new HttpException(
-          '이미 존재하는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (gameRoom) throw new WsException('이미 존재하는 게임룸 입니다');
 
       gameRoom = this.gameService.createGameRoom(randomRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '게임룸 생성 실패했습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('게임룸 생성 실패했습니다.');
 
       socket.emit('createGameRoom', {
         message: `${randomRoomName} 게임룸이 생성되었습니다.`,
         gameRoom,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('joinGameRoom')
-  async joinGameRoom(socket: Socket, body: GameRoomNameDto): Promise<void> {
+  async joinGameRoom(
+    socket: Socket,
+    body: GameRoomNameDto,
+  ): Promise<void | WsException> {
     try {
       const user: User = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const gameRoom = this.gameService.findGameRoom(body.gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       for (const player of gameRoom.players) {
         if (player.user.username == socket.data.user.username)
-          throw new HttpException(
-            '이미 참여중인 게임룸입니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('이미 참여중인 게임룸입니다.');
       }
 
       const result = this.gameService.joinGameRoom(socket, gameRoom);
@@ -183,36 +157,28 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           gameRoom,
         });
       } else {
-        throw new HttpException(
-          'PlayerType이 정의되지 않은 유저 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('PlayerType이 정의되지 않은 유저 입니다.');
       }
 
       // await this.userService.updateStatus(user.id, userStatus.GAMEROOM);
       await this.userService.updateStatus(user.id, userStatus.INGAME);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('readyGame')
-  readyGame(socket: Socket, body: ReadyGameOptionDto): void {
+  readyGame(socket: Socket, body: ReadyGameOptionDto): void | WsException {
     try {
       const user = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
       const player = this.gameService.findPlayerInGameRoom(
         user.id,
         body.gameRoomName,
       );
       if (!player)
-        throw new HttpException(
+        throw new WsException(
           `${body.gameRoomName}에 해당 플레이어가 없습니다.`,
-          HttpStatus.BAD_REQUEST,
         );
 
       const gameRoom = this.gameService.readyGame(
@@ -233,36 +199,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('startGame')
-  async startGame(socket: Socket, body: GameRoomNameDto): Promise<void> {
+  async startGame(
+    socket: Socket,
+    body: GameRoomNameDto,
+  ): Promise<void | WsException> {
     try {
       const user = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const player = this.gameService.findPlayerInGameRoom(
         user.id,
         body.gameRoomName,
       );
       if (!player)
-        throw new HttpException(
+        throw new WsException(
           `${body.gameRoomName}에 해당 플레이어는 없습니다.`,
-          HttpStatus.BAD_REQUEST,
         );
 
       const gameRoom = this.gameService.findGameRoom(player.gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       let ballPosition;
       if (gameRoom.gameStatus == gameStatus.COUNTDOWN) {
@@ -272,10 +232,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (!ballPosition)
-        throw new HttpException(
-          '게임 시작 전 공셋팅에 실패했습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('게임 시작 전 공셋팅에 실패했습니다.');
 
       this.server
         .to(gameRoom.gameRoomName)
@@ -326,32 +283,24 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         gameRoom.gameStatus = gameStatus.COUNTDOWN;
 
-        throw new HttpException(
-          '게임 시작 전 GAMEPLAYING 문제 발생했습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('게임 시작 전 GAMEPLAYING 문제 발생했습니다.');
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('exitGameRoom')
-  async exitGameRoom(socket: Socket, body: GameRoomNameDto): Promise<void> {
+  async exitGameRoom(
+    socket: Socket,
+    body: GameRoomNameDto,
+  ): Promise<void | WsException> {
     try {
       const user: User = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const gameRoom = this.gameService.findGameRoom(body.gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const player: GamePlayerDto = this.gameService.findPlayerInGameRoom(
         user.id,
@@ -378,13 +327,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
         await this.userService.updateStatus(user.id, userStatus.INGAME);
       } else {
-        throw new HttpException(
-          '해당룸에 당신은 존재하지 않습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('해당룸에 당신은 존재하지 않습니다.');
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -393,14 +339,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('randomGameMatch')
-  randomGameMatching(socket: Socket): void {
+  randomGameMatching(socket: Socket): void | WsException {
     try {
       const user: User = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const gameRoomName = this.gameService.randomGameMatching(socket);
 
@@ -411,7 +353,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -420,31 +362,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('touchBar')
-  async updatetouchBar(socket: Socket, body: TouchBarDto): Promise<void> {
+  async updatetouchBar(
+    socket: Socket,
+    body: TouchBarDto,
+  ): Promise<void | WsException> {
     try {
       const user: User = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const gameRoom = await this.gameService.findGameRoom(body.gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const player: GamePlayerDto = await this.gameService.findPlayerInGameRoom(
         socket.data.user.id,
         body.gameRoomName,
       );
       if (!player)
-        throw new HttpException(
-          '해당룸에 플레이어는 존재하지 않습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('해당룸에 플레이어는 존재하지 않습니다.');
 
       player.touchBar = body.touchBar * gameRoom.facts.display.height;
       this.server.to(gameRoom.gameRoomName).emit('touchBar', {
@@ -453,7 +387,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         touchBar: body.touchBar,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 }
