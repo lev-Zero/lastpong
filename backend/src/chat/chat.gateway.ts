@@ -1,10 +1,13 @@
-import { Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Body, HttpStatus, UseFilters } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { sanitize } from 'class-sanitizer';
 import { Socket } from 'socket.io';
@@ -52,15 +55,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				handleDisconnect		|
 	---------------------------*/
 
-  async handleConnection(socket: Socket) {
+  async handleConnection(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsException | void> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       if (!user) {
         socket.disconnect();
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('소켓 연결 유저 없습니다.');
       }
 
       // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
@@ -112,17 +114,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         allChatRooms,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
-  async handleDisconnect(socket: Socket) {
+  async handleDisconnect(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsException | void> {
     try {
       const user = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
       else await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       const disconnectUser = await this.userService.findUserById(user.id);
@@ -179,7 +179,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoomDm,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -188,7 +188,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createChatRoom')
-  async createChatRoom(socket: Socket, body: ChatRoomDto): Promise<void> {
+  async createChatRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomDto,
+  ): Promise<WsException | void> {
     try {
       //TEST
       const data = sanitize(body);
@@ -208,7 +211,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .to(body.name)
         .emit('join', `${body.name}방에 ${user.username}이/가 들어왔습니다`);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -216,13 +219,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				updatePwd						|
 	---------------------------*/
   @SubscribeMessage('updatePwd')
-  async updatePwd(socket: Socket, body: updatePwdDto): Promise<void> {
+  async updatePwd(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: updatePwdDto,
+  ): Promise<WsException | void> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       await this.chatService.updatePwd(user.id, body.password, body.chatRoomId);
       socket.emit('updatePwd', { message: `채팅방 비밀번호 변경 완료` });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -235,18 +241,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('chatRoomAll')
-  async findChatRoomAll(socket: Socket): Promise<void> {
+  async findChatRoomAll(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsException | void> {
     try {
       const chatRoom = await this.chatService.findChatRoomAll();
 
       socket.emit('chatRoomAll', { message: '모든 채팅 방 목록', chatRoom });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('chatRoomById')
-  async findChatRoomById(socket: Socket, body: ChatRoomIdDto): Promise<void> {
+  async findChatRoomById(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdDto,
+  ): Promise<WsException | void> {
     try {
       const chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
@@ -265,7 +276,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoom,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -273,7 +284,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async findChatRoomByName(
     socket: Socket,
     body: ChatRoomNameDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const chatRoom = await this.chatService.findChatRoomByName(
         body.chatRoomName,
@@ -292,7 +303,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoom,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -300,7 +311,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async findChatRoomByUserId(
     socket: Socket,
     body: ChatRoomUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const user = await this.userService.findUserById(body.userId);
       const chatRoom = await this.chatService.findChatRoomByUserId(user.id);
@@ -310,12 +321,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoom,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('chatRoomMe')
-  async findChatRoomMe(socket: Socket): Promise<void> {
+  async findChatRoomMe(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsException | void> {
     try {
       const user = await this.userService.findUserById(socket.data.user.id);
       const chatRooms = await this.chatService.findChatRoomByUserId(user.id);
@@ -325,7 +338,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRooms,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -335,7 +348,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('join')
-  async joinChatRoom(socket: Socket, body: ChatRoomJoinDto): Promise<void> {
+  async joinChatRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomJoinDto,
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(
         body.chatRoomId,
@@ -363,13 +379,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
       socket.emit('join', { chatRoom });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   //offerUser가 body.targetId를 남으로 하면 강퇴, 지가 지꺼쓰면 퇴장
   @SubscribeMessage('leave')
-  async leaveChatRoom(socket: Socket, body: ChatRoomleaveDto): Promise<void> {
+  async leaveChatRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomleaveDto,
+  ): Promise<WsException | void> {
     try {
       const offerUser = socket.data.user;
       const targetUser = await this.userService.findUserById(body.targetUserId);
@@ -427,7 +446,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         targetUserSocket.leave(chatRoom.name);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -437,7 +456,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   //클라이언트에서 block유저 관계 확인해서 해당 유저면 그 유저 화면에서는 특정유저의 메지시 안보여줌.
   @SubscribeMessage('message')
-  async sendMessage(socket: Socket, body: ChatRoomMessageDto): Promise<void> {
+  async sendMessage(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomMessageDto,
+  ): Promise<WsException | void> {
     try {
       const user = socket.data.user;
       const chatRoom = await this.chatService
@@ -448,10 +470,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (mutedUser.user.id == user.id) {
           const currentTime = new Date();
           if (mutedUser.endTime > currentTime)
-            throw new HttpException(
-              '이 방에서 당신은 Mute 상태입니다.',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new WsException('이 방에서 당신은 Mute 상태입니다.');
           else {
             await this.chatService.directRemoveMuteUser(
               mutedUser.user.id,
@@ -473,7 +492,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       };
       await this.chatService.addChatLog(log);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -483,7 +502,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('addAdmin')
-  async addAdminUser(socket: Socket, body: ChatRoomIdUserIdDto): Promise<void> {
+  async addAdminUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdUserIdDto,
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -508,7 +530,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -516,7 +538,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async removeAdminUser(
     socket: Socket,
     body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -541,7 +563,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -551,7 +573,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 ---------------------------*/
 
   @SubscribeMessage('addMute')
-  async addMutedUser(socket: Socket, body: ChatRoomIdUserIdDto): Promise<void> {
+  async addMutedUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdUserIdDto,
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -577,7 +602,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -586,7 +611,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async removeMutedUser(
     socket: Socket,
     body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -612,7 +637,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -625,7 +650,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async addBannedUser(
     socket: Socket,
     body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -656,7 +681,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -665,7 +690,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async removeBannedUser(
     socket: Socket,
     body: ChatRoomIdUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       let chatRoom = await this.chatService.findChatRoomById(body.chatRoomId, [
         'joinedUser',
@@ -695,7 +720,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -704,17 +729,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createChatRoomDm')
-  async createChatRoomDm(socket: Socket, body: ChatRoomDmDto): Promise<void> {
+  async createChatRoomDm(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomDmDto,
+  ): Promise<WsException | void> {
     try {
       const user = await this.authService.findUserByRequestToken(socket);
       const target = await this.userService.findUserById(body.targetId);
 
       const targetSocket: Socket = socket_username[target.username];
       if (!targetSocket) {
-        throw new HttpException(
-          '상대방은 채팅 가능 상태가 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('상대방은 채팅 가능 상태가 아닙니다.');
       }
 
       const chatRoomDm = await this.chatService.createChatRoomDm(
@@ -740,7 +765,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoomDmId: chatRoomDm.id,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -755,7 +780,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async findChatRoomDmById(
     socket: Socket,
     body: ChatRoomIdDmDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
@@ -766,12 +791,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoomDm,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('chatRoomDmMe')
-  async findChatRoomDmMe(socket: Socket): Promise<void> {
+  async findChatRoomDmMe(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsException | void> {
     try {
       const user = await this.userService.findUserById(socket.data.user.id);
       const chatRoomDm = await this.chatService.findChatRoomDmByUserId(
@@ -783,7 +810,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoomDm,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -791,7 +818,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async findChatRoomDmByUserId(
     socket: Socket,
     body: ChatRoomDmUserIdDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const user = await this.userService.findUserById(body.userId);
       const chatRoomDm = await this.chatService.findChatRoomDmByUserId(user.id);
@@ -801,7 +828,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         chatRoomDm,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -814,7 +841,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async leaveChatRoomDm(
     socket: Socket,
     body: ChatRoomleaveDmDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const offerUser = socket.data.user;
       const targetUser = await this.userService.findUserById(body.targetUserId);
@@ -873,7 +900,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         targetUserSocket.leave(chatRoomDm.name);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -885,7 +912,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async sendMessageDM(
     socket: Socket,
     body: ChatRoomDmMessageDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         body.chatRoomId,
@@ -908,10 +935,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         )
       ) {
         socket.emit('blocked', { message: 'you are blocked user' });
-        throw new HttpException(
-          '당신은 블락 유저 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('당신은 블락 유저 입니다.');
       }
 
       this.server.to(chatRoomDm.name).emit('directMessage', {
@@ -929,7 +953,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       await this.chatService.addChatDmLog(log);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
@@ -940,30 +964,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	---------------------------*/
 
   @SubscribeMessage('createInviteRoom')
-  async createInviteRoom(socket: Socket, body: InviteUserDto): Promise<void> {
+  async createInviteRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: InviteUserDto,
+  ): Promise<WsException | void> {
     try {
       const user: User = socket.data.user;
-      if (!user)
-        throw new HttpException(
-          '소켓 연결 유저 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
       const target = await this.userService
         .findUserById(body.userId)
         .catch(() => null);
-      if (!target)
-        throw new HttpException(
-          '해당 타겟 유저는 존재하지 않습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!target) throw new WsException('해당 타겟 유저는 존재하지 않습니다.');
 
       const targetSocket: Socket = socket_username[target.username];
       if (!targetSocket) {
-        throw new HttpException(
-          '상대방은 채팅 가능 상태가 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('상대방은 채팅 가능 상태가 아닙니다.');
       }
 
       const randomInviteRoomName = String(Math.floor(Math.random() * 1e9));
@@ -977,12 +993,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         targetId: target.id,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 
   @SubscribeMessage('responseInvite')
-  async responseInvite(socket: Socket, body: ResponseInviteDto): Promise<void> {
+  async responseInvite(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ResponseInviteDto,
+  ): Promise<WsException | void> {
     try {
       socket.to(body.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
@@ -1000,7 +1019,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         targetSocket.leave(body.randomInviteRoomName);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
   //response == true 이면
@@ -1010,7 +1029,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async inviteGameRoomInfo(
     socket: Socket,
     body: InviteGameRoomInfoDto,
-  ): Promise<void> {
+  ): Promise<WsException | void> {
     try {
       socket.to(body.inviteGameRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
@@ -1027,7 +1046,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       hostSocket.leave(body.randomInviteRoomName);
       targetSocket.leave(body.randomInviteRoomName);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new WsException(e.message);
     }
   }
 }
