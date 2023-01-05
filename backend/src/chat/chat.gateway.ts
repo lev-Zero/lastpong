@@ -193,12 +193,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: ChatRoomDto,
   ): Promise<WsException | void> {
     try {
-      //TEST
-      const data = sanitize(body);
-      console.log({ body });
-      console.log({ data });
-
-      //END TEST
       const user = await this.authService.findUserByRequestToken(socket);
       const chatRoom = await this.chatService.createChatRoom(user.id, body);
       socket.join(body.name);

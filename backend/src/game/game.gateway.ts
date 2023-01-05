@@ -344,12 +344,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user: User = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
 
-      const gameRoomName = this.gameService.randomGameMatching(socket);
+      const gameRoom = this.gameService.randomGameMatching(socket);
 
-      if (gameRoomName) {
-        this.server.to(gameRoomName).emit('randomGameMatch', {
+      if (gameRoom) {
+        this.server.to(gameRoom.gameRoomName).emit('randomGameMatch', {
           message: '랜덤 매칭 된 룸 이름입니다.',
-          gameRoomName,
+          gameRoom,
         });
       }
     } catch (e) {
