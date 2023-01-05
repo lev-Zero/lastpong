@@ -34,11 +34,11 @@ export class AuthController {
 	----------------------------------*/
 
   @Get('/')
-  viaPath(@Res({ passthrough: true }) res: Response): void {
+  viaPath(@Res({ passthrough: true }) res: Response): void | HttpException {
     try {
       res.status(301).redirect(process.env.CALLBACK_URI);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -50,7 +50,7 @@ export class AuthController {
   async redirect(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<void> {
+  ): Promise<void | HttpException> {
     try {
       if (req.user) {
         const data = await this.auth42Service.login(req.user);
@@ -65,7 +65,7 @@ export class AuthController {
         res.status(301).redirect(process.env.FRONTEND_URL);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -131,7 +131,7 @@ export class AuthController {
 
   //테스트
   @Get('/login/otp/check')
-  async loginOTPCheck(@Req() req: Request): Promise<string> {
+  async loginOTPCheck(@Req() req: Request): Promise<string | HttpException> {
     try {
       let token;
       if (req.headers.authorization)
@@ -172,7 +172,7 @@ export class AuthController {
         );
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -181,7 +181,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body('code') code: string,
-  ): Promise<void> {
+  ): Promise<void | HttpException> {
     try {
       let token;
       if (req.headers.authorization) {
@@ -217,38 +217,38 @@ export class AuthController {
         );
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   @Patch('/otp/on')
   @UseGuards(JwtAuthGuard)
-  updateOtpOn(@Req() req: Request): Promise<object> {
+  updateOtpOn(@Req() req: Request): Promise<object> | HttpException {
     try {
       return this.auth42Service.updateOtpOn(req.user.userId);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   @Patch('/otp/off')
   @UseGuards(JwtAuthGuard)
-  updateOtpOff(@Req() req: Request): Promise<object> {
+  updateOtpOff(@Req() req: Request): Promise<object> | HttpException {
     try {
       return this.auth42Service.updateOtpOff(req.user.userId);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
   @Get('/otp')
   @UseGuards(JwtAuthGuard)
-  async findOtpOn(@Req() req: Request): Promise<string> {
+  async findOtpOn(@Req() req: Request): Promise<string | HttpException> {
     try {
       return JSON.stringify({
         otpOn: await this.auth42Service.findOtpOn(req.user.userId),
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
