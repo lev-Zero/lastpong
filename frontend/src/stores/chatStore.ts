@@ -44,7 +44,7 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
               status: chatRoom.owner.status,
               rating: chatRoom.owner.rating,
             },
-            isPrivate: chatRoom.status === ChatRoomStatus.PROTECTED,
+            isProtected: chatRoom.status === ChatRoomStatus.PROTECTED,
           };
         })
       );
