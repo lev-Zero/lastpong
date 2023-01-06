@@ -104,8 +104,12 @@ export default function ChatRoomPage() {
       console.log(res);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
+
     socket.on('leave', async (res) => {
-      console.log(res.message);
+      const message: string = res.message;
+      if (message.substring(0, 5) == 'owner') {
+        exitChatRoom();
+      }
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
   }, [roomNo]);
