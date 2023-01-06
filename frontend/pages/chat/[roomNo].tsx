@@ -286,9 +286,10 @@ export default function ChatRoomPage() {
               borderRadius="20px"
               overflow="scroll"
             >
-              {chatUserList.map((chatUserItem, idx) => (
-                <ChatUserItem key={idx} chatUserItem={chatUserItem} chatRoom={chatRoom} />
-              ))}
+              {chatUserList &&
+                chatUserList.map((chatUserItem, idx) => (
+                  <ChatUserItem key={idx} chatUserItem={chatUserItem} chatRoom={chatRoom} />
+                ))}
             </VStack>
           </Flex>
         </>

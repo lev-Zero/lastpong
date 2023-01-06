@@ -160,7 +160,7 @@ export function OptionMenuChat({ chatUserItem, chatRoom }: OptionMenuChatProps) 
           }}
         >
           <Text color="win"></Text>
-          GIVE ADMIN
+          MUTE USER
         </MenuItem>
       ) : (
         <MenuItem
@@ -176,7 +176,7 @@ export function OptionMenuChat({ chatUserItem, chatRoom }: OptionMenuChatProps) 
             );
           }}
         >
-          <Text color="red">DEL ADMIN</Text>
+          <Text color="red">UNMUTE</Text>
         </MenuItem>
       )}
       {/* 벤하기 */}

@@ -15,8 +15,3 @@ export interface ChatUserItemProps {
   isMuted?: boolean;
   isBanned?: boolean;
 }
-
-export interface ChatUserItem2Props {
-  chatUserItem: ChatUserItemProps;
-  chatRoom: ChatRoomProps;
-}

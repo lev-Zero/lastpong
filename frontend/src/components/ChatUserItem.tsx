@@ -1,12 +1,8 @@
 import { Circle, Flex, Text, Spacer, Image, Box } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
-import {
-  ChatUserItem2Props,
-  ChatUserItemProps,
-  ChatUserStatus,
-} from '@/interfaces/ChatUserItemProps';
+import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import { ContextMenu } from 'chakra-ui-contextmenu';
-import { OptionMenuChat } from './OptionMenu';
+import { OptionMenuChat, OptionMenuChatProps } from './OptionMenu';
 
 export function ChatUserItem2({ user, role }: ChatUserItemProps) {
   return (
@@ -39,7 +35,7 @@ export function ChatUserItem2({ user, role }: ChatUserItemProps) {
   );
 }
 
-export default function ChatUserItem({ chatUserItem, chatRoom }: ChatUserItem2Props) {
+export default function ChatUserItem({ chatUserItem, chatRoom }: OptionMenuChatProps) {
   return (
     <ContextMenu<HTMLDivElement>
       renderMenu={() => {
