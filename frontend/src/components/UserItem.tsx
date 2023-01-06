@@ -22,12 +22,12 @@ import { OptionMenu } from './OptionMenu';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 import RawUserItem from './RawUserItem';
 import { useEffect, useRef, useState } from 'react';
-import { MsgProps } from '@/interfaces/MsgProps';
+import { MsgDmProps } from '@/interfaces/MsgProps';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
-  const [msgList, setMsgList] = useState<MsgProps[]>([]);
+  const [msgList, setMsgList] = useState<MsgDmProps[]>([]);
   const [msg, setMsg] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [roomNo, setRoomNo] = useState<number>();
@@ -142,6 +142,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
           ...prev,
           {
             username: res.user.username,
+            targetname: res.targetUser.user.username,
             text: res.message,
           },
         ];
@@ -197,21 +198,21 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
             <VStack p={5} w="full" height={'40vh'} mt={10} bg="white" overflow="scroll">
               <>
                 {msgList.map((msg, idx) =>
-                  msg.username === me.name ? (
+                  msg.username === me.name && msg.targetname === user.name ? (
                     <Flex key={idx} width="100%">
                       <Spacer />
                       <Flex p={3} borderRadius="20px" bg={'main'} color={'white'} fontSize="2xl">
                         {msg.text}
                       </Flex>
                     </Flex>
-                  ) : (
+                  ) : msg.username === user.name && msg.targetname === me.name ? (
                     <Flex key={idx} width="100%">
                       <Flex p={3} borderRadius="20px" bg="gray.200" color="black" fontSize="2xl">
                         {msg.text}
                       </Flex>
                       <Spacer />
                     </Flex>
-                  )
+                  ) : null
                 )}
               </>
             </VStack>
