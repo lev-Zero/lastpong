@@ -1,12 +1,26 @@
-import { Circle, Flex, Text, Spacer, Image } from '@chakra-ui/react';
+import { Circle, Flex, Text, Spacer, Image, Box } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
-import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
+import {
+  ChatUserItem2Props,
+  ChatUserItemProps,
+  ChatUserStatus,
+} from '@/interfaces/ChatUserItemProps';
+import { ContextMenu } from 'chakra-ui-contextmenu';
+import { OptionMenuChat } from './OptionMenu';
 
-export default function ChatUserItem({ user, role }: ChatUserItemProps) {
+export function ChatUserItem2({ user, role }: ChatUserItemProps) {
   return (
     <>
-      {role !== ChatUserStatus.COMMON ? (
-        <Image src="/crown.svg" position="absolute" color="yellow" />
+      {role === ChatUserStatus.OWNER ? (
+        <Image src="/crown.svg" position="absolute" left={'4%'} zIndex={'100'} color="yellow" />
+      ) : role === ChatUserStatus.ADMINISTRATOR ? (
+        <Image
+          src="/green_crown.svg"
+          position="absolute"
+          left={'4%'}
+          zIndex={'100'}
+          color="yellow"
+        />
       ) : null}
       <Flex
         w="100%"
@@ -22,5 +36,24 @@ export default function ChatUserItem({ user, role }: ChatUserItemProps) {
         <Text mr={2}>{user.name.toUpperCase()}</Text>
       </Flex>
     </>
+  );
+}
+
+export default function ChatUserItem({ chatUserItem, chatRoom }: ChatUserItem2Props) {
+  return (
+    <ContextMenu<HTMLDivElement>
+      renderMenu={() => {
+        return (
+          <OptionMenuChat chatUserItem={chatUserItem} chatRoom={chatRoom} />
+          // isAdmin={} isMuted={} isBanned={}
+        );
+      }}
+    >
+      {(ref) => (
+        <Box ref={ref} w="100%" position="relative">
+          <ChatUserItem2 user={chatUserItem.user} role={chatUserItem.role} />
+        </Box>
+      )}
+    </ContextMenu>
   );
 }

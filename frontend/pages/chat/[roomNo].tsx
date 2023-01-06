@@ -16,7 +16,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const [roomNo, setRoomNo] = useState<number>();
   const [msg, setMsg] = useState<string>('');
-  const { me } = userStore();
+  const { me, friends } = userStore();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [chatRoom, setChatRoom] = useState<ChatRoomProps>();
@@ -105,6 +105,33 @@ export default function ChatRoomPage() {
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
 
+    //TODO: 뮤트 벤 리무브 어드민 등 이렇게 하는거 맞나?
+    //FIXME: 이중 어떤 기능도 작동은 하는 듯 보이나 메뉴 목록에 실시간 반영이 안됨
+    socket.on('addAdmin', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+    socket.on('removeAdmin', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+    socket.on('addMute', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+    socket.on('removeMute', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+    socket.on('addBan', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+    socket.on('removeBan', (res) => {
+      console.log(res);
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
+    });
+
     socket.on('leave', async (res) => {
       const message: string = res.message;
       if (message.substring(0, 5) == 'owner') {
@@ -144,9 +171,16 @@ export default function ChatRoomPage() {
       console.log('socket is undefined');
       return;
     }
+    //TODO: 뮤트 벤 리무브 어드민 등 이렇게 하는거 맞나?
     socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
     socket.off('chatRoomById');
     socket.off('join');
+    socket.off('addAdmin');
+    socket.off('removeAdmin');
+    socket.off('addMute');
+    socket.off('removeMute');
+    socket.off('addBan');
+    socket.off('removeBan');
     socket.off('leave');
     router.push('/chat');
   }
@@ -253,7 +287,7 @@ export default function ChatRoomPage() {
               overflow="scroll"
             >
               {chatUserList.map((chatUserItem, idx) => (
-                <ChatUserItem key={idx} user={chatUserItem.user} role={chatUserItem.role} />
+                <ChatUserItem key={idx} chatUserItem={chatUserItem} chatRoom={chatRoom} />
               ))}
             </VStack>
           </Flex>
