@@ -1,4 +1,6 @@
 import { UserProps } from '@/interfaces/UserProps';
+import { Socket } from 'socket.io';
+import { ChatRoomProps } from './ChatRoomProps';
 
 export enum ChatUserStatus {
   OWNER,
@@ -9,4 +11,12 @@ export enum ChatUserStatus {
 export interface ChatUserItemProps {
   user: UserProps;
   role: ChatUserStatus;
+  isFriend?: boolean;
+  isMuted?: boolean;
+  isBanned?: boolean;
+}
+
+export interface ChatUserItem2Props {
+  chatUserItem: ChatUserItemProps;
+  chatRoom: ChatRoomProps;
 }
