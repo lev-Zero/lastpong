@@ -122,14 +122,16 @@ export default function ChatPage() {
       return;
     }
 
-    socket.emit('join', { chatRoomId: id, password: valuePasswordPriv }, (res) => {
+    socket.emit('join', { chatRoomId: id, password: valuePasswordPriv }, (res: any) => {
       // console.log(res);
       if (!res.error) {
+        privOnClose();
         router.push(`/chat/${id}`);
+      } else {
+        alert('비밀번호가 틀렸습니다!'); // TODO: UI 개선 (OTP 틀렸을 때처럼)
+        setValuePasswordPriv('');
       }
     });
-    privOnClose();
-    setValuePasswordPriv('');
   };
 
   const privChatRoomID = useRef(0);
