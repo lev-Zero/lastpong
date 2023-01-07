@@ -738,7 +738,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.chatService.addBannedUser(targetUser.id, chatRoom.id, me.id);
 
       const targetUserSocket = socket_username[targetUser.username];
+      targetUserSocket.emit('ban', {
+        message: `${targetUser.username}은 ${chatRoom.name} 에서 ban 당했습니다.`,
+      });
       targetUserSocket.leave(chatRoom.name);
+
       // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
       await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
 
@@ -762,48 +766,48 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   //조건없이 강제로 지워줌
-  @SubscribeMessage('removeBan')
-  async removeBannedUser(
-    socket: Socket,
-    body: ChatRoomIdUserIdDto,
-  ): Promise<WsException | void> {
-    try {
-      const validBody = await this.chatParameterValidation(
-        body,
-        ChatRoomIdUserIdDto,
-      );
+  // @SubscribeMessage('removeBan')
+  // async removeBannedUser(
+  //   socket: Socket,
+  //   body: ChatRoomIdUserIdDto,
+  // ): Promise<WsException | void> {
+  //   try {
+  //     const validBody = await this.chatParameterValidation(
+  //       body,
+  //       ChatRoomIdUserIdDto,
+  //     );
 
-      let chatRoom = await this.chatService.findChatRoomById(
-        validBody.chatRoomId,
-        ['joinedUser', 'bannedUser'],
-      );
-      const targetUser = await this.userService.findUserById(validBody.userId);
-      const me = socket.data.user;
+  //     let chatRoom = await this.chatService.findChatRoomById(
+  //       validBody.chatRoomId,
+  //       ['joinedUser', 'bannedUser'],
+  //     );
+  //     const targetUser = await this.userService.findUserById(validBody.userId);
+  //     const me = socket.data.user;
 
-      await this.chatService.removeBannedUser(
-        targetUser.id,
-        chatRoom.id,
-        me.id,
-      );
+  //     await this.chatService.removeBannedUser(
+  //       targetUser.id,
+  //       chatRoom.id,
+  //       me.id,
+  //     );
 
-      chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
-        'joinedUser',
-        'bannedUser',
-      ]);
+  //     chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
+  //       'joinedUser',
+  //       'bannedUser',
+  //     ]);
 
-      this.server.to(chatRoom.name).emit('ban', {
-        message: `ban user가 삭제 되었습니다`,
-        bannedUser: { id: targetUser.id, username: targetUser.username },
-        chatRoom: {
-          id: chatRoom.id,
-          name: chatRoom.name,
-          banned: chatRoom.bannedUser,
-        },
-      });
-    } catch (e) {
-      return new WsException(e.message);
-    }
-  }
+  //     this.server.to(chatRoom.name).emit('ban', {
+  //       message: `ban user가 삭제 되었습니다`,
+  //       bannedUser: { id: targetUser.id, username: targetUser.username },
+  //       chatRoom: {
+  //         id: chatRoom.id,
+  //         name: chatRoom.name,
+  //         banned: chatRoom.bannedUser,
+  //       },
+  //     });
+  //   } catch (e) {
+  //     return new WsException(e.message);
+  //   }
+  // }
 
   /* --------------------------
 	|				createChatRoomDm			|
