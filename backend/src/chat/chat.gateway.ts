@@ -740,6 +740,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const targetUserSocket = socket_username[targetUser.username];
       targetUserSocket.emit('ban', {
         message: `${targetUser.username}은 ${chatRoom.name} 에서 ban 당했습니다.`,
+        bannedUser: { id: targetUser.id, username: targetUser.username },
+        chatRoom: {
+          id: chatRoom.id,
+          name: chatRoom.name,
+        },
       });
       targetUserSocket.leave(chatRoom.name);
 
