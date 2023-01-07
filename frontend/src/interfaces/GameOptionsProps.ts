@@ -25,15 +25,15 @@ interface Ball {
   radius: number;
 }
 
-interface Tray {
-  width: number;
+interface TouchBar {
   height: number;
+  width: number;
   x: number;
 }
 
 interface Score {
-  y: number;
   max: number;
+  y: number;
 }
 
 interface GameOption {
@@ -41,10 +41,10 @@ interface GameOption {
   mode: number;
 }
 
-export interface GameOptionsProps {
-  display: Display;
+export interface facts {
   ball: Ball;
-  tray: Tray;
-  score: Score;
+  display: Display;
   gameOption: GameOption;
+  score: Score;
+  touchBar: TouchBar;
 }

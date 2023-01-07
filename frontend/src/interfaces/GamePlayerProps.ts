@@ -1,9 +1,9 @@
-import { UserProps } from './UserProps';
+import { GameUserProps } from './GameUserProps';
 
 export interface GamePlayerProps {
-  playerUser: UserProps;
-  gameRoomNale: string;
   gameOption: any;
-  touchBar: number;
+  gameRoomName: string;
   score: string;
+  touchBar: number;
+  user: GameUserProps;
 }
