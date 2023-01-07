@@ -2,22 +2,21 @@ import { Circle, Flex, Text, Spacer, Image, Box } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
 import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import { ContextMenu } from 'chakra-ui-contextmenu';
-import { OptionMenuChat, OptionMenuChatProps } from './OptionMenu';
+import { ChatAdminOptionMenu } from './ChatAdminOptionMenu';
+import { OptionMenu } from './OptionMenu';
 
-export function ChatUserItem2({ user, role }: ChatUserItemProps) {
+function ChatUserItem({ myChatUserStatus, user, role, roomNo }: ChatUserItemProps) {
   return (
     <>
       {role === ChatUserStatus.OWNER ? (
-        <Image src="/crown.svg" position="absolute" left={'4%'} zIndex={'100'} color="yellow" />
-      ) : role === ChatUserStatus.ADMINISTRATOR ? (
-        <Image
-          src="/green_crown.svg"
-          position="absolute"
-          left={'4%'}
-          zIndex={'100'}
-          color="yellow"
-        />
-      ) : null}
+        <Image src="/crown.svg" position="absolute" />
+      ) : (
+        <>
+          {role === ChatUserStatus.ADMINISTRATOR ? (
+            <Image src="/admin.svg" position="absolute" />
+          ) : null}
+        </>
+      )}
       <Flex
         w="100%"
         justifyContent="space-around"
@@ -27,7 +26,7 @@ export function ChatUserItem2({ user, role }: ChatUserItemProps) {
         border="2px"
         borderRadius={20}
       >
-        <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
+        <CustomAvatar url={user.imgUrl} size="md" />
         <Spacer />
         <Text mr={2}>{user.name.toUpperCase()}</Text>
       </Flex>
@@ -35,19 +34,39 @@ export function ChatUserItem2({ user, role }: ChatUserItemProps) {
   );
 }
 
-export default function ChatUserItem({ chatUserItem, chatRoom }: OptionMenuChatProps) {
+export default function ContextMenuHoc({
+  myChatUserStatus,
+  user,
+  role,
+  roomNo,
+}: ChatUserItemProps) {
   return (
     <ContextMenu<HTMLDivElement>
-      renderMenu={() => {
-        return (
-          <OptionMenuChat chatUserItem={chatUserItem} chatRoom={chatRoom} />
-          // isAdmin={} isMuted={} isBanned={}
-        );
-      }}
+      renderMenu={() => (
+        <>
+          {myChatUserStatus !== ChatUserStatus.COMMON ? (
+            <ChatAdminOptionMenu
+              user={user}
+              isFriend={true}
+              isBlocked={false}
+              role={role}
+              isMuted={false}
+              roomNo={roomNo}
+            />
+          ) : (
+            <OptionMenu user={user} isFriend={true} isBlocked={false}></OptionMenu>
+          )}
+        </>
+      )}
     >
       {(ref) => (
-        <Box ref={ref} w="100%" position="relative">
-          <ChatUserItem2 user={chatUserItem.user} role={chatUserItem.role} />
+        <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+          <ChatUserItem
+            myChatUserStatus={myChatUserStatus}
+            user={user}
+            role={role}
+            roomNo={roomNo}
+          />
         </Box>
       )}
     </ContextMenu>
