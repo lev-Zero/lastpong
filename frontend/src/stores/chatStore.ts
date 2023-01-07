@@ -13,6 +13,9 @@ interface ChatStoreProps {
   refreshChatRoomList: () => void;
   chatRoomList: ChatRoomItemProps[];
   setChatRoomList: (chatRoomList: ChatRoomItemProps[]) => void;
+  giveAdmin: (chatRoomId: number | undefined, userId: number) => void;
+  removeAdmin: (chatRoomId: number | undefined, userId: number) => void;
+  addBan: (chatRoomId: number | undefined, userId: number) => void;
 }
 
 export const chatStore = create<ChatStoreProps>((set, get) => ({
@@ -54,7 +57,44 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
   setChatRoomList: (chatRoomList: ChatRoomItemProps[]) => {
     set((state) => ({ ...state, chatRoomList }));
   },
+  giveAdmin: (chatRoomId: number | undefined, userId: number) => {
+    const socket = get().socket;
 
-  // setUseOtp: (useOtp: boolean) => {
-  //   set((state) => ({ ...state, useOtp }));
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (chatRoomId === undefined) {
+      console.log('chatRoomId is undefined');
+      return;
+    }
+    socket.emit('addAdmin', { chatRoomId, userId });
+  },
+  removeAdmin: (chatRoomId: number | undefined, userId: number) => {
+    const socket = get().socket;
+
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (chatRoomId === undefined) {
+      console.log('chatRoomId is undefined');
+      return;
+    }
+    socket.emit('removeAdmin', { chatRoomId, userId });
+  },
+
+  addBan: (chatRoomId: number | undefined, userId: number) => {
+    const socket = get().socket;
+
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (chatRoomId === undefined) {
+      console.log('chatRoomId is undefined');
+      return;
+    }
+    socket.emit('addBan', { chatRoomId, userId });
+  },
 }));

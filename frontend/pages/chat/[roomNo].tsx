@@ -16,7 +16,8 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const [roomNo, setRoomNo] = useState<number>();
   const [msg, setMsg] = useState<string>('');
-  const { me, friends } = userStore();
+  const { me } = userStore();
+  const [myChatUserStatus, setMyChatUserStatus] = useState<ChatUserStatus>(ChatUserStatus.COMMON);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [chatRoom, setChatRoom] = useState<ChatRoomProps>();
@@ -69,6 +70,15 @@ export default function ChatRoomPage() {
       );
       const owner: UserProps = await convertRawUserToUser(newChatRoom.owner);
 
+      adminUsers.forEach((user) => {
+        if (user.id === me.id) {
+          setMyChatUserStatus(ChatUserStatus.ADMINISTRATOR);
+        }
+      });
+      if (owner.id === me.id) {
+        setMyChatUserStatus(ChatUserStatus.OWNER);
+      }
+
       setChatRoom({
         name: newChatRoom.name,
         status: newChatRoom.status,
@@ -80,6 +90,31 @@ export default function ChatRoomPage() {
       });
     });
   }, [roomNo]);
+
+  useEffect(() => {
+    function convertToChatUserList(chatRoom: ChatRoomProps) {
+      const ret: ChatUserItemProps[] = [];
+      const usedIds: number[] = [];
+      ret.push({ myChatUserStatus, user: chatRoom.owner, role: ChatUserStatus.OWNER, roomNo });
+      usedIds.push(chatRoom.owner.id);
+      chatRoom.adminUsers.forEach((user: UserProps) => {
+        if (!usedIds.includes(user.id)) {
+          ret.push({ myChatUserStatus, user, role: ChatUserStatus.ADMINISTRATOR, roomNo });
+          usedIds.push(user.id);
+        }
+      });
+      chatRoom.joinedUsers.forEach((user: UserProps) => {
+        if (!usedIds.includes(user.id)) {
+          ret.push({ myChatUserStatus, user, role: ChatUserStatus.COMMON, roomNo });
+          usedIds.push(user.id);
+        }
+      });
+      return ret;
+    }
+    if (chatRoom) {
+      setChatUserList(convertToChatUserList(chatRoom));
+    }
+  }, [chatRoom]);
 
   useEffect(() => {
     if (socket === undefined) {
@@ -105,35 +140,26 @@ export default function ChatRoomPage() {
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
 
-    //TODO: 뮤트 벤 리무브 어드민 등 이렇게 하는거 맞나?
-    //FIXME: 이중 어떤 기능도 작동은 하는 듯 보이나 메뉴 목록에 실시간 반영이 안됨
-    socket.on('addAdmin', (res) => {
-      console.log(res);
+    socket.on('admin', (res) => {
+      console.log(res.message);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
-    socket.on('removeAdmin', (res) => {
-      console.log(res);
+    socket.on('mute', (res) => {
+      console.log(res.message);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
-    socket.on('addMute', (res) => {
-      console.log(res);
+    socket.on('ban', (res) => {
+      console.log(res.message); // FIXME: 왜 ban된 당사자에게는 emit ban이 안오는가?
+      if (res.bannedUser.id === me.id) {
+        console.log('Im out');
+        exitChatRoom();
+        return;
+      }
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
-    socket.on('removeMute', (res) => {
-      console.log(res);
-      socket.emit('chatRoomById', { chatRoomId: roomNo });
-    });
-    socket.on('addBan', (res) => {
-      console.log(res);
-      socket.emit('chatRoomById', { chatRoomId: roomNo });
-    });
-    socket.on('removeBan', (res) => {
-      console.log(res);
-      socket.emit('chatRoomById', { chatRoomId: roomNo });
-    });
-
     socket.on('leave', async (res) => {
       const message: string = res.message;
+      console.log(message);
       if (message.substring(0, 5) == 'owner') {
         exitChatRoom();
       }
@@ -141,46 +167,18 @@ export default function ChatRoomPage() {
     });
   }, [roomNo]);
 
-  useEffect(() => {
-    function convertToChatUserList(chatRoom: ChatRoomProps) {
-      const ret: ChatUserItemProps[] = [];
-      const usedIds: number[] = [];
-      ret.push({ user: chatRoom.owner, role: ChatUserStatus.OWNER });
-      usedIds.push(chatRoom.owner.id);
-      chatRoom.adminUsers.forEach((user: UserProps) => {
-        if (!usedIds.includes(user.id)) {
-          ret.push({ user, role: ChatUserStatus.ADMINISTRATOR });
-          usedIds.push(user.id);
-        }
-      });
-      chatRoom.joinedUsers.forEach((user: UserProps) => {
-        if (!usedIds.includes(user.id)) {
-          ret.push({ user, role: ChatUserStatus.COMMON });
-          usedIds.push(user.id);
-        }
-      });
-      return ret;
-    }
-    if (chatRoom) {
-      setChatUserList(convertToChatUserList(chatRoom));
-    }
-  }, [chatRoom]);
-
   function exitChatRoom() {
     if (socket === undefined) {
       console.log('socket is undefined');
       return;
     }
-    //TODO: 뮤트 벤 리무브 어드민 등 이렇게 하는거 맞나?
+
     socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
     socket.off('chatRoomById');
     socket.off('join');
-    socket.off('addAdmin');
-    socket.off('removeAdmin');
-    socket.off('addMute');
-    socket.off('removeMute');
-    socket.off('addBan');
-    socket.off('removeBan');
+    socket.off('admin');
+    socket.off('mute');
+    socket.off('ban');
     socket.off('leave');
     router.push('/chat');
   }
@@ -286,10 +284,15 @@ export default function ChatRoomPage() {
               borderRadius="20px"
               overflow="scroll"
             >
-              {chatUserList &&
-                chatUserList.map((chatUserItem, idx) => (
-                  <ChatUserItem key={idx} chatUserItem={chatUserItem} chatRoom={chatRoom} />
-                ))}
+              {chatUserList.map((chatUserItem, idx) => (
+                <ChatUserItem
+                  key={idx}
+                  myChatUserStatus={myChatUserStatus}
+                  user={chatUserItem.user}
+                  role={chatUserItem.role}
+                  roomNo={roomNo}
+                />
+              ))}
             </VStack>
           </Flex>
         </>
