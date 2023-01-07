@@ -72,7 +72,7 @@ export default function ChatRoomPage() {
 
       adminUsers.forEach((user) => {
         if (user.id === me.id) {
-          setMyChatUserStatus(ChatUserStatus.ADMINISTRATOR);
+          setMyChatUserStatus(ChatUserStatus.ADMIN);
         }
       });
       if (owner.id === me.id) {
@@ -99,7 +99,7 @@ export default function ChatRoomPage() {
       usedIds.push(chatRoom.owner.id);
       chatRoom.adminUsers.forEach((user: UserProps) => {
         if (!usedIds.includes(user.id)) {
-          ret.push({ myChatUserStatus, user, role: ChatUserStatus.ADMINISTRATOR, roomNo });
+          ret.push({ myChatUserStatus, user, role: ChatUserStatus.ADMIN, roomNo });
           usedIds.push(user.id);
         }
       });

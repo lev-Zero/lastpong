@@ -11,11 +11,7 @@ function ChatUserItem({ myChatUserStatus, user, role, roomNo }: ChatUserItemProp
       {role === ChatUserStatus.OWNER ? (
         <Image src="/crown.svg" position="absolute" />
       ) : (
-        <>
-          {role === ChatUserStatus.ADMINISTRATOR ? (
-            <Image src="/admin.svg" position="absolute" />
-          ) : null}
-        </>
+        <>{role === ChatUserStatus.ADMIN ? <Image src="/admin.svg" position="absolute" /> : null}</>
       )}
       <Flex
         w="100%"

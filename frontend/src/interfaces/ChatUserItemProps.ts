@@ -2,7 +2,7 @@ import { UserProps } from '@/interfaces/UserProps';
 
 export enum ChatUserStatus {
   OWNER,
-  ADMINISTRATOR,
+  ADMIN,
   COMMON,
 }
 
