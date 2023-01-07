@@ -378,7 +378,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async joinChatRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() body: ChatRoomJoinDto,
-  ): Promise<WsException | void> {
+  ): Promise<WsException | string> {
     try {
       const validBody = await this.chatParameterValidation(
         body,
@@ -412,8 +412,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           `${chatRoom.name}방에 ${user.username}이/가 들어왔습니다`,
         );
       socket.emit('join', { chatRoom });
+      return JSON.stringify({
+        status: `${chatRoom.name}방에 ${user.username}이 / 가 들어왔습니다`,
+      });
     } catch (e) {
-      return new WsException(e.message);
+      console.error(e.message)
+			return new WsException(e.message);
     }
   }
 
