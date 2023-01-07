@@ -149,9 +149,8 @@ export default function ChatRoomPage() {
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
     socket.on('ban', (res) => {
-      console.log(res.message); // FIXME: 왜 ban된 당사자에게는 emit ban이 안오는가?
+      console.log(res.message);
       if (res.bannedUser.id === me.id) {
-        console.log('Im out');
         exitChatRoom();
         return;
       }
@@ -161,6 +160,7 @@ export default function ChatRoomPage() {
       const message: string = res.message;
       console.log(message);
       if (message.substring(0, 5) == 'owner') {
+        // FIXME: 이 방식으로 방 폭파를 결정하는 건 ad-hoc
         exitChatRoom();
       }
       socket.emit('chatRoomById', { chatRoomId: roomNo });
