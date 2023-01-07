@@ -416,8 +416,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         status: `${chatRoom.name}방에 ${user.username}이 / 가 들어왔습니다`,
       });
     } catch (e) {
-      console.error(e.message)
-			return new WsException(e.message);
+      return new WsException(e.message);
     }
   }
 
