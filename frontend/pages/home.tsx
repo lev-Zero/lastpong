@@ -25,7 +25,7 @@ import { useRouter } from 'next/router';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, gameRoomName, makeSocket, disconnectSocket } = gameStore();
+  const { socket, room, makeSocket, disconnectSocket } = gameStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -33,15 +33,20 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  function handleMatchBtnClicked() {
+  async function handleMatchBtnClicked() {
     setTimeSpent(1);
-    makeSocket();
+    if (socket === undefined) {
+      console.log('socket Making');
+      await makeSocket();
+    } else socket.emit('randomGameMatch');
     onOpen();
   }
 
   function handleMatchCancelBtnClicked() {
-    // disconnectSocket();
-    console.log('socket is disconnected1234');
+    if (room.gameRoomName === '') {
+      disconnectSocket();
+      console.log('socket is disconnected');
+    }
     onClose();
   }
 
@@ -49,11 +54,10 @@ export default function HomePage() {
     if (socket === undefined) {
       return;
     }
-    if (gameRoomName !== 'none') {
-      router.push('/game/options');
-      console.log('Ready to play game');
-    }
-  }, [gameRoomName]);
+    console.log(`FIND Room : ${room.gameRoomName}`);
+    router.push('/game/options');
+    console.log('Ready to play game');
+  }, [room]);
 
   useEffect(() => {
     if (socket === undefined) {
@@ -63,6 +67,7 @@ export default function HomePage() {
       return new Promise((r) => setTimeout(r, ms));
     }
     sleep(3000).then(() => {
+      console.log(socket);
       console.log('EMIT : Random Game Match');
       socket.emit('randomGameMatch');
     });

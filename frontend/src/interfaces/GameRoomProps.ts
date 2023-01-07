@@ -1,5 +1,5 @@
 import { GamePlayerProps } from './GamePlayerProps';
-import { GameOptionsProps } from './GameOptionsProps';
+import { facts } from './GameOptionsProps';
 import { Socket } from 'socket.io';
 
 export enum State {
@@ -17,15 +17,20 @@ export interface Position {
 
 interface Ball {
   position: Position;
+  speed: number;
   velocity: Position;
 }
 
-export interface GameRoomProps {
-  code: string;
-  state: State;
-  players: GamePlayerProps[];
-  spectators?: Array<Socket>; //?
-  options: GameOptionsProps;
+interface GamePlayingProps {
   ball: Ball;
-  speed: number; // 사용자 입장에서 쓸모가 없음
+}
+
+export interface GameRoomProps {
+  //facts
+  facts: facts;
+  gameRoomName: string;
+  gameStatus: number;
+  players: GamePlayerProps[];
+  playing: GamePlayingProps;
+  spectators?: Array<Socket>; //?
 }
