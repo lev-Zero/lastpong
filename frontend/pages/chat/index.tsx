@@ -1,9 +1,6 @@
 import { ChatRoomItem } from '@/components/ChatRoomItem';
 import { CustomButton } from '@/components/CustomButton';
-import UserItem from '@/components/UserItem';
-import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
-import { customFetch } from '@/utils/customFetch';
 
 import {
   Button,
@@ -35,7 +32,6 @@ import RawUserItem from '@/components/RawUserItem';
 import { chatStore } from '@/stores/chatStore';
 import { useRouter } from 'next/router';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
-import { OperationCanceledException } from 'typescript';
 
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
@@ -115,7 +111,6 @@ export default function ChatPage() {
     });
   };
 
-  //TODO: 비밀번호 맞춰보는 로직 필요한 부분
   const joinPrivChatRoom = (id: number) => {
     console.log(valuePasswordPriv);
     if (valuePasswordPriv === '') {
@@ -127,13 +122,14 @@ export default function ChatPage() {
       return;
     }
 
-    socket.emit('join', { chatRoomId: id, password: valuePasswordPriv }, () => {
-      router.push(`/chat/`);
+    socket.emit('join', { chatRoomId: id, password: valuePasswordPriv }, (res) => {
+      // console.log(res);
+      if (!res.error) {
+        router.push(`/chat/${id}`);
+      }
     });
-
     privOnClose();
     setValuePasswordPriv('');
-    router.push(`/chat/${id}`);
   };
 
   const privChatRoomID = useRef(0);
