@@ -144,7 +144,7 @@ export class BlockService {
         .delete()
         .from(Block)
         .where('blockOfferUser = :id', { id: removeOfferUser })
-        .where('blockedUser = :id', { id: blockedUser })
+        .andWhere('blockedUser = :id', { id: blockedUser })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -161,7 +161,7 @@ export class BlockService {
         .delete()
         .from(Block)
         .where('blockOfferUser = :id', { id: removeOfferUser })
-        .where('blockedUser = :id', { id: blockedUser })
+        .andWhere('blockedUser = :id', { id: blockedUser })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

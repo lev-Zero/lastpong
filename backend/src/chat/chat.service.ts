@@ -571,7 +571,7 @@ export class ChatService {
         .delete()
         .from(AdminUser)
         .where('user = :user', { user: targetUserId })
-        .where('chatRoom = :chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoom = :chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -708,7 +708,7 @@ export class ChatService {
         .delete()
         .from(MutedUser)
         .where('user = :user', { user: targetUser.id })
-        .where('chatRoom =:chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -848,7 +848,7 @@ export class ChatService {
         .delete()
         .from(BannedUser)
         .where('user = :user', { user: targetUser.id })
-        .where('chatRoom =:chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -1016,7 +1016,7 @@ export class ChatService {
         .delete()
         .from(JoinedUser)
         .where('user = :user', { user: user.id })
-        .where('chatRoom =:chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -1104,7 +1104,7 @@ export class ChatService {
         .delete()
         .from(JoinedDmUser)
         .where('user = :user', { user: user.id })
-        .where('chatRoom =:chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -1209,7 +1209,7 @@ export class ChatService {
         .createQueryBuilder('chatRoom')
         .delete()
         .from(ChatRoom)
-        .where('ownerId = :ownerId', { ownerId: userId })
+        .andWhere('ownerId = :ownerId', { ownerId: userId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -1222,7 +1222,7 @@ export class ChatService {
         .createQueryBuilder('chatRoomdm')
         .delete()
         .from(ChatRoomDm)
-        .where('ownerId = :ownerId', { ownerId: userId })
+        .andWhere('ownerId = :ownerId', { ownerId: userId })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

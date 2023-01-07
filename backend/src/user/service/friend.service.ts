@@ -108,7 +108,7 @@ export class FriendService {
         .delete()
         .from(Friend)
         .where('friendOfferUserId = :id', { id: removeOfferUser })
-        .where('friendId = :id', { id: friend })
+        .andWhere('friendId = :id', { id: friend })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -125,7 +125,7 @@ export class FriendService {
         .delete()
         .from(Friend)
         .where('friendOfferUserId = :id', { id: removeOfferUser })
-        .where('friendId = :id', { id: friend })
+        .andWhere('friendId = :id', { id: friend })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
