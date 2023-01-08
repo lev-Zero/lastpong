@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from 'react';
 import UserItem from './UserItem';
 import RawUserItem from './RawUserItem';
 import { allUserStore } from '@/stores/allUserStore';
+import { chatStore } from '@/stores/chatStore';
 
 export default function Sidebar() {
   const { friends, fetchFriends } = userStore();
@@ -31,6 +32,29 @@ export default function Sidebar() {
   const { allUsers, getAllUsers } = allUserStore();
   const [allUsersExceptMe, setAllUsersExceptMe] = useState<UserProps[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const { socket, makeSocket, joinAllMyDmRoom } = chatStore();
+
+  useEffect(() => {
+    if (socket === undefined) {
+      makeSocket();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (socket === undefined || !socket.connected) {
+      return;
+    }
+    socket.on('createChatRoomDm', console.log);
+    socket.on('join', console.log);
+  }, [socket?.connected]);
+
+  useEffect(() => {
+    if (socket === undefined || !socket.connected || friends === undefined) {
+      return;
+    }
+    joinAllMyDmRoom(friends);
+  }, [socket?.connected, friends]);
 
   useEffect(() => {
     fetchFriends();
