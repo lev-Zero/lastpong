@@ -183,7 +183,10 @@ export class GameService {
     mode: number,
   ): GameRoomDto | null {
     try {
-      let gameOption;
+      const gameOption = {
+        backgroundColor: 0,
+        mode: 0,
+      };
       gameOption['backgroundColor'] = backgroundColor;
       gameOption['mode'] = mode;
       const gameRoom = this.gameRooms.get(gameRoomName);

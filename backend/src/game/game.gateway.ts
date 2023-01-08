@@ -218,10 +218,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .to(validBody.gameRoomName)
           .emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
       } else {
+        // this.server.to(gameRoom.gameRoomName).emit('readyGame', {
+        //   message: `양 쪽 유저 게임 준비 완료`,
+        //   gameRoomOptions: gameRoom.facts,
+        //   players: gameRoom.players.map((player) => player.user),
+        // });
         this.server.to(gameRoom.gameRoomName).emit('readyGame', {
           message: `양 쪽 유저 게임 준비 완료`,
-          gameRoomOptions: gameRoom.facts,
-          players: gameRoom.players.map((player) => player.user),
+          gameRoom: gameRoom,
         });
       }
     } catch (e) {
