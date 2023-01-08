@@ -105,14 +105,17 @@ export default function ChatPage() {
   };
 
   const joinChatRoom = (id: number) => {
-    console.log(id);
     socket?.emit('join', { chatRoomId: id, password: '' }, (res: any) => {
       console.log(res);
+      if (!res.error) {
+        router.push(`/chat/${id}`);
+      } else {
+        alert(res.message);
+      }
     });
   };
 
   const joinPrivChatRoom = (id: number) => {
-    console.log(valuePasswordPriv);
     if (valuePasswordPriv === '') {
       alert('비밀번호를 입력해주십시오.');
       return;
@@ -153,7 +156,6 @@ export default function ChatPage() {
                   onClick={() => {
                     if (!chatRoom.isProtected) {
                       joinChatRoom(chatRoom.id);
-                      router.push(`/chat/${chatRoom.id}`);
                     } else {
                       // TODO:  비밀번호 입력 모달 제작하기
                       privChatRoomID.current = chatRoom.id;
