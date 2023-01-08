@@ -221,28 +221,63 @@ export class GameService {
       }
 
       gameRoom.gameStatus = gameStatus.COUNTDOWN;
-      const selectRandomOption: number = Math.round(Math.random());
-      gameRoom.facts.gameOption.backgroundColor =
-        gameRoom.players[selectRandomOption].gameOption.backgroundColor;
-      gameRoom.facts.gameOption.mode =
-        gameRoom.players[selectRandomOption].gameOption.mode;
 
-      if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
-        gameRoom.facts.ball.speed = 40;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
-        gameRoom.facts.ball.speed = 15;
+      const player1Rating = gameRoom.players[0].user.rating;
+      const player2Rating = gameRoom.players[1].user.rating;
+      let lowerRatingUser: number;
+      if (player1Rating < player2Rating) lowerRatingUser = 0;
+      else if (player1Rating > player2Rating) lowerRatingUser = 1;
+      else lowerRatingUser = 2;
+
+      if (lowerRatingUser == 2) {
+        const selectRandomOption: number = Math.round(Math.random());
+
+        gameRoom.facts.gameOption.backgroundColor =
+          gameRoom.players[selectRandomOption].gameOption.backgroundColor;
+
+        gameRoom.facts.gameOption.mode =
+          gameRoom.players[selectRandomOption].gameOption.mode;
+
+        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+          gameRoom.facts.ball.speed = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+          gameRoom.facts.ball.speed = 15;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+          gameRoom.facts.ball.radius = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+          gameRoom.facts.ball.radius = 10;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+          gameRoom.facts.touchBar.height = 300;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+          gameRoom.facts.touchBar.height = 150;
+      } else {
+        gameRoom.facts.gameOption.backgroundColor =
+          gameRoom.players[lowerRatingUser].gameOption.backgroundColor;
+
+        gameRoom.facts.gameOption.mode =
+          gameRoom.players[lowerRatingUser].gameOption.mode;
+
+        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+          gameRoom.facts.ball.speed = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+          gameRoom.facts.ball.speed = 15;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+          gameRoom.facts.ball.radius = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+          gameRoom.facts.ball.radius = 10;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+          gameRoom.facts.touchBar.height = 300;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+          gameRoom.facts.touchBar.height = 150;
       }
-
-      if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
-        gameRoom.facts.ball.radius = 40;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
-        gameRoom.facts.ball.radius = 10;
-      }
-
-      if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
-        gameRoom.facts.touchBar.height = 300;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
-        gameRoom.facts.touchBar.height = 150;
 
       return gameRoom;
     } catch (e) {
