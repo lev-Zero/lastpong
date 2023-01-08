@@ -446,7 +446,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('removeSocketInQueue')
   removeSocketInQueue(@ConnectedSocket() socket): WsException | null {
     try {
-      return this.removeSocketInQueue(socket);
+      this.removeSocketInQueue(socket);
+      socket.emit('removeSocketInQueue', { message: 'removeSocketInQueue' });
     } catch (e) {
       return new WsException(e.message);
     }
