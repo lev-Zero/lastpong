@@ -58,7 +58,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       socket.data.user = user;
       socket_username[user.username] = socket;
-
+      this.gameService.removeSocketInQueue(socket);
       socket.emit('connection', { message: `${user.username} 연결`, user });
     } catch (e) {
       return new WsException(e.message);
@@ -76,6 +76,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
+      this.gameService.removeSocketInQueue(socket);
       socket.emit('disconnection', { message: `${user.username} 연결해제` });
     } catch (e) {
       return new WsException(e.message);
@@ -403,6 +404,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* --------------------------
 	|				touchBar 		|
+	|				removeSocketInQueue 		|
 	---------------------------*/
 
   @SubscribeMessage('touchBar')
@@ -440,6 +442,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return new WsException(e.message);
     }
   }
+
+  @SubscribeMessage('removeSocketInQueue')
+  removeSocketInQueue(@ConnectedSocket() socket): WsException | null {
+    try {
+      return this.removeSocketInQueue(socket);
+    } catch (e) {
+      return new WsException(e.message);
+    }
+  }
+
   private gameParameterSanitizer(data: string) {
     try {
       const data1 = Sanitizer.blacklist(data, ' ');

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
 import { GamePlayerDto, GameRoomDto, PositionDto } from './dto/game.dto';
 import {
@@ -9,7 +9,7 @@ import {
   PlayerType,
 } from './enum/game.enum';
 import { MatchService } from 'src/user/service/match.service';
-import { ConnectedSocket } from '@nestjs/websockets';
+import { ConnectedSocket, WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class GameService {
@@ -36,7 +36,7 @@ export class GameService {
     try {
       return this.gameRooms.get(gameRoomName);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -44,7 +44,7 @@ export class GameService {
     try {
       return this.gameRooms;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -64,7 +64,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -81,7 +81,7 @@ export class GameService {
     return null;
   }
 
-  findGameRoomOfUser(userId: number): any {
+  findGameRoomOfUser(userId: number): string | null {
     try {
       for (const gameRoom of this.gameRooms) {
         for (const player of gameRoom[1].players) {
@@ -95,7 +95,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -134,7 +134,7 @@ export class GameService {
       this.gameRooms.set(gameRoomName, gameRoom);
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -172,7 +172,7 @@ export class GameService {
       }
       return { gameRoom, user };
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -284,7 +284,7 @@ export class GameService {
 
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -315,7 +315,7 @@ export class GameService {
 
       return gameRoom.playing.ball.position;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -342,7 +342,7 @@ export class GameService {
         radian,
       );
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -374,7 +374,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -440,7 +440,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -474,7 +474,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -484,7 +484,11 @@ export class GameService {
 |			exitGameRoom|
 ---------------------------*/
 
-  isGameOver(gameRoom: GameRoomDto, server: any, socket: Socket): null {
+  isGameOver(
+    gameRoom: GameRoomDto,
+    server: Server,
+    @ConnectedSocket() socket: Socket,
+  ): null {
     try {
       for (const player of gameRoom.players) {
         if (player.score == gameRoom.facts.score.max) {
@@ -494,16 +498,16 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
   async gameOver(
     gameRoom: GameRoomDto,
     win: GamePlayerDto,
-    server: any,
+    server: Server,
     @ConnectedSocket() socket: Socket,
-  ): Promise<any> {
+  ): Promise<null> {
     try {
       let winner;
       let loser;
@@ -542,16 +546,17 @@ export class GameService {
             .emit('gameOver', { message: 'gameOver', winner, loser });
         }
       }
+      return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
-  async exitGameRoom(server: any, socket: Socket): Promise<any> {
+  async exitGameRoom(server: any, socket: Socket): Promise<number[] | boolean> {
     try {
       const userId = socket.data.user.id;
-      if (this.queue.indexOf(userId) != -1) {
-        this.queue.splice(this.queue.indexOf(userId), 1);
+      if (this.queue.indexOf(socket) != -1) {
+        this.queue.splice(this.queue.indexOf(socket), 1);
       }
 
       for (const gameRoom of this.gameRooms.values()) {
@@ -583,7 +588,7 @@ export class GameService {
           return this.gameRooms.delete(gameRoom.gameRoomName);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -592,7 +597,7 @@ export class GameService {
 |				isPlayerInAnyGameRoom			|
 ---------------------------*/
 
-  randomGameMatching(socket: Socket): any {
+  randomGameMatching(@ConnectedSocket() socket: Socket): null | GameRoomDto {
     try {
       if (this.queue.find((playerSockets) => playerSockets == socket)) {
         throw new HttpException(
@@ -627,11 +632,11 @@ export class GameService {
       }
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
-  isPlayerInAnyGameRoom(MyId: number): GamePlayerDto {
+  isPlayerInAnyGameRoom(MyId: number): GamePlayerDto | null {
     try {
       for (const gameRoom of this.gameRooms.values()) {
         for (const player of gameRoom.players) {
@@ -640,7 +645,17 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
+    }
+  }
+  removeSocketInQueue(@ConnectedSocket() socket: Socket): null {
+    try {
+      if (this.queue.indexOf(socket) != -1) {
+        this.queue.splice(this.queue.indexOf(socket), 1);
+      }
+      return null;
+    } catch (e) {
+      throw new WsException(e.message);
     }
   }
 }
