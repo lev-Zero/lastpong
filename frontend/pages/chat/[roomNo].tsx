@@ -146,11 +146,11 @@ export default function ChatRoomPage() {
     });
     socket.on('mute', (res) => {
       console.log(res.message);
-      console.log(
-        'mute end time',
-        res.chatRoom.muted[0].user.username,
-        res.chatRoom.muted[0].endTime
-      );
+      // console.log(
+      //   'mute end time',
+      //   res.chatRoom.muted[0].user.username,
+      //   res.chatRoom.muted[0].endTime
+      // );
 
       const tmp = res.chatRoom.muted.find((muted: any) => muted.user.username === me.name);
       if (tmp) {
@@ -160,7 +160,10 @@ export default function ChatRoomPage() {
           console.log('endtime : ', endTime);
           setMutedTime(new Date(endTime));
         }
+      } else {
+        setMutedTime(new Date());
       }
+
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
     socket.on('ban', (res) => {

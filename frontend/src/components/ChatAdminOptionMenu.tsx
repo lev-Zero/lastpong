@@ -21,7 +21,7 @@ export function ChatAdminOptionMenu({
   roomNo,
 }: ChatAdminOptionMenuProps) {
   const { addFriend, deleteFriend } = userStore();
-  const { giveAdmin, removeAdmin, addBan, muteUser } = chatStore();
+  const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
 
   return (
     <MenuList>
@@ -44,7 +44,14 @@ export function ChatAdminOptionMenu({
             MUTE 1 MIN
           </Text>
         ) : (
-          <Text color="gray.200">MUTE 1 MIN</Text>
+          <Text
+            color="gray.200"
+            onClick={() => {
+              removeMute(roomNo, user.id);
+            }}
+          >
+            MUTE 1 MIN
+          </Text>
         )}
       </MenuItem>
       <MenuItem>

@@ -431,7 +431,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!player)
         throw new WsException('해당룸에 플레이어는 존재하지 않습니다.');
 
-      player.touchBar = validBody.touchBar * gameRoom.facts.display.height;
+      player.touchBar = validBody.touchBar;
       this.server.to(gameRoom.gameRoomName).emit('touchBar', {
         message: 'touchBar',
         player: player.user.id,

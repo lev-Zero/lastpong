@@ -44,8 +44,11 @@ export default function HomePage() {
 
   function handleMatchCancelBtnClicked() {
     if (room.gameRoomName === '') {
-      disconnectSocket();
-      console.log('socket is disconnected');
+      if (socket !== undefined) {
+        socket.removeAllListeners();
+        disconnectSocket();
+        console.log('socket is disconnected');
+      }
     }
     onClose();
   }

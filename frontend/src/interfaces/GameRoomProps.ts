@@ -25,6 +25,11 @@ interface GamePlayingProps {
   ball: Ball;
 }
 
+export interface GameBall {
+  x: number;
+  y: number;
+}
+
 export interface GameRoomProps {
   //facts
   facts: facts;
