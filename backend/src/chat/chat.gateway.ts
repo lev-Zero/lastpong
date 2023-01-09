@@ -83,7 +83,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           );
         }
       }
-
       await this.chatService.deleteChatRoomDmIfOwner(user.id);
       const initChatRoomDms = await this.chatService
         .findChatRoomDmByUserId(user.id, ['joinedDmUser', 'owner'])
@@ -97,7 +96,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           );
         }
       }
-
       const chatRooms = await this.chatService.findChatRoomByUserId(user.id);
       const chatRoomsDm = await this.chatService.findChatRoomDmByUserId(
         user.id,
@@ -904,6 +902,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.findUserById(socket.data.user.id);
       const chatRoomDm = await this.chatService.findChatRoomDmByUserId(
         socket.data.user.id,
+        ['joinedDmUser'],
       );
 
       socket.emit('chatRoomDmMe', {
@@ -926,7 +925,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ChatRoomDmUserIdDto,
       );
       const user = await this.userService.findUserById(validBody.userId);
-      const chatRoomDm = await this.chatService.findChatRoomDmByUserId(user.id);
+      const chatRoomDm = await this.chatService.findChatRoomDmByUserId(
+        user.id,
+        ['joinedDmUser'],
+      );
 
       socket.emit('chatRoomDmByUserId', {
         message: `${user.username}이 / 가 속한 방 정보`,
