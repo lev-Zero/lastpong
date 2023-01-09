@@ -82,6 +82,7 @@ export default function ChatRoomPage() {
       );
       const owner: UserProps = await convertRawUserToUser(newChatRoom.owner);
 
+      setMyChatUserStatus(ChatUserStatus.COMMON);
       adminUsers.forEach((user) => {
         if (user.id === me.id) {
           setMyChatUserStatus(ChatUserStatus.ADMIN);
