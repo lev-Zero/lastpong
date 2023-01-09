@@ -94,7 +94,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 
   return (
     //FIXME: placement가 하단에 고정될 수는 없을까?
-    <Popover placement="left" onOpen={getDmRoomNo}>
+    <Popover placement="left" onOpen={getDmRoomNo} onClose={() => setMsg('')}>
       <PopoverTrigger>
         <Box>
           <RawUserItem user={user} msgNum={msgNum} />
