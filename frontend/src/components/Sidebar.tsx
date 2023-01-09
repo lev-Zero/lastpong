@@ -24,6 +24,7 @@ import UserItem from './UserItem';
 import RawUserItem from './RawUserItem';
 import { allUserStore } from '@/stores/allUserStore';
 import { chatStore } from '@/stores/chatStore';
+import { DmMsgProps } from '@/interfaces/MsgProps';
 
 export default function Sidebar() {
   const { friends, fetchFriends } = userStore();
@@ -32,6 +33,7 @@ export default function Sidebar() {
   const { allUsers, getAllUsers } = allUserStore();
   const [allUsersExceptMe, setAllUsersExceptMe] = useState<UserProps[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { dmMsgList, addDmMsg } = chatStore();
 
   const { socket, makeSocket } = chatStore();
 
@@ -46,7 +48,19 @@ export default function Sidebar() {
       return;
     }
     socket.on('join', console.log);
+    socket.on('directMessage', ({ user, targetUser, message }) => {
+      addDmMsg(user.username, targetUser.user.username, message);
+    });
+
+    return () => {
+      socket.off('join');
+      socket.off('directMessage');
+    };
   }, [socket?.connected]);
+
+  useEffect(() => {
+    console.log(dmMsgList);
+  }, [dmMsgList]);
 
   useEffect(() => {
     fetchFriends();

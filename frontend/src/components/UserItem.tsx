@@ -26,7 +26,7 @@ import { chatStore } from '@/stores/chatStore';
 import { MsgProps } from '@/interfaces/MsgProps';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
-  const [msgList, setMsgList] = useState<MsgProps[]>([]);
+  const { dmMsgList } = chatStore();
   const [msg, setMsg] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [dmRoomNo, setDmRoomNo] = useState<number>();
@@ -64,13 +64,13 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         const newDmRoomNo = chatRoomDm.id;
         setDmRoomNo(newDmRoomNo);
 
-        // TODO: newDmRoomNo를 이용하여 보내기
-        console.log(`${newDmRoomNo}번 DM 방으로 ${msg}를 보내야 합니다`);
+        // newDmRoomNo를 이용하여 보내기
+        socket.emit('directMessage', { chatRoomId: newDmRoomNo, message: msg });
       });
       return;
     }
     // dmRoomNo를 이용하여 보내기
-    console.log(`${dmRoomNo}번 DM 방으로 ${msg}를 보내야 합니다`);
+    socket.emit('directMessage', { chatRoomId: dmRoomNo, message: msg });
   }
 
   function handleSendButtonClicked() {
@@ -118,15 +118,15 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
           <PopoverBody>
             <VStack p={5} w="full" height={'40vh'} mt={10} bg="white" overflow="scroll">
               <>
-                {msgList.map((msg, idx) =>
-                  msg.username === me.name ? (
+                {dmMsgList.map((msg, idx) =>
+                  msg.username === me.name && msg.targetUsername === user.name ? (
                     <Flex key={idx} width="100%">
                       <Spacer />
                       <Flex p={3} borderRadius="20px" bg={'main'} color={'white'} fontSize="2xl">
                         {msg.text}
                       </Flex>
                     </Flex>
-                  ) : msg.username === user.name ? (
+                  ) : msg.username === user.name && msg.targetUsername === me.name ? (
                     <Flex key={idx} width="100%">
                       <Flex p={3} borderRadius="20px" bg="gray.200" color="black" fontSize="2xl">
                         {msg.text}

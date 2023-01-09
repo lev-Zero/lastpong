@@ -1,3 +1,4 @@
+import { DmMsgProps } from './../interfaces/MsgProps';
 import { UserProps } from '@/interfaces/UserProps';
 import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
@@ -18,6 +19,8 @@ interface ChatStoreProps {
   muteUser: (chatRoomId: number | undefined, userId: number) => void;
   removeAdmin: (chatRoomId: number | undefined, userId: number) => void;
   addBan: (chatRoomId: number | undefined, userId: number) => void;
+  dmMsgList: DmMsgProps[];
+  addDmMsg: (username: string, targetUsername: string, text: string) => void;
 }
 
 export const chatStore = create<ChatStoreProps>((set, get) => ({
@@ -112,5 +115,12 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       return;
     }
     socket.emit('addBan', { chatRoomId, userId });
+  },
+  dmMsgList: [],
+  addDmMsg: (username: string, targetUsername: string, text: string) => {
+    set((state) => ({
+      ...state,
+      dmMsgList: [...get().dmMsgList, { username, targetUsername, text }],
+    }));
   },
 }));
