@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
 import { GamePlayerDto, GameRoomDto, PositionDto } from './dto/game.dto';
@@ -54,11 +54,7 @@ export class GameService {
   ): GamePlayerDto | null {
     try {
       const gameRoom = this.gameRooms.get(gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
       for (const player of gameRoom.players) {
         if (player.user.id == userId) return player;
       }
@@ -70,11 +66,7 @@ export class GameService {
 
   findSpectatorInGameRoom(userId: number, gameRoomName: string): number | null {
     const gameRoom = this.gameRooms.get(gameRoomName);
-    if (!gameRoom)
-      throw new HttpException(
-        '존재하지 않는 게임룸 입니다',
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
     for (const spectatorId of gameRoom.spectators) {
       if (spectatorId == userId) return spectatorId;
     }
@@ -164,10 +156,7 @@ export class GameService {
           if (!gameRoom.spectators) gameRoom.spectators = [];
           gameRoom.spectators.push(socket.data.user.id);
         } else {
-          throw new HttpException(
-            '아직 해당 게임에 참관할 수 없습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('아직 해당 게임에 참관할 수 없습니다.');
         }
       }
       return { gameRoom, user };
@@ -190,21 +179,14 @@ export class GameService {
       gameOption['backgroundColor'] = backgroundColor;
       gameOption['mode'] = mode;
       const gameRoom = this.gameRooms.get(gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const findPlayer = this.findPlayerInGameRoom(
         player.user.id,
         gameRoomName,
       );
       if (!findPlayer)
-        throw new HttpException(
-          `${gameRoomName}에 해당 플레이어는 없습니다.`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException(`${gameRoomName}에 해당 플레이어는 없습니다.`);
 
       for (const player of gameRoom.players) {
         if (player.user.username == findPlayer.user.username) {
@@ -600,25 +582,16 @@ export class GameService {
   randomGameMatching(@ConnectedSocket() socket: Socket): null | GameRoomDto {
     try {
       if (this.queue.find((playerSockets) => playerSockets == socket)) {
-        throw new HttpException(
-          '이미 queue에서 다른 유저 기다리는 중입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('이미 queue에서 다른 유저 기다리는 중입니다');
       }
       if (this.isPlayerInAnyGameRoom(socket.data.user.id)) {
-        throw new HttpException(
-          '이미 다른 게임룸에 참여중입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('이미 다른 게임룸에 참여중입니다.');
       }
 
       this.queue.push(socket);
 
       if (this.queue.length < 2) {
-        throw new HttpException(
-          '다른 유저를 기다리는 중입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('다른 유저를 기다리는 중입니다.');
         return;
       }
 
