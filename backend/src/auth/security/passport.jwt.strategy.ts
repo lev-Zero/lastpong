@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         );
       return { userId: payload.id, username: payload.username }; //-> req.user
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -1069,7 +1069,7 @@ export class ChatService {
         .createQueryBuilder('chatRoom')
         .delete()
         .from(ChatRoom)
-        .andWhere('ownerId = :ownerId', { ownerId: userId })
+        .where('ownerId = :ownerId', { ownerId: userId })
         .execute();
     } catch (e) {
       throw new WsException(e.message);
@@ -1082,7 +1082,40 @@ export class ChatService {
         .createQueryBuilder('chatRoomdm')
         .delete()
         .from(ChatRoomDm)
-        .andWhere('ownerId = :ownerId', { ownerId: userId })
+        .where('ownerId = :ownerId', { ownerId: userId })
+        .execute();
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  async deleteChatRoomAll(): Promise<void> {
+    try {
+      await this.chatRoomRepository
+        .createQueryBuilder('chatRoom')
+        .delete()
+        .from(ChatRoom)
+        .execute();
+      await this.joinedUserRepository
+        .createQueryBuilder('joinedUser')
+        .delete()
+        .from(JoinedUser)
+        .execute();
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+  async deleteChatRoomDmAll(): Promise<void> {
+    try {
+      await this.chatRoomDmRepository
+        .createQueryBuilder('chatRoomdm')
+        .delete()
+        .from(ChatRoomDm)
+        .execute();
+      await this.joinedDmUserRepository
+        .createQueryBuilder('joinedDmUser')
+        .delete()
+        .from(JoinedDmUser)
         .execute();
     } catch (e) {
       throw new WsException(e.message);

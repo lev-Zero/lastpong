@@ -4,6 +4,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -41,7 +42,9 @@ const socket_username = {};
 
 // ws://localhost:3000/chat
 @WebSocketGateway({ namespace: 'chat', cors: true })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
@@ -55,6 +58,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	|				handleConnection 		|
 	|				handleDisconnect		|
 	---------------------------*/
+
+  async afterInit(): Promise<void> {
+    await this.chatService.deleteChatRoomAll();
+    await this.chatService.deleteChatRoomDmAll();
+  }
 
   async handleConnection(
     @ConnectedSocket() socket: Socket,
