@@ -1,8 +1,8 @@
 import MainLayout from '@/layouts/MainLayout';
-import { Center, Flex, HStack, Spacer, VStack, Image, Input, Spinner } from '@chakra-ui/react';
+import { Center, Flex, HStack, Spacer, VStack, Image, Input, Spinner, Box } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import React, { ReactElement, useState, useRef, useEffect } from 'react';
+import React, { ReactElement, useState, useRef, useEffect, LegacyRef } from 'react';
 import { userStore } from '@/stores/userStore';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { MsgProps } from '@/interfaces/MsgProps';
@@ -26,6 +26,18 @@ export default function ChatRoomPage() {
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
   const [mutedTime, setMutedTime] = useState<Date>(new Date());
+
+  const messageBoxRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (messageBoxRef.current) {
+      messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [msgList]);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -274,7 +286,7 @@ export default function ChatRoomPage() {
                 <Image w="30px" mx={10} src="/exit.svg" onClick={exitChatRoom} />
               </Flex>
               {/* Chat Part */}
-              <VStack p={5} w="full" mt={10} bg="white" overflow="scroll">
+              <VStack p={5} w="full" mt={10} bg="white" overflow="scroll" ref={messageBoxRef}>
                 <>
                   {msgList.map((msg, idx) =>
                     msg.username === me.name ? (

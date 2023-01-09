@@ -33,6 +33,17 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const { me } = userStore();
   const { socket } = chatStore();
 
+  const messageBoxRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    if (messageBoxRef.current) {
+      messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [dmMsgList]);
+
   function getDmRoomNo() {
     if (socket === undefined) {
       console.log('socket is undefined');
@@ -116,7 +127,15 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
             </HStack>
           </PopoverHeader>
           <PopoverBody>
-            <VStack p={5} w="full" height={'40vh'} mt={10} bg="white" overflow="scroll">
+            <VStack
+              p={5}
+              w="full"
+              height={'40vh'}
+              mt={10}
+              bg="white"
+              overflow="scroll"
+              ref={messageBoxRef}
+            >
               <>
                 {dmMsgList.map((msg, idx) =>
                   msg.username === me.name && msg.targetUsername === user.name ? (
