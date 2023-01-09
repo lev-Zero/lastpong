@@ -210,22 +210,22 @@ export default function ChatRoomPage() {
       console.log(res.message);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
-    socket.on('mute', (res) => {
-      console.log(res.message);
+    socket.on('mute', ({ message, chatRoom, mutedUser }) => {
+      console.log(message);
       socket.emit('chatRoomById', { chatRoomId: roomNo });
 
-      const tmp = res.chatRoom.muted.find((muted: any) => muted.user.username === me.name);
-      if (tmp !== undefined) {
-        const endTime = tmp.endTime;
-        if (endTime) {
-          console.log('endtime : ', endTime);
-          setMutedTime(new Date(endTime));
+      if (mutedUser.id !== me.id) {
+        return;
+      }
+      if (message.includes('추가')) {
+        const foundItem = chatRoom.muted.find((muted: any) => muted.user.username === me.name);
+        if (foundItem === undefined) {
+          return;
         }
+        setMutedTime(new Date(foundItem.endTime));
       } else {
         setMutedTime(new Date());
       }
-
-      socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
     socket.on('ban', (res) => {
       console.log(res.message);
