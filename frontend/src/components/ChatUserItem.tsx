@@ -4,6 +4,8 @@ import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProp
 import { ContextMenu } from 'chakra-ui-contextmenu';
 import { ChatAdminOptionMenu } from './ChatAdminOptionMenu';
 import { OptionMenu } from './OptionMenu';
+import { userStore } from '@/stores/userStore';
+import { useEffect, useState } from 'react';
 
 function ChatUserItem({ myChatUserStatus, user, role, roomNo }: ChatUserItemProps) {
   return (
@@ -36,35 +38,52 @@ export default function ContextMenuHoc({
   role,
   roomNo,
 }: ChatUserItemProps) {
+  const { friends } = userStore();
+  const [isFriend, setIsFriend] = useState<boolean>();
+  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 추후 로직 추가
+  const [isMuted, setIsMuted] = useState<boolean>(false); // TODO: 추후 로직 추가
+
+  useEffect(() => {
+    setIsFriend(friends.some((friend) => friend.id === user.id));
+  }, []);
+
   return (
-    <ContextMenu<HTMLDivElement>
-      renderMenu={() => (
-        <>
-          {myChatUserStatus !== ChatUserStatus.COMMON ? (
-            <ChatAdminOptionMenu
-              user={user}
-              isFriend={true}
-              isBlocked={false}
-              role={role}
-              isMuted={false}
-              roomNo={roomNo}
-            />
-          ) : (
-            <OptionMenu user={user} isFriend={true} isBlocked={false}></OptionMenu>
+    <>
+      {isFriend === undefined ||
+      isBlocked === undefined ||
+      (myChatUserStatus !== ChatUserStatus.COMMON && isMuted === undefined) ? (
+        <></>
+      ) : (
+        <ContextMenu<HTMLDivElement>
+          renderMenu={() => (
+            <>
+              {myChatUserStatus !== ChatUserStatus.COMMON ? (
+                <ChatAdminOptionMenu
+                  user={user}
+                  isFriend={isFriend}
+                  isBlocked={isBlocked}
+                  role={role}
+                  isMuted={isMuted}
+                  roomNo={roomNo}
+                />
+              ) : (
+                <OptionMenu user={user} isFriend={isFriend} isBlocked={isBlocked}></OptionMenu>
+              )}
+            </>
           )}
-        </>
+        >
+          {(ref) => (
+            <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+              <ChatUserItem
+                myChatUserStatus={myChatUserStatus}
+                user={user}
+                role={role}
+                roomNo={roomNo}
+              />
+            </Box>
+          )}
+        </ContextMenu>
       )}
-    >
-      {(ref) => (
-        <Box ref={ref} w="100%" position="relative" px={3} py={1}>
-          <ChatUserItem
-            myChatUserStatus={myChatUserStatus}
-            user={user}
-            role={role}
-            roomNo={roomNo}
-          />
-        </Box>
-      )}
-    </ContextMenu>
+    </>
   );
 }

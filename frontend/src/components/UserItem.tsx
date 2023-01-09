@@ -69,34 +69,34 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   // }, []);
 
   function handleSendButtonClicked() {
-    if (socket === undefined) {
-      console.log('socket is undefined');
-      return;
-    }
+    // if (socket === undefined) {
+    //   console.log('socket is undefined');
+    //   return;
+    // }
     console.log(msg);
     setMsg('');
     if (inputRef.current !== null) inputRef.current.focus();
-    socket.emit('directMessage', { chatRoomId: roomNo, message: msg });
+    // socket.emit('directMessage', { chatRoomId: roomNo, message: msg });
   }
 
   function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
-    if (socket === undefined) {
-      console.log('socket is undefined');
-      return;
-    }
+    // if (socket === undefined) {
+    //   console.log('socket is undefined');
+    //   return;
+    // }
     if (e.nativeEvent.isComposing) {
       return;
     }
     if (e.key === 'Enter') {
       console.log(msg);
       setMsg('');
-      socket.emit('directMessage', { chatRoomId: roomNo, message: msg });
+      // socket.emit('directMessage', { chatRoomId: roomNo, message: msg });
     }
   }
 
-  async function makeS() {
-    makeSocket();
-  }
+  // async function makeS() {
+  //   makeSocket();
+  // }
 
   // function checkRoomExist() {
   //   socket?.once('chatRoomAll', (res) => {
@@ -108,70 +108,70 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   //   });
   // }
 
-  const { socket, makeSocket } = chatStore();
-  async function dmStart() {
-    if (socket === undefined) {
-      await makeS();
-    }
-    // checkRoomExist();
-    // if (socket === undefined) {
-    //   console.log('socket is UD dmStart', socket);
-    //   return;
-    // }
-    socket?.emit('createChatRoomDm', {
-      targetId: user.id,
-    });
-    socket?.once('createChatRoomDm', (res) => {
-      console.log(res);
-      setRoomNo(res.chatRoomDm.id);
-    });
-    socket?.on('chatRoomDmById', async (res) => {
-      console.log(res);
-    });
-    socket?.on('joinDm', (res) => {
-      console.log(res);
-      socket.emit('chatRoomDmById', { chatRoomId: roomNo });
-    });
-    socket?.on('leaveDm', async (res) => {
-      console.log(res.message);
-      socket.emit('chatRoomDmById', { chatRoomId: roomNo });
-    });
-    socket?.on('directMessage', (res) => {
-      setMsgList((prev) => {
-        return [
-          ...prev,
-          {
-            username: res.user.username,
-            targetname: res.targetUser.user.username,
-            text: res.message,
-          },
-        ];
-      });
-    });
-    console.log('popover open -> DM START');
-  }
-  async function dmOver() {
-    if (socket === undefined) {
-      console.log('socket is UD dmOver');
-      return;
-    }
-    socket.emit('leaveDm', { targetUserId: me.id, chatRoomId: roomNo });
-    socket.off('chatRoomDmById');
-    socket.off('joinDm');
-    socket.off('leaveDm');
-    console.log('popover close -> DM DONE');
-  }
+  // const { socket, makeSocket } = chatStore();
+  // async function dmStart() {
+  //   if (socket === undefined) {
+  //     await makeS();
+  //   }
+  //   // checkRoomExist();
+  //   // if (socket === undefined) {
+  //   //   console.log('socket is UD dmStart', socket);
+  //   //   return;
+  //   // }
+  //   socket?.emit('createChatRoomDm', {
+  //     targetId: user.id,
+  //   });
+  //   socket?.once('createChatRoomDm', (res) => {
+  //     console.log(res);
+  //     setRoomNo(res.chatRoomDm.id);
+  //   });
+  //   socket?.on('chatRoomDmById', async (res) => {
+  //     console.log(res);
+  //   });
+  //   socket?.on('joinDm', (res) => {
+  //     console.log(res);
+  //     socket.emit('chatRoomDmById', { chatRoomId: roomNo });
+  //   });
+  //   socket?.on('leaveDm', async (res) => {
+  //     console.log(res.message);
+  //     socket.emit('chatRoomDmById', { chatRoomId: roomNo });
+  //   });
+  //   socket?.on('directMessage', (res) => {
+  //     setMsgList((prev) => {
+  //       return [
+  //         ...prev,
+  //         {
+  //           username: res.user.username,
+  //           targetname: res.targetUser.user.username,
+  //           text: res.message,
+  //         },
+  //       ];
+  //     });
+  //   });
+  //   console.log('popover open -> DM START');
+  // }
+  // async function dmOver() {
+  //   if (socket === undefined) {
+  //     console.log('socket is UD dmOver');
+  //     return;
+  //   }
+  //   socket.emit('leaveDm', { targetUserId: me.id, chatRoomId: roomNo });
+  //   socket.off('chatRoomDmById');
+  //   socket.off('joinDm');
+  //   socket.off('leaveDm');
+  //   console.log('popover close -> DM DONE');
+  // }
 
   return (
     //FIXME: placement가 하단에 고정될 수는 없을까?
     <Popover
       placement="left"
       onOpen={() => {
-        console.log('DMTARGET : ', user.id, user.name);
-        dmStart();
+        // console.log('DMTARGET : ', user.id, user.name);
+        // dmStart();
       }}
       onClose={() => {
-        dmOver();
+        // dmOver();
       }}
     >
       <PopoverTrigger>
@@ -243,15 +243,31 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 }
 
 export default function ContextMenuHoc({ user, msgNum }: RawUserItemProps) {
+  const { friends } = userStore();
+  const [isFriend, setIsFriend] = useState<boolean>();
+  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 추후 로직 추가
+
+  useEffect(() => {
+    setIsFriend(friends.some((friend) => friend.id === user.id));
+  }, []);
+
   return (
-    <ContextMenu<HTMLDivElement>
-      renderMenu={() => <OptionMenu user={user} isFriend={true} isBlocked={false} />}
-    >
-      {(ref) => (
-        <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+    <>
+      {isFriend === undefined || isBlocked === undefined ? (
+        <Box w="100%" position="relative" px={3} py={1}>
           <PopoverHoc user={user} msgNum={msgNum} />
         </Box>
+      ) : (
+        <ContextMenu<HTMLDivElement>
+          renderMenu={() => <OptionMenu user={user} isFriend={isFriend} isBlocked={isBlocked} />}
+        >
+          {(ref) => (
+            <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+              <PopoverHoc user={user} msgNum={msgNum} />
+            </Box>
+          )}
+        </ContextMenu>
       )}
-    </ContextMenu>
+    </>
   );
 }
