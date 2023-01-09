@@ -204,8 +204,7 @@ export default function ChatRoomPage() {
   function checkIfMuted() {
     if (mutedTime === undefined) return -1;
     const nowTime = new Date();
-    const leftTime = mutedTime - nowTime;
-    console.log('leftTime : ', leftTime);
+    const leftTime = mutedTime.getTime() - nowTime.getTime();
     return leftTime;
   }
 
@@ -214,7 +213,6 @@ export default function ChatRoomPage() {
       console.log('socket is undefined');
       return;
     }
-    console.log(msg);
     setMsg('');
     if (inputRef.current !== null) inputRef.current.focus();
     const leftTime = checkIfMuted();
@@ -223,7 +221,6 @@ export default function ChatRoomPage() {
       alert(`${second} 초 후에 채팅 가능`);
       return;
     }
-    console.log(msg);
     socket.emit('message', { chatRoomId: roomNo, message: msg });
   }
 
