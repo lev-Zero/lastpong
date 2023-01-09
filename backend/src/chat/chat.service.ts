@@ -22,7 +22,7 @@ import { ChatLog } from './entity/chatLog.entity';
 import { ChatDmLog } from './entity/chatDmLog.entity';
 import { WsException } from '@nestjs/websockets';
 
-const temporary = 30 * 60 * 10;
+const temporary = 60 * 1000;
 
 @Injectable()
 export class ChatService {
