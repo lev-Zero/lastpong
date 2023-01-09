@@ -28,7 +28,7 @@ export class Auth42Strategy extends PassportStrategy(Strategy) {
       };
       return user;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

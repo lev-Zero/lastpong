@@ -22,7 +22,7 @@ export class AuthenticatedGuard implements CanActivate {
       const req = context.switchToHttp().getRequest();
       return req.isAuthenticated();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 }
