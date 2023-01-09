@@ -20,6 +20,11 @@ interface userStoreProps {
   fetchFriends: () => void;
   addFriend: (name: string) => void;
   deleteFriend: (name: string) => void;
+  blockedUsers: UserProps[];
+  setBlockedUsers: (friends: UserProps[]) => void;
+  fetchBlockedUsers: () => void;
+  addBlock: (name: string) => void;
+  deleteBlock: (name: string) => void;
 }
 
 export const userStore = create<userStoreProps>((set, get) => ({
@@ -115,6 +120,48 @@ export const userStore = create<userStoreProps>((set, get) => ({
       const text = await customFetch('DELETE', 'user/friend/name', { username: name });
       console.log(text);
       get().fetchFriends();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw Error(e.message);
+      }
+    }
+  },
+  blockedUsers: [],
+  setBlockedUsers: (blockedUsers: UserProps[]) => {
+    set((state) => ({ ...state, blockedUsers }));
+  },
+  fetchBlockedUsers: async () => {
+    try {
+      const rawBlockedUsers = await customFetch('GET', '/user/block');
+      const blockedUsers: UserProps[] = await Promise.all(
+        rawBlockedUsers.map(async ({ blockedUser: rawBlockedUser }: any) =>
+          convertRawUserToUser(rawBlockedUser)
+        )
+      );
+      get().setBlockedUsers(blockedUsers);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        return;
+      }
+    }
+  },
+  addBlock: async (name: string) => {
+    try {
+      const json = await customFetch('POST', 'user/block/name', { username: name });
+      console.log(json);
+      get().fetchBlockedUsers();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw Error(e.message);
+      }
+    }
+  },
+  deleteBlock: async (name: string) => {
+    try {
+      const json = await customFetch('DELETE', 'user/block/name', { username: name });
+      console.log(json);
+      get().fetchBlockedUsers();
     } catch (e) {
       if (e instanceof Error) {
         throw Error(e.message);

@@ -17,7 +17,23 @@ export default function UserProfilePage() {
   const router = useRouter();
   const [username, setUsername] = useState<string>();
   const [user, setUser] = useState<UserProps>();
-  const { addFriend } = userStore();
+  const { friends, addFriend, deleteFriend, blockedUsers, addBlock, deleteBlock } = userStore();
+  const [isFriend, setIsFriend] = useState<boolean>(false); // TODO: 연동
+  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 연동
+
+  useEffect(() => {
+    if (user === undefined) {
+      return;
+    }
+    setIsFriend(friends.some(({ name }) => name === user.name));
+  }, [friends, user]);
+
+  useEffect(() => {
+    if (user === undefined) {
+      return;
+    }
+    setIsBlocked(blockedUsers.some(({ name }) => name === user.name));
+  }, [blockedUsers, user]);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -100,14 +116,46 @@ export default function UserProfilePage() {
               ))}
             </VStack>
           </Flex>
-          <CustomButton
-            size="xl"
-            onClick={() => {
-              addFriend(user.name);
-            }}
-          >
-            ADD FRIEND
-          </CustomButton>
+          <HStack>
+            {!isFriend ? (
+              <CustomButton
+                size="xl"
+                onClick={() => {
+                  addFriend(user.name);
+                }}
+              >
+                ADD FRIEND
+              </CustomButton>
+            ) : (
+              <CustomButton
+                size="xl"
+                onClick={() => {
+                  deleteFriend(user.name);
+                }}
+              >
+                DELETE FRIEND
+              </CustomButton>
+            )}
+            {!isBlocked ? (
+              <CustomButton
+                size="xl"
+                onClick={() => {
+                  addBlock(user.name);
+                }}
+              >
+                BLOCK
+              </CustomButton>
+            ) : (
+              <CustomButton
+                size="xl"
+                onClick={() => {
+                  deleteBlock(user.name);
+                }}
+              >
+                UNBLOCK
+              </CustomButton>
+            )}
+          </HStack>
         </VStack>
       )}
     </>
