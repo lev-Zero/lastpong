@@ -17,7 +17,6 @@ interface ChatStoreProps {
   giveAdmin: (chatRoomId: number | undefined, userId: number) => void;
   removeAdmin: (chatRoomId: number | undefined, userId: number) => void;
   addBan: (chatRoomId: number | undefined, userId: number) => void;
-  joinAllMyDmRoom: (friends: UserProps[]) => void;
 }
 
 export const chatStore = create<ChatStoreProps>((set, get) => ({
@@ -98,22 +97,5 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       return;
     }
     socket.emit('addBan', { chatRoomId, userId });
-  },
-  joinAllMyDmRoom: (friends: UserProps[]) => {
-    const socket: Socket | undefined = get().socket;
-    if (socket === undefined) {
-      console.log('socket is undefined');
-      return;
-    }
-    socket.once('chatRoomDmMe', (res) => {
-      const dmRoomList = res.chatRoomDm;
-      console.log('dmRoomList', dmRoomList);
-      friends.forEach((friend) => {
-        socket.emit('createChatRoomDm', { targetId: friend.id }, console.log);
-      });
-    });
-    socket.emit('chatRoomDmMe', (err: any) => {
-      console.log(err);
-    });
   },
 }));

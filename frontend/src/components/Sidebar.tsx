@@ -33,7 +33,7 @@ export default function Sidebar() {
   const [allUsersExceptMe, setAllUsersExceptMe] = useState<UserProps[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { socket, makeSocket, joinAllMyDmRoom } = chatStore();
+  const { socket, makeSocket } = chatStore();
 
   useEffect(() => {
     if (socket === undefined) {
@@ -48,13 +48,6 @@ export default function Sidebar() {
     socket.on('createChatRoomDm', console.log);
     socket.on('join', console.log);
   }, [socket?.connected]);
-
-  useEffect(() => {
-    if (socket === undefined || !socket.connected || friends === undefined) {
-      return;
-    }
-    joinAllMyDmRoom(friends);
-  }, [socket?.connected, friends]);
 
   useEffect(() => {
     fetchFriends();
