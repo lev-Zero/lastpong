@@ -45,7 +45,6 @@ export default function Sidebar() {
     if (socket === undefined || !socket.connected) {
       return;
     }
-    socket.on('createChatRoomDm', console.log);
     socket.on('join', console.log);
   }, [socket?.connected]);
 
