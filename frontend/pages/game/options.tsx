@@ -27,8 +27,9 @@ import { useState, useEffect } from 'react';
 import { ReactElement } from 'react';
 import { Socket } from 'socket.io-client';
 import { gameStore } from '@/stores/gameStore';
+import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
-import { removeEmitHelper } from 'typescript';
+import { GameUserProps } from '@/interfaces/GameUserProps';
 
 export default function GameOptionsPage() {
   const router = useRouter();
@@ -36,10 +37,37 @@ export default function GameOptionsPage() {
   const [valueOpt2, setValueOpt2] = React.useState(false);
   const [valueInt1, setValueInt1] = React.useState(0);
   const [valueInt2, setValueInt2] = React.useState(0);
+
+  const [isMyTurn, setMyTurn] = React.useState(false);
+  const { me } = userStore();
+
+  const [leftUser, setLeftUser] = React.useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER1',
+    username42: '',
+  });
+
+  const [rightUser, setRightUser] = React.useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER2',
+    username42: '',
+  });
+
+  const [meUser, setMeUser] = React.useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER_ME',
+    username42: '',
+  });
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-
-  const { socket, room } = gameStore();
+  const { socket, room, isReady } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -62,24 +90,34 @@ export default function GameOptionsPage() {
     }
   }, [valueOpt2]);
 
-  //플레이어 이름을 통해서 정보 가져오기 필요
-  const leftUser: UserProps = {
-    id: room.players[0].user.id,
-    name: room.players[0].user.username,
-    imgUrl: '',
-    status: room.players[0].user.status,
-    rating: room.players[0].user.rating,
-  };
+  useEffect(() => {
+    if (room === undefined) return;
+    else {
+      if (room.players.length === 2) {
+        if (me.name === room.players[0].user.username) setMeUser(room.players[0].user);
+        if (me.name === room.players[1].user.username) setMeUser(room.players[1].user);
+        setLeftUser(room.players[0].user);
+        setRightUser(room.players[1].user);
+      }
+    }
+  }, [room]);
 
-  const rightUser: UserProps = {
-    id: room.players[1].user.id,
-    name: room.players[1].user.username,
-    imgUrl: '',
-    status: room.players[1].user.status, //UserStatus.INGAME,
-    rating: room.players[1].user.rating,
-  };
+  useEffect(() => {
+    if (meUser.username === leftUser.username) {
+      if (meUser.rating <= rightUser.rating) setMyTurn(false);
+      else setMyTurn(true);
+    } else if (meUser.username === rightUser.username) {
+      if (meUser.rating <= rightUser.rating) setMyTurn(false);
+      else setMyTurn(true);
+    }
+  }, [meUser]);
 
-  const isMyTurn: boolean = true;
+  useEffect(() => {
+    if (isReady === 0) return;
+    else {
+      if (room.gameRoomName !== '') router.push('/game/' + room.gameRoomName);
+    }
+  }, [isReady]);
 
   async function handleMatchBtnClicked() {
     setTimeSpent(1);
@@ -92,7 +130,6 @@ export default function GameOptionsPage() {
       console.log(room.gameRoomName);
       console.log(valueInt1);
       console.log(valueInt2);
-      console.log('Player readyGame');
       socket.emit('readyGame', {
         gameRoomName: room.gameRoomName,
         backgroundColor: valueInt1,
@@ -139,13 +176,23 @@ export default function GameOptionsPage() {
             <FormLabel htmlFor="dark-mode" mb="0">
               <Text fontSize="xl">DARK MODE?</Text>
             </FormLabel>
-            <Switch size="lg" id="dark-mode" onChange={(e) => setValueOpt1(!valueOpt1)} />
+            <Switch
+              size="lg"
+              id="dark-mode"
+              onChange={(e) => setValueOpt1(!valueOpt1)}
+              disabled={!isMyTurn}
+            />
           </FormControl>
           <FormControl display="flex" alignItems="center">
             <FormLabel htmlFor="fast-mode" mb="0">
               <Text fontSize="xl">FAST MODE?</Text>
             </FormLabel>
-            <Switch size="lg" id="dark-mode" onChange={(e) => setValueOpt2(!valueOpt2)} />
+            <Switch
+              size="lg"
+              id="dark-mode"
+              onChange={(e) => setValueOpt2(!valueOpt2)}
+              disabled={!isMyTurn}
+            />
           </FormControl>
         </Box>
         <Box py={10}>
