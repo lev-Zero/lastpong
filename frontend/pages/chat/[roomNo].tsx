@@ -1,5 +1,28 @@
 import MainLayout from '@/layouts/MainLayout';
-import { Center, Flex, HStack, Spacer, VStack, Image, Input, Spinner, Box } from '@chakra-ui/react';
+import {
+  Center,
+  Flex,
+  HStack,
+  Spacer,
+  VStack,
+  Image,
+  Input,
+  Spinner,
+  Box,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  Checkbox,
+  Text,
+  InputGroup,
+  InputRightElement,
+  Button,
+  ModalFooter,
+} from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React, { ReactElement, useState, useRef, useEffect, LegacyRef } from 'react';
@@ -11,6 +34,7 @@ import { ChatRoomProps, ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProps';
 import ChatUserItem from '@/components/ChatUserItem';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
+import { CustomButton } from '@/components/CustomButton';
 
 export default function ChatRoomPage() {
   const router = useRouter();
@@ -28,6 +52,12 @@ export default function ChatRoomPage() {
   const [mutedTime, setMutedTime] = useState<Date>(new Date()); // FIXME: mute는 동시에 여러명도 당할 수 있음.
 
   const messageBoxRef = useRef<HTMLDivElement>(null);
+
+  const {
+    isOpen: isSettingModalOpen,
+    onOpen: onSettingModalOpen,
+    onClose: onSettingModalClose,
+  } = useDisclosure();
 
   const scrollToBottom = () => {
     if (messageBoxRef.current) {
@@ -279,6 +309,49 @@ export default function ChatRoomPage() {
     }
   }
 
+  const [show, setShow] = useState(false);
+  const handleClick = () => setShow(!show);
+  const [valueTitle, setValueTitle] = useState('');
+  const [valuePassword, setValuePassword] = useState('');
+  const [roomProtected, setRoomProtected] = useState(false);
+  const handleTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setValueTitle(event.target.value);
+  const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setValuePassword(event.target.value);
+
+  const handleRoomProtected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRoomProtected(event.target.checked);
+    setValuePassword('');
+  };
+
+  const createChatRoom = () => {
+    if (valueTitle === '') {
+      alert('방 제목을 입력해주십시오.');
+      return;
+    }
+    if (roomProtected && valuePassword === '') {
+      alert('비밀번호를 입력해주십시오.');
+      return;
+    }
+    if (socket === undefined) {
+      console.log('socket is undefined!');
+      return;
+    }
+
+    console.log('updateChatRoom을 해야 할 자리 (제작되면 연동)');
+    // socket.emit('createChatRoom', {
+    //   name: valueTitle,
+    //   status: roomProtected ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
+    //   password: valuePassword,
+    // });
+    // socket.once('createChatRoom', (res) => {
+    //   console.log(res);
+    //   console.log(roomProtected);
+    //   router.push(`/chat/${res.chatRoom.id}`);
+    // });
+    onSettingModalClose();
+  };
+
   return (
     <>
       {chatRoom === undefined ? (
@@ -300,7 +373,9 @@ export default function ChatRoomPage() {
                   <Image ml={4} src="/lock-white.svg" />
                 ) : null}
                 <Spacer />
-                <Image w="40px" src="/chatroom-setting.svg" />
+                {myChatUserStatus === ChatUserStatus.OWNER ? (
+                  <Image w="40px" src="/chatroom-setting.svg" onClick={onSettingModalOpen} />
+                ) : null}
                 <Image w="30px" mx={10} src="/exit.svg" onClick={exitChatRoom} />
               </Flex>
               {/* Chat Part */}
@@ -366,6 +441,63 @@ export default function ChatRoomPage() {
               ))}
             </VStack>
           </Flex>
+          {/* 방 설정 변경 */}
+          <Modal isOpen={isSettingModalOpen} onClose={onSettingModalClose} isCentered>
+            <ModalOverlay />
+            <ModalContent bg="white" color="black" borderRadius={30}>
+              <Center>
+                <HStack>
+                  <VStack>
+                    <ModalHeader>
+                      <ModalCloseButton />
+                    </ModalHeader>
+                    <ModalBody>
+                      <HStack spacing={3}>
+                        <VStack spacing={6}>
+                          <Text>TITLE</Text>
+                          <HStack>
+                            <Text>PASSWORD</Text>
+                            <Checkbox onChange={handleRoomProtected} />
+                          </HStack>
+                        </VStack>
+                        <VStack>
+                          <Input
+                            variant="outline"
+                            placeholder="enter title"
+                            onChange={handleTitle}
+                          />
+
+                          <InputGroup size="md">
+                            <Input
+                              pr="4.5rem"
+                              type={show ? 'text' : 'password'}
+                              placeholder="enter password"
+                              onChange={handlePassword}
+                              disabled={!roomProtected}
+                              bg={!roomProtected ? 'gray.200' : 'white'}
+                              value={valuePassword}
+                            />
+                            <InputRightElement width="4.5rem">
+                              <Button h="1.75rem" size="sm" onClick={handleClick}>
+                                {show ? 'hide' : 'Show'}
+                              </Button>
+                            </InputRightElement>
+                          </InputGroup>
+                        </VStack>
+                      </HStack>
+                    </ModalBody>
+                    <ModalFooter>
+                      <VStack mb={'7'}>
+                        <CustomButton size="lg" onClick={createChatRoom}>
+                          UPDATE
+                        </CustomButton>
+                      </VStack>
+                    </ModalFooter>
+                  </VStack>
+                </HStack>
+              </Center>
+            </ModalContent>
+          </Modal>
         </>
       )}
     </>
