@@ -32,7 +32,9 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const [dmRoomNo, setDmRoomNo] = useState<number>();
   const { me } = userStore();
   const { socket } = chatStore();
-
+  const [msgCount, setMsgCount] = useState<number>(0);
+  const [isOpened, setIsOpened] = useState<boolean>(false);
+  const [lastIdx, setLastIdx] = useState<number>(-1);
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
     if (messageBoxRef.current) {
@@ -42,6 +44,16 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 
   useEffect(() => {
     scrollToBottom();
+    if (!isOpened) {
+      dmMsgList.forEach((msg, idx) => {
+        if (idx > lastIdx && msg.username === user.name && msg.targetUsername === me.name) {
+          setMsgCount((prev) => {
+            return prev + 1;
+          });
+          setLastIdx(idx);
+        }
+      });
+    }
   }, [dmMsgList]);
 
   function getDmRoomNo() {
@@ -61,6 +73,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         });
       });
     });
+    setMsgCount(0);
   }
 
   function submitDm() {
@@ -103,12 +116,50 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
     setMsg('');
   }
 
+  function makeDmList() {
+    let arr: any = [];
+
+    dmMsgList.map((msg, idx) =>
+      msg.username === me.name && msg.targetUsername === user.name
+        ? arr.push(
+            <Flex key={idx} width="100%">
+              <Spacer />
+              <Flex p={3} borderRadius="20px" bg={'main'} color={'white'} fontSize="2xl">
+                {msg.text}
+              </Flex>
+            </Flex>
+          )
+        : msg.username === user.name && msg.targetUsername === me.name
+        ? arr.push(
+            <Flex key={idx} width="100%">
+              <Flex p={3} borderRadius="20px" bg="gray.200" color="black" fontSize="2xl">
+                {msg.text}
+              </Flex>
+              <Spacer />
+            </Flex>
+          )
+        : null
+    );
+
+    return arr;
+  }
+
   return (
     //FIXME: placement가 하단에 고정될 수는 없을까?
-    <Popover placement="left" onOpen={getDmRoomNo} onClose={() => setMsg('')}>
+    <Popover
+      placement="left"
+      onOpen={() => {
+        getDmRoomNo();
+        setIsOpened(true);
+      }}
+      onClose={() => {
+        setMsg('');
+        setIsOpened(false);
+      }}
+    >
       <PopoverTrigger>
         <Box>
-          <RawUserItem user={user} msgNum={msgNum} />
+          <RawUserItem user={user} msgNum={msgCount} />
         </Box>
       </PopoverTrigger>
       <Portal>
@@ -136,25 +187,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
               overflow="scroll"
               ref={messageBoxRef}
             >
-              <>
-                {dmMsgList.map((msg, idx) =>
-                  msg.username === me.name && msg.targetUsername === user.name ? (
-                    <Flex key={idx} width="100%">
-                      <Spacer />
-                      <Flex p={3} borderRadius="20px" bg={'main'} color={'white'} fontSize="2xl">
-                        {msg.text}
-                      </Flex>
-                    </Flex>
-                  ) : msg.username === user.name && msg.targetUsername === me.name ? (
-                    <Flex key={idx} width="100%">
-                      <Flex p={3} borderRadius="20px" bg="gray.200" color="black" fontSize="2xl">
-                        {msg.text}
-                      </Flex>
-                      <Spacer />
-                    </Flex>
-                  ) : null
-                )}
-              </>
+              <>{makeDmList()}</>
             </VStack>
             <Spacer />
             <HStack w="full" p={5}>
