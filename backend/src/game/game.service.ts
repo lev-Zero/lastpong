@@ -347,8 +347,8 @@ export class GameService {
         nextBallPosition.x - ballRadius < 0 ||
         nextBallPosition.x + ballRadius > widthOnDisplay
       ) {
-        if (nextBallPosition.x - ballRadius < 0) ++gameRoom.players[0].score;
-        else ++gameRoom.players[1].score;
+        if (nextBallPosition.x - ballRadius < 0) ++gameRoom.players[1].score;
+        else ++gameRoom.players[0].score;
 
         this.resetBallPosition(gameRoom);
 

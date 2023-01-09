@@ -980,7 +980,7 @@ export class ChatGateway
           //   userStatus.CHATCHANNEL,
           // );
           await this.userService.updateStatus(so.data.id, userStatus.INGAME);
-          so.emit('leave', {
+          so.emit('leaveDm', {
             message: `owner가 ${chatRoomDm.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoomDm,
             targetUser,
@@ -1003,13 +1003,13 @@ export class ChatGateway
           ['joinedDmUser', 'owner'],
         );
 
-        socket.to(chatRoomDm.name).emit('leave', {
+        socket.to(chatRoomDm.name).emit('leaveDm', {
           message: `${chatRoomDm.name}방에 ${targetUser.username}이/가 나갔습니다.`,
           chatRoomDm,
           targetUser,
         });
 
-        socket.emit('leave', {
+        socket.emit('leaveDm', {
           message: `${chatRoomDm.name}방에 ${targetUser.username}이/가 나갔습니다.`,
           chatRoomDm,
           targetUser,
