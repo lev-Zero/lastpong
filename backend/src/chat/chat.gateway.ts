@@ -163,7 +163,7 @@ export class ChatGateway
             targetUserId: disconnectUser.id,
             chatRoomId: chatRoomDm.id,
           };
-          await this.leaveChatRoom(socket, leaveUser);
+          await this.leaveChatRoomDm(socket, leaveUser);
           // await this.chatService.leaveChatRoomDm(
           //   disconnectUser.id,
           //   chatRoomDm.id,
