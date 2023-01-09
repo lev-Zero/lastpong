@@ -1,4 +1,3 @@
-import { Body, HttpException, HttpStatus } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -58,7 +57,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       socket.data.user = user;
       socket_username[user.username] = socket;
-
+      this.gameService.removeSocketInQueue(socket);
       socket.emit('connection', { message: `${user.username} 연결`, user });
     } catch (e) {
       return new WsException(e.message);
@@ -76,6 +75,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
+      this.gameService.removeSocketInQueue(socket);
       socket.emit('disconnection', { message: `${user.username} 연결해제` });
     } catch (e) {
       return new WsException(e.message);
@@ -218,10 +218,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .to(validBody.gameRoomName)
           .emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
       } else {
+        // this.server.to(gameRoom.gameRoomName).emit('readyGame', {
+        //   message: `양 쪽 유저 게임 준비 완료`,
+        //   gameRoomOptions: gameRoom.facts,
+        //   players: gameRoom.players.map((player) => player.user),
+        // });
         this.server.to(gameRoom.gameRoomName).emit('readyGame', {
           message: `양 쪽 유저 게임 준비 완료`,
-          gameRoomOptions: gameRoom.facts,
-          players: gameRoom.players.map((player) => player.user),
+          gameRoom: gameRoom,
         });
       }
     } catch (e) {
@@ -399,6 +403,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* --------------------------
 	|				touchBar 		|
+	|				removeSocketInQueue 		|
 	---------------------------*/
 
   @SubscribeMessage('touchBar')
@@ -436,6 +441,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return new WsException(e.message);
     }
   }
+
+  @SubscribeMessage('removeSocketInQueue')
+  removeSocketInQueue(@ConnectedSocket() socket): WsException | null {
+    try {
+      this.removeSocketInQueue(socket);
+      socket.emit('removeSocketInQueue', { message: 'removeSocketInQueue' });
+    } catch (e) {
+      return new WsException(e.message);
+    }
+  }
+
   private gameParameterSanitizer(data: string) {
     try {
       const data1 = Sanitizer.blacklist(data, ' ');

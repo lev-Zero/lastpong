@@ -143,8 +143,10 @@ export class BlockService {
         .createQueryBuilder('blockedUser') //alias = select Block as blockedUser
         .delete()
         .from(Block)
-        .where('blockOfferUser = :id', { id: removeOfferUser })
-        .andWhere('blockedUser = :id', { id: blockedUser })
+        .where('blockOfferUser = :blockOfferUser', {
+          blockOfferUser: removeOfferUser,
+        })
+        .andWhere('blockedUser = :blockedUser', { blockedUser: blockedUser })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -160,8 +162,10 @@ export class BlockService {
         .createQueryBuilder('blockedUser')
         .delete()
         .from(Block)
-        .where('blockOfferUser = :id', { id: removeOfferUser })
-        .andWhere('blockedUser = :id', { id: blockedUser })
+        .where('blockOfferUser = :blockOfferUser', {
+          blockOfferUser: removeOfferUser,
+        })
+        .andWhere('blockedUser = :blockedUser', { blockedUser: blockedUser })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

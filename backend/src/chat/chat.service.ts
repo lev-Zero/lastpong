@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { chatRoomStatus } from 'src/user/enum/status.enum';
 import { UserService } from 'src/user/service/user.service';
@@ -20,6 +20,7 @@ import {
 } from './dto/chat.dto';
 import { ChatLog } from './entity/chatLog.entity';
 import { ChatDmLog } from './entity/chatDmLog.entity';
+import { WsException } from '@nestjs/websockets';
 
 const temporary = 30 * 60 * 10;
 
@@ -63,21 +64,14 @@ export class ChatService {
       if (chatRoom.status === chatRoomStatus.PROTECTED) {
         {
           if (!chatRoom.password)
-            throw new HttpException(
-              '비밀번호 입력해주세요',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new WsException('비밀번호 입력해주세요');
         }
         hashedPwd = await bcrypt.hashSync(chatRoom.password, 10);
       }
       const isChatRoom = await this.chatRoomRepository.findOne({
         where: { name: chatRoom.name },
       });
-      if (isChatRoom)
-        throw new HttpException(
-          '이미 사용중인 방 이름 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (isChatRoom) throw new WsException('이미 사용중인 방 이름 입니다.');
 
       const createChatRoom = await this.chatRoomRepository.create({
         name: chatRoom.name,
@@ -112,7 +106,7 @@ export class ChatService {
       delete createChatRoom.password;
       return createChatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -122,10 +116,7 @@ export class ChatService {
   ): Promise<ChatRoomDm> {
     try {
       if (userId == targetId)
-        throw new HttpException(
-          '나 자신과는 대화할 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('나 자신과는 대화할 수 없습니다.');
 
       const user = await this.userService.findUserById(userId);
       const target = await this.userService.findUserById(targetId);
@@ -135,11 +126,7 @@ export class ChatService {
       const isName = await this.chatRoomDmRepository.findOne({
         where: { name: chatRoomName },
       });
-      if (isName)
-        throw new HttpException(
-          '이미 사용중인 방 이름 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (isName) throw new WsException('이미 사용중인 방 이름 입니다.');
 
       const chatRoomDm = await this.chatRoomDmRepository.create({
         name: chatRoomName,
@@ -169,7 +156,7 @@ export class ChatService {
 
       return chatRoomDm;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -184,32 +171,21 @@ export class ChatService {
       const chatRoom = await this.findChatRoomById(body.chatRoomId, ['owner']);
 
       if (chatRoom.status == chatRoomStatus.PUBLIC)
-        throw new HttpException(
-          '이 방은 PUBLIC 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('이 방은 PUBLIC 입니다.');
       if (chatRoom.owner.id != user.id)
-        throw new HttpException(
-          '방 주인만 방 비밀번호 수정 가능합니다.',
-          HttpStatus.BAD_REQUEST,
-        );
-      if (!body.newPwd)
-        throw new HttpException(
-          '새 비밀번호를 입력해주세요.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인만 방 비밀번호 수정 가능합니다.');
+      if (!body.newPwd) throw new WsException('새 비밀번호를 입력해주세요.');
 
       const isCorrectPwd = await this.checkPwd(chatRoom.id, body.oldPwd);
       if (!isCorrectPwd)
-        throw new HttpException(
+        throw new WsException(
           '입력하신 이전 비밀번호가 현재 방 비밀번호와 일치하지 않습니다.',
-          HttpStatus.BAD_REQUEST,
         );
 
       const password = await bcrypt.hash(body.newPwd, 10);
       await this.chatRoomRepository.update(chatRoom.id, { password });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -219,7 +195,7 @@ export class ChatService {
 
       return await bcrypt.compare(password, chatRoom.password);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -247,7 +223,7 @@ export class ChatService {
 
       return chatRooms;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -291,7 +267,7 @@ export class ChatService {
       }
       return chatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -335,7 +311,7 @@ export class ChatService {
       }
       return chatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -376,7 +352,7 @@ export class ChatService {
 
       return chatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -391,11 +367,14 @@ export class ChatService {
     relations = [] as string[],
   ): Promise<ChatRoomDm> {
     try {
-      const chatRoom = await this.chatRoomDmRepository.findOne({
-        where: { id: chatRoomId },
-        relations,
-      });
+      const chatRoom = await this.chatRoomDmRepository
+        .findOne({
+          where: { id: chatRoomId },
+          relations,
+        })
+        .catch(() => null);
 
+      if (!chatRoom) throw new WsException('해당 채팅룸은 존재하지 않습니다.');
       if (chatRoom.owner) delete chatRoom.owner.token;
       if (chatRoom.joinedDmUser) {
         for (const joinedDmUser of chatRoom.joinedDmUser)
@@ -408,7 +387,7 @@ export class ChatService {
       }
       return chatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -439,7 +418,7 @@ export class ChatService {
       }
       return chatRoomDm;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -455,7 +434,7 @@ export class ChatService {
 
       return chatRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -479,28 +458,18 @@ export class ChatService {
       ]);
 
       if (chatRoom.owner.id != me.id)
-        throw new HttpException(
+        throw new WsException(
           '방 주인만 다른 유저를 admin으로 지정할 수 있습니다.',
-          HttpStatus.BAD_REQUEST,
         );
 
       if (targetUser.id == chatRoom.owner.id)
-        throw new HttpException(
-          '방 주인은 이미 admin 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인은 이미 admin 입니다.');
 
       if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
-        throw new HttpException(
-          '타겟유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이 방에 없습니다.');
 
       if (chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id))
-        throw new HttpException(
-          '타겟유저는 이미 admin입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이미 admin입니다.');
 
       if (!chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
         this.adminUserRepository.create({
@@ -513,7 +482,7 @@ export class ChatService {
         });
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -532,35 +501,25 @@ export class ChatService {
       ]);
 
       if (chatRoom.owner.id != me.id)
-        throw new HttpException(
+        throw new WsException(
           '방 주인만 다른 유저를 admin으로 지정할 수 있습니다.',
-          HttpStatus.BAD_REQUEST,
         );
 
       if (targetUser.id == chatRoom.owner.id)
-        throw new HttpException(
-          '방주인을 admin 지정취소 할 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방주인을 admin 지정취소 할 수 없습니다.');
 
       if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
-        throw new HttpException(
-          '타겟유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이 방에 없습니다.');
 
       if (!chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
-        throw new HttpException(
-          '타겟유저는 어드민이 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 어드민이 아닙니다.');
       }
 
       if (chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
         this.directRemoveAdminUser(targetUser.id, chatRoom.id);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -574,7 +533,7 @@ export class ChatService {
         .andWhere('chatRoom = :chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -599,28 +558,16 @@ export class ChatService {
       ]);
 
       if (chatRoom.owner.id == targetUser.id)
-        throw new HttpException(
-          '방 주인은 타겟유저로 만들 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
       if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
-        throw new HttpException(
-          '타겟유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이 방에 없습니다.');
 
       if (chatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
-        throw new HttpException(
-          '타겟유저는 admin 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 admin 입니다.');
 
       if (!chatRoom.adminUser.find((admin) => admin.user.id == me.id))
-        throw new HttpException(
-          '당신은 admin이 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('당신은 admin이 아닙니다.');
 
       const isMutedUser = await this.mutedUserRepository
         .findOne({ where: { user: targetUser } })
@@ -638,14 +585,11 @@ export class ChatService {
         if (
           chatRoom.mutedUser.find((user1) => user1.user.id == targetUser.id)
         ) {
-          throw new HttpException(
-            '유저는 이미 mute 상태 입니다',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('유저는 이미 mute 상태 입니다');
         }
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -665,28 +609,16 @@ export class ChatService {
       ]);
 
       if (chatRoom.owner.id == targetUser.id)
-        throw new HttpException(
-          '방 주인은 타겟유저로 만들 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
       if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
-        throw new HttpException(
-          '타겟유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이 방에 없습니다.');
 
       if (!chatRoom.adminUser.find((admin) => admin.user.id == me.id))
-        throw new HttpException(
-          '당신은 admin이 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('당신은 admin이 아닙니다.');
 
       if (!chatRoom.mutedUser.find((muted) => muted.user.id == targetUser.id)) {
-        throw new HttpException(
-          '타겟유저는 mute상태가 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 mute상태가 아닙니다.');
       }
 
       const isMutedUser = await this.mutedUserRepository
@@ -696,7 +628,7 @@ export class ChatService {
         this.directRemoveMuteUser(targetUserId, chatRoomId);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -711,7 +643,7 @@ export class ChatService {
         .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -736,29 +668,17 @@ export class ChatService {
       ]);
 
       if (findChatRoom.owner.id == targetUser.id)
-        throw new HttpException(
-          '방 주인은 타겟유저로 만들 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
       if (
         !findChatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id)
       )
-        throw new HttpException(
-          '타겟유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 이 방에 없습니다.');
 
       if (findChatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
-        throw new HttpException(
-          '타겟유저는 admin 입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 admin 입니다.');
       if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
-        throw new HttpException(
-          '당신은 admin이 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('당신은 admin이 아닙니다.');
 
       const isBannedUser = await this.bannedUserRepository
         .findOne({ where: { user: targetUser } })
@@ -785,14 +705,11 @@ export class ChatService {
             (user1) => user1.user.id == targetUser.id,
           )
         ) {
-          throw new HttpException(
-            '타겟유저는 이미 ban상태 입니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('타겟유저는 이미 ban상태 입니다.');
         }
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -812,16 +729,10 @@ export class ChatService {
       ]);
 
       if (findChatRoom.owner.id == targetUser.id)
-        throw new HttpException(
-          '방 주인은 타겟유저로 만들 수 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
       if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
-        throw new HttpException(
-          '당신은 admin이 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('당신은 admin이 아닙니다.');
 
       const isBannedUser = await this.bannedUserRepository.findOne({
         where: { user: targetUser },
@@ -830,13 +741,10 @@ export class ChatService {
       if (isBannedUser) {
         this.directRemoveBannedUser(targetUserId, chatRoomId);
       } else {
-        throw new HttpException(
-          '타겟유저는 ban상태가 아닙니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 ban상태가 아닙니다.');
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -851,7 +759,7 @@ export class ChatService {
         .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -878,30 +786,20 @@ export class ChatService {
             findChatRoom.password,
           );
 
-        if (!valide)
-          throw new HttpException(
-            '입력된 비밀번호는 잘못되었습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+        if (!valide) throw new WsException('입력된 비밀번호는 잘못되었습니다.');
       }
 
       for (const banned of findChatRoom.bannedUser)
         if (banned.user.id == user.id) {
           const time = new Date();
           if (banned.endTime > time)
-            throw new HttpException(
-              '유저는 방에서 밴당했습니다.',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new WsException('유저는 방에서 밴당했습니다.');
           else
             await this.directRemoveBannedUser(banned.user.id, findChatRoom.id);
         }
 
       if (findChatRoom.joinedUser.find((user1) => user1.user.id == user.id))
-        throw new HttpException(
-          '유저는 이미 방에 있습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('유저는 이미 방에 있습니다.');
 
       await this.joinedUserRepository.create({
         user: user,
@@ -912,7 +810,7 @@ export class ChatService {
         chatRoom: findChatRoom,
       });
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -938,17 +836,11 @@ export class ChatService {
       const offerUser = await this.userService.findUserById(offerUserId);
 
       if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUserId))
-        throw new HttpException(
-          '타겟유저는 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('타겟유저는 방에 없습니다.');
 
       if (offerUserId) {
         if (!chatRoom.joinedUser.find((user1) => user1.user.id == offerUserId))
-          throw new HttpException(
-            '요청유저는 방에 없습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('요청유저는 방에 없습니다.');
       }
 
       if (offerUserId && offerUserId != targetUser.id) {
@@ -957,26 +849,17 @@ export class ChatService {
           .catch(() => null);
 
         if (!isAdminOfferUser)
-          throw new HttpException(
-            '요청유저는 admin이 아닙니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('요청유저는 admin이 아닙니다.');
 
         const isAdmintargetUser = await this.adminUserRepository.findOne({
           where: { chatRoom: chatRoom, user: targetUser },
         });
 
         if (isAdmintargetUser)
-          throw new HttpException(
-            '타겟유저는 admin 입니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('타겟유저는 admin 입니다.');
 
         if (targetUser.id == chatRoom.owner.id) {
-          throw new HttpException(
-            '방 주인을 쫓아낼 수는 없습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('방 주인을 쫓아낼 수는 없습니다.');
         }
 
         for (const joinedUser of chatRoom.joinedUser)
@@ -1000,7 +883,7 @@ export class ChatService {
         return await this.removeChatRoom(chatRoom.id);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1019,7 +902,7 @@ export class ChatService {
         .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1038,7 +921,7 @@ export class ChatService {
       await this.joinedUserRepository.remove(chatRoom.joinedUser);
       await this.chatRoomRepository.remove(chatRoom);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1063,10 +946,7 @@ export class ChatService {
 
       if (offerUser.id && offerUser.id != targetUser.id) {
         if (targetUser.id == chatRoomDm.owner.id) {
-          throw new HttpException(
-            '방 주인을 쫓아낼 수는 없습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('방 주인을 쫓아낼 수는 없습니다.');
         }
 
         for (const joinedUser of chatRoomDm.joinedDmUser)
@@ -1088,7 +968,7 @@ export class ChatService {
         return await this.removeChatRoomDm(chatRoomDm.id);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1107,7 +987,7 @@ export class ChatService {
         .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1121,7 +1001,7 @@ export class ChatService {
       await this.joinedDmUserRepository.remove(chatRoomDm.joinedDmUser);
       await this.chatRoomDmRepository.remove(chatRoomDm);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1134,23 +1014,13 @@ export class ChatService {
         'joinedUser',
       ]).catch(() => null);
 
-      if (!user)
-        throw new HttpException(
-          '메시지 보낸 유저는 존재하지 않습니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('메시지 보낸 유저는 존재하지 않습니다');
 
       if (!chatRoom)
-        throw new HttpException(
-          '메시지 보낸 채팅룸은 존재하지 않습니다',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('메시지 보낸 채팅룸은 존재하지 않습니다');
 
       if (!chatRoom.joinedUser.find((joined) => joined.user.id == user.id))
-        throw new HttpException(
-          '메시지 보낸 유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('메시지 보낸 유저는 이 방에 없습니다.');
       const log = {
         message: body.message,
         user: user,
@@ -1160,7 +1030,7 @@ export class ChatService {
       const chatLog = await this.chatLogRepository.create(log);
       await this.chatLogRepository.save(chatLog);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1173,23 +1043,13 @@ export class ChatService {
         'joinedDmUser',
       ]).catch(() => null);
 
-      if (!user)
-        throw new HttpException(
-          '메시지 보낸 유저는 존재하지 않습니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!user) throw new WsException('메시지 보낸 유저는 존재하지 않습니다');
 
       if (!chatRoomDm)
-        throw new HttpException(
-          '메시지 보낸 채팅룸은 존재하지 않습니다',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('메시지 보낸 채팅룸은 존재하지 않습니다');
 
       if (!chatRoomDm.joinedDmUser.find((joined) => joined.user.id == user.id))
-        throw new HttpException(
-          '메시지 보낸 유저는 이 방에 없습니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('메시지 보낸 유저는 이 방에 없습니다.');
       const log = {
         message: body.message,
         user: user,
@@ -1199,7 +1059,7 @@ export class ChatService {
       const chatDmLog = await this.chatDmLogRepository.create(log);
       await this.chatDmLogRepository.save(chatDmLog);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1212,7 +1072,7 @@ export class ChatService {
         .andWhere('ownerId = :ownerId', { ownerId: userId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -1225,7 +1085,7 @@ export class ChatService {
         .andWhere('ownerId = :ownerId', { ownerId: userId })
         .execute();
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 }

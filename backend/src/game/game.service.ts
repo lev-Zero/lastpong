@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Injectable } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
 import { GamePlayerDto, GameRoomDto, PositionDto } from './dto/game.dto';
 import {
@@ -9,7 +9,7 @@ import {
   PlayerType,
 } from './enum/game.enum';
 import { MatchService } from 'src/user/service/match.service';
-import { ConnectedSocket } from '@nestjs/websockets';
+import { ConnectedSocket, WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class GameService {
@@ -36,7 +36,7 @@ export class GameService {
     try {
       return this.gameRooms.get(gameRoomName);
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -44,7 +44,7 @@ export class GameService {
     try {
       return this.gameRooms;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -54,34 +54,26 @@ export class GameService {
   ): GamePlayerDto | null {
     try {
       const gameRoom = this.gameRooms.get(gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
       for (const player of gameRoom.players) {
         if (player.user.id == userId) return player;
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
   findSpectatorInGameRoom(userId: number, gameRoomName: string): number | null {
     const gameRoom = this.gameRooms.get(gameRoomName);
-    if (!gameRoom)
-      throw new HttpException(
-        '존재하지 않는 게임룸 입니다',
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
     for (const spectatorId of gameRoom.spectators) {
       if (spectatorId == userId) return spectatorId;
     }
     return null;
   }
 
-  findGameRoomOfUser(userId: number): any {
+  findGameRoomOfUser(userId: number): string | null {
     try {
       for (const gameRoom of this.gameRooms) {
         for (const player of gameRoom[1].players) {
@@ -95,7 +87,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -134,7 +126,7 @@ export class GameService {
       this.gameRooms.set(gameRoomName, gameRoom);
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -164,15 +156,12 @@ export class GameService {
           if (!gameRoom.spectators) gameRoom.spectators = [];
           gameRoom.spectators.push(socket.data.user.id);
         } else {
-          throw new HttpException(
-            '아직 해당 게임에 참관할 수 없습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new WsException('아직 해당 게임에 참관할 수 없습니다.');
         }
       }
       return { gameRoom, user };
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -183,25 +172,21 @@ export class GameService {
     mode: number,
   ): GameRoomDto | null {
     try {
-      let gameOption;
+      const gameOption = {
+        backgroundColor: 0,
+        mode: 0,
+      };
       gameOption['backgroundColor'] = backgroundColor;
       gameOption['mode'] = mode;
       const gameRoom = this.gameRooms.get(gameRoomName);
-      if (!gameRoom)
-        throw new HttpException(
-          '존재하지 않는 게임룸 입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       const findPlayer = this.findPlayerInGameRoom(
         player.user.id,
         gameRoomName,
       );
       if (!findPlayer)
-        throw new HttpException(
-          `${gameRoomName}에 해당 플레이어는 없습니다.`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException(`${gameRoomName}에 해당 플레이어는 없습니다.`);
 
       for (const player of gameRoom.players) {
         if (player.user.username == findPlayer.user.username) {
@@ -221,32 +206,67 @@ export class GameService {
       }
 
       gameRoom.gameStatus = gameStatus.COUNTDOWN;
-      const selectRandomOption: number = Math.round(Math.random());
-      gameRoom.facts.gameOption.backgroundColor =
-        gameRoom.players[selectRandomOption].gameOption.backgroundColor;
-      gameRoom.facts.gameOption.mode =
-        gameRoom.players[selectRandomOption].gameOption.mode;
 
-      if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
-        gameRoom.facts.ball.speed = 40;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
-        gameRoom.facts.ball.speed = 15;
+      const player1Rating = gameRoom.players[0].user.rating;
+      const player2Rating = gameRoom.players[1].user.rating;
+      let lowerRatingUser: number;
+      if (player1Rating < player2Rating) lowerRatingUser = 0;
+      else if (player1Rating > player2Rating) lowerRatingUser = 1;
+      else lowerRatingUser = 2;
+
+      if (lowerRatingUser == 2) {
+        const selectRandomOption: number = Math.round(Math.random());
+
+        gameRoom.facts.gameOption.backgroundColor =
+          gameRoom.players[selectRandomOption].gameOption.backgroundColor;
+
+        gameRoom.facts.gameOption.mode =
+          gameRoom.players[selectRandomOption].gameOption.mode;
+
+        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+          gameRoom.facts.ball.speed = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+          gameRoom.facts.ball.speed = 15;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+          gameRoom.facts.ball.radius = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+          gameRoom.facts.ball.radius = 10;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+          gameRoom.facts.touchBar.height = 300;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+          gameRoom.facts.touchBar.height = 150;
+      } else {
+        gameRoom.facts.gameOption.backgroundColor =
+          gameRoom.players[lowerRatingUser].gameOption.backgroundColor;
+
+        gameRoom.facts.gameOption.mode =
+          gameRoom.players[lowerRatingUser].gameOption.mode;
+
+        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+          gameRoom.facts.ball.speed = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+          gameRoom.facts.ball.speed = 15;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+          gameRoom.facts.ball.radius = 40;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+          gameRoom.facts.ball.radius = 10;
+        }
+
+        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+          gameRoom.facts.touchBar.height = 300;
+        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+          gameRoom.facts.touchBar.height = 150;
       }
-
-      if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
-        gameRoom.facts.ball.radius = 40;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
-        gameRoom.facts.ball.radius = 10;
-      }
-
-      if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
-        gameRoom.facts.touchBar.height = 300;
-      } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
-        gameRoom.facts.touchBar.height = 150;
 
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -277,7 +297,7 @@ export class GameService {
 
       return gameRoom.playing.ball.position;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -304,7 +324,7 @@ export class GameService {
         radian,
       );
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -336,7 +356,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -402,7 +422,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -436,7 +456,7 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -446,7 +466,11 @@ export class GameService {
 |			exitGameRoom|
 ---------------------------*/
 
-  isGameOver(gameRoom: GameRoomDto, server: any, socket: Socket): null {
+  isGameOver(
+    gameRoom: GameRoomDto,
+    server: Server,
+    @ConnectedSocket() socket: Socket,
+  ): null {
     try {
       for (const player of gameRoom.players) {
         if (player.score == gameRoom.facts.score.max) {
@@ -456,16 +480,16 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
   async gameOver(
     gameRoom: GameRoomDto,
     win: GamePlayerDto,
-    server: any,
+    server: Server,
     @ConnectedSocket() socket: Socket,
-  ): Promise<any> {
+  ): Promise<null> {
     try {
       let winner;
       let loser;
@@ -504,16 +528,17 @@ export class GameService {
             .emit('gameOver', { message: 'gameOver', winner, loser });
         }
       }
+      return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
-  async exitGameRoom(server: any, socket: Socket): Promise<any> {
+  async exitGameRoom(server: any, socket: Socket): Promise<number[] | boolean> {
     try {
       const userId = socket.data.user.id;
-      if (this.queue.indexOf(userId) != -1) {
-        this.queue.splice(this.queue.indexOf(userId), 1);
+      if (this.queue.indexOf(socket) != -1) {
+        this.queue.splice(this.queue.indexOf(socket), 1);
       }
 
       for (const gameRoom of this.gameRooms.values()) {
@@ -545,7 +570,7 @@ export class GameService {
           return this.gameRooms.delete(gameRoom.gameRoomName);
       }
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
@@ -554,28 +579,19 @@ export class GameService {
 |				isPlayerInAnyGameRoom			|
 ---------------------------*/
 
-  randomGameMatching(socket: Socket): any {
+  randomGameMatching(@ConnectedSocket() socket: Socket): null | GameRoomDto {
     try {
       if (this.queue.find((playerSockets) => playerSockets == socket)) {
-        throw new HttpException(
-          '이미 queue에서 다른 유저 기다리는 중입니다',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('이미 queue에서 다른 유저 기다리는 중입니다');
       }
       if (this.isPlayerInAnyGameRoom(socket.data.user.id)) {
-        throw new HttpException(
-          '이미 다른 게임룸에 참여중입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('이미 다른 게임룸에 참여중입니다.');
       }
 
       this.queue.push(socket);
 
       if (this.queue.length < 2) {
-        throw new HttpException(
-          '다른 유저를 기다리는 중입니다.',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new WsException('다른 유저를 기다리는 중입니다.');
         return;
       }
 
@@ -589,11 +605,11 @@ export class GameService {
       }
       return gameRoom;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
     }
   }
 
-  isPlayerInAnyGameRoom(MyId: number): GamePlayerDto {
+  isPlayerInAnyGameRoom(MyId: number): GamePlayerDto | null {
     try {
       for (const gameRoom of this.gameRooms.values()) {
         for (const player of gameRoom.players) {
@@ -602,7 +618,17 @@ export class GameService {
       }
       return null;
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      throw new WsException(e.message);
+    }
+  }
+  removeSocketInQueue(@ConnectedSocket() socket: Socket): null {
+    try {
+      if (this.queue.indexOf(socket) != -1) {
+        this.queue.splice(this.queue.indexOf(socket), 1);
+      }
+      return null;
+    } catch (e) {
+      throw new WsException(e.message);
     }
   }
 }
