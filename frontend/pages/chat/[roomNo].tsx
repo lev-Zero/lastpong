@@ -25,7 +25,7 @@ export default function ChatRoomPage() {
   const { socket } = chatStore();
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
-  const [mutedTime, setMutedTime] = useState<Date>(new Date());
+  const [mutedTime, setMutedTime] = useState<Date>(new Date()); // FIXME: mute는 동시에 여러명도 당할 수 있음.
 
   const messageBoxRef = useRef<HTMLDivElement>(null);
 
@@ -107,17 +107,35 @@ export default function ChatRoomPage() {
     function convertToChatUserList(chatRoom: ChatRoomProps) {
       const ret: ChatUserItemProps[] = [];
       const usedIds: number[] = [];
-      ret.push({ myChatUserStatus, user: chatRoom.owner, role: ChatUserStatus.OWNER, roomNo });
+      ret.push({
+        myChatUserStatus,
+        user: chatRoom.owner,
+        isMuted: chatRoom.mutedUsers.some(({ id }) => id === chatRoom.owner.id),
+        role: ChatUserStatus.OWNER,
+        roomNo,
+      });
       usedIds.push(chatRoom.owner.id);
       chatRoom.adminUsers.forEach((user: UserProps) => {
         if (!usedIds.includes(user.id)) {
-          ret.push({ myChatUserStatus, user, role: ChatUserStatus.ADMIN, roomNo });
+          ret.push({
+            myChatUserStatus,
+            user,
+            isMuted: chatRoom.mutedUsers.some(({ id }) => id === user.id),
+            role: ChatUserStatus.ADMIN,
+            roomNo,
+          });
           usedIds.push(user.id);
         }
       });
       chatRoom.joinedUsers.forEach((user: UserProps) => {
         if (!usedIds.includes(user.id)) {
-          ret.push({ myChatUserStatus, user, role: ChatUserStatus.COMMON, roomNo });
+          ret.push({
+            myChatUserStatus,
+            user,
+            isMuted: chatRoom.mutedUsers.some(({ id }) => id === user.id),
+            role: ChatUserStatus.COMMON,
+            roomNo,
+          });
           usedIds.push(user.id);
         }
       });
@@ -158,11 +176,7 @@ export default function ChatRoomPage() {
     });
     socket.on('mute', (res) => {
       console.log(res.message);
-      // console.log(
-      //   'mute end time',
-      //   res.chatRoom.muted[0].user.username,
-      //   res.chatRoom.muted[0].endTime
-      // );
+      socket.emit('chatRoomById', { chatRoomId: roomNo });
 
       const tmp = res.chatRoom.muted.find((muted: any) => muted.user.username === me.name);
       if (tmp) {
@@ -338,6 +352,7 @@ export default function ChatRoomPage() {
                   key={idx}
                   myChatUserStatus={myChatUserStatus}
                   user={chatUserItem.user}
+                  isMuted={chatUserItem.isMuted}
                   role={chatUserItem.role}
                   roomNo={roomNo}
                 />

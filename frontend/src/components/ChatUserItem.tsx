@@ -7,7 +7,7 @@ import { OptionMenu } from './OptionMenu';
 import { userStore } from '@/stores/userStore';
 import { useEffect, useState } from 'react';
 
-function ChatUserItem({ myChatUserStatus, user, role, roomNo }: ChatUserItemProps) {
+function ChatUserItem({ user, role }: ChatUserItemProps) {
   return (
     <>
       {role === ChatUserStatus.OWNER ? (
@@ -35,25 +35,22 @@ function ChatUserItem({ myChatUserStatus, user, role, roomNo }: ChatUserItemProp
 export default function ContextMenuHoc({
   myChatUserStatus,
   user,
+  isMuted,
   role,
   roomNo,
 }: ChatUserItemProps) {
   const { friends } = userStore();
   const [isFriend, setIsFriend] = useState<boolean>();
-  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 추후 로직 추가
-  const [isMuted, setIsMuted] = useState<boolean>(false); // TODO: 추후 로직 추가
+  const [isBlocked, setIsBlocked] = useState<boolean>();
 
   useEffect(() => {
     setIsFriend(friends.some((friend) => friend.id === user.id));
+    setIsBlocked(false); // TODO: isBlocked는 userStore에서 관리하다가 꺼내쎠야 함.
   }, []);
 
   return (
     <>
-      {isFriend === undefined ||
-      isBlocked === undefined ||
-      (myChatUserStatus !== ChatUserStatus.COMMON && isMuted === undefined) ? (
-        <></>
-      ) : (
+      {isFriend === undefined || isBlocked === undefined ? null : (
         <ContextMenu<HTMLDivElement>
           renderMenu={() => (
             <>
@@ -77,6 +74,7 @@ export default function ContextMenuHoc({
               <ChatUserItem
                 myChatUserStatus={myChatUserStatus}
                 user={user}
+                isMuted={isMuted}
                 role={role}
                 roomNo={roomNo}
               />
