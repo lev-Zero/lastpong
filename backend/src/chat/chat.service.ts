@@ -984,7 +984,7 @@ export class ChatService {
         .delete()
         .from(JoinedDmUser)
         .where('user = :user', { user: user.id })
-        .andWhere('chatRoom =:chatRoom', { chatRoom: chatRoomId })
+        .andWhere('chatRoomDm =:chatRoomDm', { chatRoomDm: chatRoomId })
         .execute();
     } catch (e) {
       throw new WsException(e.message);
