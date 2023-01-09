@@ -45,12 +45,12 @@ export function ChatAdminOptionMenu({
           </Text>
         ) : (
           <Text
-            color="gray.200"
+            color="black"
             onClick={() => {
               removeMute(roomNo, user.id);
             }}
           >
-            MUTE 1 MIN
+            UNMUTE
           </Text>
         )}
       </MenuItem>

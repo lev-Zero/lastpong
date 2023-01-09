@@ -179,9 +179,8 @@ export default function ChatRoomPage() {
       socket.emit('chatRoomById', { chatRoomId: roomNo });
 
       const tmp = res.chatRoom.muted.find((muted: any) => muted.user.username === me.name);
-      if (tmp) {
+      if (tmp !== undefined) {
         const endTime = tmp.endTime;
-        console.log(endTime);
         if (endTime) {
           console.log('endtime : ', endTime);
           setMutedTime(new Date(endTime));
@@ -209,6 +208,15 @@ export default function ChatRoomPage() {
       }
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
+
+    return () => {
+      socket.off('chatRoomById');
+      socket.off('join');
+      socket.off('admin');
+      socket.off('ban');
+      socket.off('mute');
+      socket.off('leave');
+    };
   }, [roomNo]);
 
   function exitChatRoom() {
@@ -218,12 +226,6 @@ export default function ChatRoomPage() {
     }
 
     socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
-    socket.off('chatRoomById');
-    socket.off('join');
-    socket.off('admin');
-    socket.off('mute');
-    socket.off('ban');
-    socket.off('leave');
     router.push('/chat');
   }
 
