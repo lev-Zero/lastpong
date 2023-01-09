@@ -15,6 +15,7 @@ interface ChatStoreProps {
   chatRoomList: ChatRoomItemProps[];
   setChatRoomList: (chatRoomList: ChatRoomItemProps[]) => void;
   giveAdmin: (chatRoomId: number | undefined, userId: number) => void;
+  muteUser: (chatRoomId: number | undefined, userId: number) => void;
   removeAdmin: (chatRoomId: number | undefined, userId: number) => void;
   addBan: (chatRoomId: number | undefined, userId: number) => void;
 }
@@ -70,6 +71,20 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       return;
     }
     socket.emit('addAdmin', { chatRoomId, userId });
+  },
+  muteUser: (chatRoomId: number | undefined, userId: number) => {
+    const socket = get().socket;
+
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (chatRoomId === undefined) {
+      console.log('chatRoomId is undefined');
+      return;
+    }
+    console.log('mute user');
+    socket.emit('addMute', { chatRoomId, userId });
   },
   removeAdmin: (chatRoomId: number | undefined, userId: number) => {
     const socket = get().socket;

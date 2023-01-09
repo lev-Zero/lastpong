@@ -25,6 +25,7 @@ export default function ChatRoomPage() {
   const { socket } = chatStore();
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
+  const [mutedTime, setMutedTime] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!router.isReady) {
@@ -41,7 +42,6 @@ export default function ChatRoomPage() {
     if (roomNo === undefined) {
       return;
     }
-
     socket.on('message', (res) => {
       setMsgList((prev) => {
         return [
@@ -146,6 +146,21 @@ export default function ChatRoomPage() {
     });
     socket.on('mute', (res) => {
       console.log(res.message);
+      console.log(
+        'mute end time',
+        res.chatRoom.muted[0].user.username,
+        res.chatRoom.muted[0].endTime
+      );
+
+      const tmp = res.chatRoom.muted.find((muted: any) => muted.user.username === me.name);
+      if (tmp) {
+        const endTime = tmp.endTime;
+        console.log(endTime);
+        if (endTime) {
+          console.log('endtime : ', endTime);
+          setMutedTime(new Date(endTime));
+        }
+      }
       socket.emit('chatRoomById', { chatRoomId: roomNo });
     });
     socket.on('ban', (res) => {
@@ -183,6 +198,14 @@ export default function ChatRoomPage() {
     router.push('/chat');
   }
 
+  function checkIfMuted() {
+    if (mutedTime === undefined) return -1;
+    const nowTime = new Date();
+    const leftTime = mutedTime - nowTime;
+    console.log('leftTime : ', leftTime);
+    return leftTime;
+  }
+
   function handleSendButtonClicked() {
     if (socket === undefined) {
       console.log('socket is undefined');
@@ -191,6 +214,13 @@ export default function ChatRoomPage() {
     console.log(msg);
     setMsg('');
     if (inputRef.current !== null) inputRef.current.focus();
+    const leftTime = checkIfMuted();
+    if (leftTime > 0) {
+      const second = Math.floor(leftTime / 1000);
+      alert(`${second} 초 후에 채팅 가능`);
+      return;
+    }
+    console.log(msg);
     socket.emit('message', { chatRoomId: roomNo, message: msg });
   }
 
@@ -205,6 +235,13 @@ export default function ChatRoomPage() {
     if (e.key === 'Enter') {
       console.log(msg);
       setMsg('');
+      const leftTime = checkIfMuted();
+      if (leftTime > 0) {
+        const second = Math.floor(leftTime / 1000);
+        alert(`${second} 초 후에 채팅 가능`);
+        return;
+      }
+
       socket.emit('message', { chatRoomId: roomNo, message: msg });
     }
   }
