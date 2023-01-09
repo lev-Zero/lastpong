@@ -847,13 +847,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(chatRoomDm.name).emit('join', {
         message: `${chatRoomDm.name}방에 ${user.username}이/가 들어왔습니다`,
+        hostUserId: user.id,
+        targetUserId: target.id,
+        chatRoomDmId: chatRoomDm.id,
       });
 
       targetSocket.join(chatRoomDm.name);
 
       this.server.to(chatRoomDm.name).emit('join', {
         message: `${chatRoomDm.name}방에 ${target.username}이/가 들어왔습니다`,
-        inviteUserId: user.id,
+        hostUserId: user.id,
+        targetUserId: target.id,
         chatRoomDmId: chatRoomDm.id,
       });
     } catch (e) {

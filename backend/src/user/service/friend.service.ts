@@ -107,8 +107,10 @@ export class FriendService {
         .createQueryBuilder('friend') //alias = select Friend as friend
         .delete()
         .from(Friend)
-        .where('friendOfferUserId = :id', { id: removeOfferUser })
-        .andWhere('friendId = :id', { id: friend })
+        .where('friendOfferUserId = :friendOfferUserId', {
+          friendOfferUserId: removeOfferUser,
+        })
+        .andWhere('friendId = :friendId', { friendId: friend })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -124,8 +126,10 @@ export class FriendService {
         .createQueryBuilder('friend') //alias = select Friend as friend
         .delete()
         .from(Friend)
-        .where('friendOfferUserId = :id', { id: removeOfferUser })
-        .andWhere('friendId = :id', { id: friend })
+        .where('friendOfferUserId = :friendOfferUserId', {
+          friendOfferUserId: removeOfferUser,
+        })
+        .andWhere('friendId = :friendId', { friendId: friend })
         .execute();
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
