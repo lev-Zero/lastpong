@@ -401,7 +401,7 @@ export class GameService {
           nextBallPosition.x + ballRadius > widthOnDisplay
         )
       ) {
-        if (gameRoom.players.length == 2) {
+        if (gameRoom.players.length === 2) {
           if (
             nextBallPosition.y >=
               gameRoom.players[0].touchBar - touchBarHeight / 2 &&
@@ -410,6 +410,10 @@ export class GameService {
           ) {
             if (nextBallPosition.x - ballRadius < gameRoom.facts.touchBar.x) {
               gameRoom.playing.ball.velocity.x *= -1;
+              nextBallPosition.x =
+                gameRoom.facts.touchBar.x +
+                gameRoom.facts.touchBar.width +
+                ballRadius;
               return this.updateBallPositionAndVelocity(
                 gameRoom.playing.ball.position.x,
                 gameRoom.playing.ball.position.y,
@@ -429,6 +433,11 @@ export class GameService {
               widthOnDisplay - gameRoom.facts.touchBar.x
             ) {
               gameRoom.playing.ball.velocity.x *= -1;
+              nextBallPosition.x =
+                gameRoom.facts.display.width -
+                gameRoom.facts.touchBar.x -
+                gameRoom.facts.touchBar.width -
+                ballRadius;
               return this.updateBallPositionAndVelocity(
                 gameRoom.playing.ball.position.x,
                 gameRoom.playing.ball.position.y,

@@ -4,7 +4,12 @@ import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
+import { userStore } from '@/stores/userStore';
+import dynamic from 'next/dynamic';
+import p5Types from 'p5';
 import { GameRoomProps } from '@/interfaces/GameRoomProps';
+import { GameUserProps } from '@/interfaces/GameUserProps';
+
 import {
   Button,
   Center,
@@ -23,11 +28,6 @@ import {
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
-
-// Game Board
-let gameBoardHeight: number = 800;
-let gameBoardWidth: number = 1400;
-let ballRadius: number = 12.5;
 
 const styles = {
   MainLayout: {
@@ -51,8 +51,8 @@ const styles = {
   } as React.CSSProperties,
 
   GameLayout: {
-    width: '1400px',
-    height: '800px',
+    width: '100%',
+    height: '100%',
   } as React.CSSProperties,
 
   TextUser: {
@@ -68,82 +68,146 @@ const styles = {
   } as React.CSSProperties,
 };
 
+const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
+  ssr: false,
+});
+
 export default function GamePage() {
-  const { room, setRoom } = gameStore();
-
-  let curRoom: GameRoomProps;
-
-  curRoom = room;
-  let paddle1 = {
-    width: 25,
-    height: 100,
-    x: 0,
-    y: gameBoardHeight / 2 - 50,
-  };
-
-  let paddle2 = {
-    width: 25,
-    height: 100,
-    x: gameBoardWidth - 25,
-    y: gameBoardHeight / 2 - 50,
-  };
-
-  function clearBoard(context: CanvasRenderingContext2D) {
-    context.strokeStyle = 'black';
-    context.lineWidth = 2;
-    context.fillStyle = '#e3e3e3';
-    context.fillStyle = '#';
-    context.fillRect(0, 0, 1400, 800);
-  }
-
-  function drawPaddles(context: CanvasRenderingContext2D) {
-    context.strokeStyle = 'black';
-    context.fillStyle = 'white';
-    context.fillRect(paddle1.x, paddle1PosY, paddle1.width, paddle1.height);
-    context.strokeRect(paddle1.x, paddle1PosY, paddle1.width, paddle1.height);
-
-    context.strokeStyle = 'black';
-    context.fillStyle = 'white';
-    context.fillRect(paddle2.x, paddle2PosY, paddle2.width, paddle2.height);
-    context.strokeRect(paddle2.x, paddle2PosY, paddle2.width, paddle2.height);
-  }
-
-  function drawBall(context: CanvasRenderingContext2D) {
-    context.fillStyle = '#0f0';
-    context.strokeStyle = 'black';
-    context.lineWidth = 3;
-    context.beginPath();
-    context.arc(ballPosX, ballPosY, ballRadius, 0, 2 * Math.PI);
-    context.stroke();
-    context.fill();
-  }
-
-  function changeDir(e: React.KeyboardEvent<HTMLImageElement>) {
-    let keyPressed = e.key;
-    switch (keyPressed) {
-      case 'w':
-        if (paddle1PosY > 0) {
-          setPaddle1PosY(paddle1PosY - 50);
-        }
-        break;
-      case 's':
-        if (paddle1PosY < gameBoardHeight - paddle1.height) {
-          setPaddle1PosY(paddle1PosY + 50);
-        }
-        break;
-    }
-  }
-
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  React.useEffect(() => {
-    if (!canvasRef.current) return;
-    const canvas: HTMLCanvasElement = canvasRef.current!;
-    const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
-
-    clearBoard(context);
-    drawBall(context);
-    drawPaddles(context);
+  const { socket, room, GameBall, GameScore, leftTouchBar, rightTouchBar } = gameStore();
+  const { me } = userStore();
+  const [leftUser, setLeftUser] = useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER1',
+    username42: '',
   });
+
+  const [rightUser, setRightUser] = useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER2',
+    username42: '',
+  });
+
+  const [meUser, setMeUser] = useState<GameUserProps>({
+    id: 0,
+    rating: 1000,
+    status: 0,
+    username: 'PLAYER_ME',
+    username42: '',
+  });
+
+  useEffect(() => {
+    if (room === undefined) return;
+    else {
+      if (room.players.length === 2) {
+        if (me.name === room.players[0].user.username) setMeUser(room.players[0].user);
+        if (me.name === room.players[1].user.username) setMeUser(room.players[1].user);
+        setLeftUser(room.players[0].user);
+        setRightUser(room.players[1].user);
+      }
+    }
+  }, [room]);
+
+  const setup = (p5: p5Types, canvasParentRef: Element) => {
+    // use parent to render the canvas in this ref
+    // (without that p5 will render the canvas outside of your component)
+    p5.createCanvas(room.facts.display.width, room.facts.display.height).parent(canvasParentRef);
+  };
+
+  useEffect(() => {
+    if (socket === undefined) console.log('socket is undefined');
+    else {
+      console.log('SOCKET EMIT START GAME!');
+      socket.emit('startGame', {
+        gameRoomName: room.gameRoomName,
+      });
+    }
+  });
+
+  const draw = (p5: p5Types) => {
+    p5.background(230);
+    function draw_score(p5obj: p5Types) {
+      p5obj.fill('red');
+      p5obj.textSize(50);
+      p5obj.textFont('Knewave');
+      p5obj.textAlign(p5obj.CENTER);
+      p5obj.text('VS', room.facts.display.width / 2, 60);
+
+      p5obj.fill('black');
+      p5obj.textSize(50);
+      p5obj.textAlign(p5obj.LEFT);
+
+      p5obj.text(leftUser.username, 15, 60);
+      p5obj.text(GameScore[0], room.facts.display.width / 3 + 50, 60);
+      p5obj.textAlign(p5obj.LEFT);
+      p5obj.text(
+        rightUser.username,
+        room.facts.display.width - 30 * rightUser.username.length - 40,
+        60
+      );
+      p5obj.text(GameScore[1], (2 * room.facts.display.width) / 3 - 100, 60);
+    }
+
+    function draw_p1_bar(p5obj: p5Types) {
+      p5obj.fill(51, 255, 51);
+      p5obj.rect(
+        room.facts.touchBar.x,
+        leftTouchBar - room.facts.touchBar.height / 2,
+        room.facts.touchBar.width,
+        room.facts.touchBar.height
+      );
+    }
+
+    function draw_p2_bar(p5obj: p5Types) {
+      p5obj.fill(234, 30, 81);
+      p5obj.rect(
+        room.facts.display.width - room.facts.touchBar.width - room.facts.touchBar.x,
+        rightTouchBar - room.facts.touchBar.height / 2,
+        room.facts.touchBar.width,
+        room.facts.touchBar.height
+      );
+    }
+
+    function draw_ball(p5obj: p5Types) {
+      p5obj.fill(255, 255, 0);
+      p5obj.circle(GameBall.x, GameBall.y, room.facts.ball.radius);
+    }
+
+    if (socket !== undefined) {
+      socket.emit('touchBar', {
+        touchBar: p5.mouseY,
+        gameRoomName: room.gameRoomName,
+      });
+    }
+
+    draw_p1_bar(p5);
+    draw_p2_bar(p5);
+    draw_score(p5);
+    draw_ball(p5);
+    // p5.fill('white');
+    // twinkle(p5);
+    // if (data.countDown >= 0) {
+    //   draw_countDown(p5, data);
+    // } else {
+    //   draw_countDown2(p5, data);
+    // }
+    // p5.fill('white');
+    // draw_p1_bar(p5, data);
+    // draw_p2_bar(p5, data);
+
+    // if (data.leftUser.id === userId || data.rightUser.id === userId) {
+    //   let send = {
+    //     roomId: roomId,
+    //     m_y: p5.mouseY,
+    //   };
+    //   socket.emit('racket', send);
+    // }
+
+    // if (data.ball.x != 0) draw_ball(p5, data);
+  };
 
   const [winLose, setWinLose] = useState<boolean>();
 
@@ -158,27 +222,9 @@ export default function GamePage() {
       </Head>
 
       <Flex style={styles.MainLayout}>
-        <Flex style={styles.PlayerLayout}>
-          <Box style={styles.PlayerBoxLayout}>
-            <Text style={styles.TextUser}>{p1Name}</Text>
-            <Text style={styles.TextScore}>{p1Score}</Text>
-          </Box>
-        </Flex>
-        <Box width={'1400px'} height={'800px'} bg={'black'}>
-          <canvas
-            ref={canvasRef}
-            width={gameBoardWidth}
-            height={gameBoardHeight}
-            tabIndex={0}
-            onKeyPress={changeDir}
-          />
-        </Box>
-        <Flex style={styles.PlayerLayout}>
-          <Box style={styles.PlayerBoxLayout} marginLeft="180px">
-            <Text style={styles.TextUser}>{p2Name}</Text>
-            <Text style={styles.TextScore}>{p2Score}</Text>
-          </Box>
-        </Flex>
+        {/* <Box style={styles.GameLayout}> */}
+        <Sketch setup={setup} draw={draw} />
+        {/* </Box> */}
       </Flex>
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -192,9 +238,7 @@ export default function GamePage() {
                   <Flex w="100%" justifyContent="space-around" alignItems="center" bg="transparent">
                     <Text fontSize="400%">{winLose ? 'WIN' : 'LOSE'}</Text>
                   </Flex>
-                  <Text fontSize="200%">
-                    {p1Score} : {p2Score}
-                  </Text>
+                  <Text fontSize="200%">0 : 0{/* {p1Score} : {p2Score} */}</Text>
                 </VStack>
               </ModalBody>
               <ModalFooter>
@@ -204,7 +248,7 @@ export default function GamePage() {
                     size="lg"
                     // onClick={onClose}
                     onClick={() => {
-                      router.push('/');
+                      // router.push('/');
                     }}
                     btnStyle={{
                       background: 'transparent',
