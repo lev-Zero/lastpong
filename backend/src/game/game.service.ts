@@ -105,7 +105,7 @@ export class GameService {
         players: [],
         spectators: [],
         facts: {
-          display: { width: 1920, height: 1080 },
+          display: { width: 1920, height: 800 },
           ball: { speed: 20, radius: 20 },
           touchBar: { width: 20, height: 200, x: 50 },
           score: { y: 15, max: 10 },
