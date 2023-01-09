@@ -101,6 +101,11 @@ export default function ChatRoomPage() {
         owner,
       });
     });
+
+    return () => {
+      socket.off('message');
+      socket.off('chatRoomById');
+    };
   }, [roomNo]);
 
   useEffect(() => {
@@ -210,7 +215,6 @@ export default function ChatRoomPage() {
     });
 
     return () => {
-      socket.off('chatRoomById');
       socket.off('join');
       socket.off('admin');
       socket.off('ban');
