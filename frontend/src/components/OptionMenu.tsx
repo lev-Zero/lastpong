@@ -35,17 +35,6 @@ export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
           </Text>
         )}
       </MenuItem>
-      <MenuItem>
-        {!isBlocked ? (
-          <Text color="red" onClick={() => {}}>
-            BLOCK
-          </Text>
-        ) : (
-          <Text color="black" onClick={() => {}}>
-            UNBLOCK
-          </Text>
-        )}
-      </MenuItem>
     </MenuList>
   );
 }
