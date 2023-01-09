@@ -121,7 +121,7 @@ export class ChatService {
       const user = await this.userService.findUserById(userId);
       const target = await this.userService.findUserById(targetId);
 
-      const chatRoomName = `${user.username}, ${target.username}'s DmChatRoom`;
+      const chatRoomName = String(Math.floor(Math.random() * 1e9));
 
       const isName = await this.chatRoomDmRepository.findOne({
         where: { name: chatRoomName },
