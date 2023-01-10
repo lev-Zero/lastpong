@@ -67,7 +67,7 @@ export default function GameOptionsPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, room, isReady } = gameStore();
+  const { socket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -103,14 +103,19 @@ export default function GameOptionsPage() {
   }, [room]);
 
   useEffect(() => {
-    if (meUser.username === leftUser.username) {
-      if (meUser.rating <= rightUser.rating) setMyTurn(false);
-      else setMyTurn(true);
-    } else if (meUser.username === rightUser.username) {
-      if (meUser.rating <= rightUser.rating) setMyTurn(false);
-      else setMyTurn(true);
-    }
+    setGameMeProps(meUser);
   }, [meUser]);
+
+  useEffect(() => {
+    if (GameMeProps === undefined) return;
+    if (GameMeProps.username === leftUser.username) {
+      if (GameMeProps.rating <= rightUser.rating) setMyTurn(true);
+      else setMyTurn(false);
+    } else if (GameMeProps.username === rightUser.username) {
+      if (GameMeProps.rating <= rightUser.rating) setMyTurn(true);
+      else setMyTurn(false);
+    }
+  }, [GameMeProps]);
 
   useEffect(() => {
     if (isReady === 0) return;
@@ -124,12 +129,8 @@ export default function GameOptionsPage() {
     if (socket === undefined) {
       console.log('socket is undefined');
       alert('Sockect is not working Critical ERROR!!');
-      // disconnectSocket();
-      // router.push('/');
+      router.push('/');
     } else {
-      console.log(room.gameRoomName);
-      console.log(valueInt1);
-      console.log(valueInt2);
       socket.emit('readyGame', {
         gameRoomName: room.gameRoomName,
         backgroundColor: valueInt1,
@@ -137,14 +138,6 @@ export default function GameOptionsPage() {
       });
       onOpen();
     }
-  }
-
-  function handleMatchCancelBtnClicked() {
-    if (room.gameRoomName === '') {
-      // disconnectSocket();
-      console.log('socket is disconnected1234');
-    }
-    onClose();
   }
 
   // TODO : Form 요청 보내는 로직 추가
@@ -209,9 +202,9 @@ export default function GameOptionsPage() {
               <ModalHeader>READY FOR THE GAME...</ModalHeader>
               <ModalBody fontSize="6xl">{timeSpent}</ModalBody>
               <ModalFooter>
-                <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
+                {/* <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
                   CANCEL
-                </CustomButton>
+                </CustomButton> */}
               </ModalFooter>
             </VStack>
           </Center>

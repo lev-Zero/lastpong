@@ -25,8 +25,12 @@ import { useRouter } from 'next/router';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, room, makeSocket, disconnectSocket } = gameStore();
+  const { socket, room, isSetting, setIsSetting, makeSocket, disconnectSocket } = gameStore();
   const router = useRouter();
+
+  function sleep(ms: number) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -35,18 +39,26 @@ export default function HomePage() {
 
   async function handleMatchBtnClicked() {
     setTimeSpent(1);
-    if (socket === undefined) {
-      console.log('socket Making');
-      await makeSocket();
-    } else socket.emit('randomGameMatch');
-    onOpen();
+    if (socket === undefined || socket.connected === false) {
+      console.log('socket is not Working');
+      alert('socket is not Working');
+    } else {
+      onOpen();
+      sleep(2000).then(() => {
+        console.log(socket);
+        console.log('EMIT : Random Game Match');
+        socket.emit('randomGameMatch');
+      });
+    }
   }
 
   function handleMatchCancelBtnClicked() {
     if (room.gameRoomName === '') {
       if (socket !== undefined) {
+        socket.emit('removeSocketInQueue');
         socket.removeAllListeners();
         disconnectSocket();
+        setIsSetting(0);
         console.log('socket is disconnected');
       }
     }
@@ -54,25 +66,20 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    if (socket === undefined) {
+    if (socket === undefined || isSetting === 0) {
       return;
     }
     console.log(`FIND Room : ${room.gameRoomName}`);
     router.push('/game/options');
     console.log('Ready to play game');
-  }, [room]);
+  }, [isSetting]);
 
   useEffect(() => {
-    if (socket === undefined) {
-      return;
-    }
-    function sleep(ms: number) {
-      return new Promise((r) => setTimeout(r, ms));
-    }
-    sleep(3000).then(() => {
-      console.log(socket);
-      console.log('EMIT : Random Game Match');
-      socket.emit('randomGameMatch');
+    sleep(300).then(() => {
+      if (socket === undefined || socket.connected === false) {
+        console.log('Socket Making');
+        makeSocket();
+      }
     });
   }, [socket]);
 
