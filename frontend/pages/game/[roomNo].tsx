@@ -148,6 +148,11 @@ export default function GamePage() {
     if (isFinished === 0) return;
     else {
       onOpen();
+      if (socket !== undefined) {
+        socket.emit('exitGameRoom', {
+          gameRoomName: room.gameRoomName,
+        });
+      }
       setIsSetting(0);
       setIsFinished(0);
       setIsReady(0);
@@ -156,13 +161,7 @@ export default function GamePage() {
   }, [winLose]);
 
   function handleFinishBtnClicked() {
-    if (socket !== undefined) {
-      socket.emit('exitGameRoom', {
-        gameRoomName: room.gameRoomName,
-      });
-
-      router.push('/');
-    }
+    router.push('/home');
   }
 
   const draw = (p5: p5Types) => {

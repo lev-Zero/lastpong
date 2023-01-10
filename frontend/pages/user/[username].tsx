@@ -9,10 +9,15 @@ import { userStore } from '@/stores/userStore';
 import { convertRawUserToUser } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
 import { Box, Center, Divider, Flex, HStack, Text, VStack } from '@chakra-ui/react';
+import { match } from 'assert';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { ReactElement, useEffect, useState } from 'react';
 
+interface WinLoseProps {
+  winCnt: number;
+  loseCnt: number;
+}
 export default function UserProfilePage() {
   const router = useRouter();
   const [username, setUsername] = useState<string>();
@@ -20,7 +25,11 @@ export default function UserProfilePage() {
   const { friends, addFriend, deleteFriend, blockedUsers, addBlock, deleteBlock } = userStore();
   const [isFriend, setIsFriend] = useState<boolean>(false);
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
-
+  const [matchHistory, setMatchHistory] = useState<MatchHistoryProps[]>([]);
+  const [winLose, setWinLose] = useState<WinLoseProps>({
+    winCnt: 0,
+    loseCnt: 0,
+  });
   useEffect(() => {
     if (user === undefined) {
       return;
@@ -60,16 +69,58 @@ export default function UserProfilePage() {
     setUserInfo();
   }, [username]);
 
-  const winCnt = 42;
-  const loseCnt = 42;
+  useEffect(() => {
+    if (username === undefined) return;
+    setProfile();
+  }, [username]);
 
-  const dummyMatchHistory: MatchHistoryProps = {
-    myName: 'asdfasdf',
-    myScore: 4,
-    oppName: 'pongmaster',
-    oppScore: 10,
-  };
+  //[GET]  http://localhost:3000/user/match/id/9 (userId)
+  //[GET] http://localhost:3000/user/match/name/jeonghwl
+  async function setProfile() {
+    const res = await customFetch('GET', `/user/match/name/${username}`);
+    console.log('res', res);
+    const tmp = res.map((match: any): MatchHistoryProps => {
+      return {
+        winName: match.winner.username,
+        winScore: match.winnerScore,
+        loseName: match.loser.username,
+        loseScore: match.loserScore,
+      };
+    });
+    setMatchHistory(tmp);
+    console.log('tmp', tmp);
+  }
 
+  useEffect(() => {
+    matchHistory.forEach((match) => {
+      if (match.winName === username) {
+        setWinLose((prev: WinLoseProps): WinLoseProps => {
+          return {
+            winCnt: prev.winCnt + 1,
+            loseCnt: prev.loseCnt,
+          };
+        });
+      } else {
+        setWinLose((prev: WinLoseProps): WinLoseProps => {
+          return {
+            winCnt: prev.winCnt,
+            loseCnt: prev.loseCnt + 1,
+          };
+        });
+      }
+    });
+  }, [matchHistory]);
+
+  // const winCnt = 42;
+  // const loseCnt = 42;
+
+  // const dummyMatchHistory: MatchHistoryProps = {
+  //   winName: 'asdfasdf',
+  //   winScore: 4,
+  //   loseName: 'pongmaster',
+  //   loseScore: 10,
+  // };
+  // TODO: ㅁㅐ치히스토리 거꾸로 쌓쌓기기
   return (
     <>
       {user === undefined ? null : (
@@ -103,15 +154,15 @@ export default function UserProfilePage() {
               </VStack>
             </HStack>
             <Divider border="1px" borderColor="main" my={10} />
-            <WinLoseSum winCnt={winCnt} loseCnt={loseCnt} fontSize="3xl" />
+            <WinLoseSum winCnt={winLose.winCnt} loseCnt={winLose.loseCnt} fontSize="3xl" />
             <VStack w="100%" my={10} maxH="15vh" overflowY="scroll">
-              {[...Array(10)].map((_, idx) => (
+              {matchHistory.reverse().map((match, idx) => (
                 <MatchHistory
                   key={idx}
-                  myName={dummyMatchHistory.myName}
-                  myScore={dummyMatchHistory.myScore}
-                  oppName={dummyMatchHistory.oppName}
-                  oppScore={dummyMatchHistory.oppScore}
+                  winName={match.winName}
+                  winScore={match.winScore}
+                  loseName={match.loseName}
+                  loseScore={match.loseScore}
                 />
               ))}
             </VStack>
@@ -136,7 +187,7 @@ export default function UserProfilePage() {
                 DELETE FRIEND
               </CustomButton>
             )}
-            {!isBlocked ? (
+            {/* {!isBlocked ? (
               <CustomButton
                 size="xl"
                 onClick={() => {
@@ -154,7 +205,7 @@ export default function UserProfilePage() {
               >
                 UNBLOCK
               </CustomButton>
-            )}
+            )} */}
           </HStack>
         </VStack>
       )}
