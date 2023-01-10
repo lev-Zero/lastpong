@@ -9,7 +9,7 @@ export interface OptionMenuProps {
 }
 
 export function OptionMenu({ user, isFriend }: OptionMenuProps) {
-  const { addFriend, deleteFriend } = userStore();
+  const { me, addFriend, deleteFriend } = userStore();
 
   return (
     <MenuList>
@@ -23,17 +23,19 @@ export function OptionMenu({ user, isFriend }: OptionMenuProps) {
           <Text color="gray.200">INVITE TO GAME</Text>
         )}
       </MenuItem>
-      <MenuItem>
-        {!isFriend ? (
-          <Text color="win" onClick={() => addFriend(user.name)}>
-            ADD FRIEND
-          </Text>
-        ) : (
-          <Text color="red" onClick={() => deleteFriend(user.name)}>
-            DELETE FRIEND
-          </Text>
-        )}
-      </MenuItem>
+      {user.name !== me.name ? (
+        <MenuItem>
+          {!isFriend ? (
+            <Text color="win" onClick={() => addFriend(user.name)}>
+              ADD FRIEND
+            </Text>
+          ) : (
+            <Text color="red" onClick={() => deleteFriend(user.name)}>
+              DELETE FRIEND
+            </Text>
+          )}
+        </MenuItem>
+      ) : null}
     </MenuList>
   );
 }
