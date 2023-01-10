@@ -18,8 +18,8 @@ export default function UserProfilePage() {
   const [username, setUsername] = useState<string>();
   const [user, setUser] = useState<UserProps>();
   const { friends, addFriend, deleteFriend, blockedUsers, addBlock, deleteBlock } = userStore();
-  const [isFriend, setIsFriend] = useState<boolean>(false); // TODO: 연동
-  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 연동
+  const [isFriend, setIsFriend] = useState<boolean>(false);
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
 
   useEffect(() => {
     if (user === undefined) {

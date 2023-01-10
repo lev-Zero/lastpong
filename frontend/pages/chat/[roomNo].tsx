@@ -40,7 +40,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const [roomNo, setRoomNo] = useState<number>();
   const [msg, setMsg] = useState<string>('');
-  const { me } = userStore();
+  const { me, blockedUsers } = userStore();
   const [myChatUserStatus, setMyChatUserStatus] = useState<ChatUserStatus>(ChatUserStatus.COMMON);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,7 +49,7 @@ export default function ChatRoomPage() {
   const { socket } = chatStore();
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
-  const [mutedTime, setMutedTime] = useState<Date>(new Date()); // FIXME: mute는 동시에 여러명도 당할 수 있음.
+  const [mutedTime, setMutedTime] = useState<Date>(new Date());
 
   const messageBoxRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +85,10 @@ export default function ChatRoomPage() {
       return;
     }
     socket.on('message', (res) => {
+      // Block한 유저가 단체 채팅방에서 보낸 메시지는 표시하지 않음
+      if (blockedUsers.some(({ name }) => name === res.user.username)) {
+        return;
+      }
       setMsgList((prev) => {
         return [
           ...prev,
