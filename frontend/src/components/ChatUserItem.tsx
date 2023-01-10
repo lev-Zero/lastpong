@@ -47,7 +47,7 @@ export default function ContextMenuHoc({
   useEffect(() => {
     setIsFriend(friends.some((friend) => friend.id === user.id));
     setIsBlocked(blockedUsers.some((blockedUser) => blockedUser.id === user.id));
-  }, []);
+  }, [friends, blockedUsers]);
 
   return (
     <>
