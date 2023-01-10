@@ -4,9 +4,9 @@ import { chatStore } from '@/stores/chatStore';
 import { userStore } from '@/stores/userStore';
 import { MenuDivider, MenuItem, MenuList, Text } from '@chakra-ui/react';
 import Link from 'next/link';
-import { OptionMenuProps } from './OptionMenu';
+import { ChatOptionMenuProps } from './ChatOptionMenu';
 
-export interface ChatAdminOptionMenuProps extends OptionMenuProps {
+export interface ChatAdminOptionMenuProps extends ChatOptionMenuProps {
   role: ChatUserStatus;
   isMuted: boolean;
   roomNo: number | undefined;

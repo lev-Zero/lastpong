@@ -6,6 +6,7 @@ import { ChatAdminOptionMenu } from './ChatAdminOptionMenu';
 import { OptionMenu } from './OptionMenu';
 import { userStore } from '@/stores/userStore';
 import { useEffect, useState } from 'react';
+import { ChatOptionMenu } from './ChatOptionMenu';
 
 function ChatUserItem({ user, role }: ChatUserItemProps) {
   return (
@@ -39,13 +40,13 @@ export default function ContextMenuHoc({
   role,
   roomNo,
 }: ChatUserItemProps) {
-  const { friends } = userStore();
+  const { friends, blockedUsers } = userStore();
   const [isFriend, setIsFriend] = useState<boolean>();
   const [isBlocked, setIsBlocked] = useState<boolean>();
 
   useEffect(() => {
     setIsFriend(friends.some((friend) => friend.id === user.id));
-    setIsBlocked(false); // TODO: isBlocked는 userStore에서 관리하다가 꺼내쎠야 함.
+    setIsBlocked(blockedUsers.some((blockedUser) => blockedUser.id === user.id));
   }, []);
 
   return (
@@ -64,7 +65,11 @@ export default function ContextMenuHoc({
                   roomNo={roomNo}
                 />
               ) : (
-                <OptionMenu user={user} isFriend={isFriend} isBlocked={isBlocked}></OptionMenu>
+                <ChatOptionMenu
+                  user={user}
+                  isFriend={isFriend}
+                  isBlocked={isBlocked}
+                ></ChatOptionMenu>
               )}
             </>
           )}
