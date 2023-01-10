@@ -43,7 +43,7 @@ export default function Header() {
       bg="main"
     >
       <Box mx={10}>
-        <Link href="/">
+        <Link href="/home">
           <Text fontSize="3xl">LASTPONG</Text>
         </Link>
       </Box>
