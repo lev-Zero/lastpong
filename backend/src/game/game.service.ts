@@ -108,7 +108,7 @@ export class GameService {
           display: { width: 1920, height: 1080 },
           ball: { speed: 20, radius: 20 },
           touchBar: { width: 20, height: 200, x: 50 },
-          score: { y: 15, max: 10 },
+          score: { y: 15, max: 5 },
           gameOption: {
             backgroundColor: BackgroundColor.DEFAULT,
             mode: Mode.NONE,
@@ -470,24 +470,27 @@ export class GameService {
 |			exitGameRoom|
 ---------------------------*/
 
-  isGameOver(
+  async isGameOver(
     gameRoom: GameRoomDto,
     server: Server,
     @ConnectedSocket() socket: Socket,
-  ): null {
+  ): Promise<void> {
     try {
       for (const player of gameRoom.players) {
         console.log(
           player.user.username,
           player.score,
           gameRoom.facts.score.max,
+          Number(player.score) === Number(gameRoom.facts.score.max),
         );
         if (Number(player.score) === Number(gameRoom.facts.score.max)) {
-          if (socket.data.user.id == player.user.id)
-            this.gameOver(gameRoom, player, server, socket);
+          const sockets = await server.in(gameRoom.gameRoomName).fetchSockets();
+          for (const so of sockets) {
+            if (so.data.user.id == player.user.id)
+              await this.gameOver(gameRoom, player, server, so.data.user.id);
+          }
         }
       }
-      return null;
     } catch (e) {
       throw new WsException(e.message);
     }
@@ -497,7 +500,7 @@ export class GameService {
     gameRoom: GameRoomDto,
     win: GamePlayerDto,
     server: Server,
-    @ConnectedSocket() socket: Socket,
+    winnerId: number,
   ): Promise<null> {
     try {
       let winner;
@@ -505,10 +508,7 @@ export class GameService {
       if (gameRoom.gameStatus == gameStatus.GAMEPLAYING) {
         gameRoom.gameStatus = gameStatus.GAMEOVER;
 
-        if (
-          gameRoom.players.length == 2 &&
-          socket.data.user.id == win.user.id
-        ) {
+        if (gameRoom.players.length == 2 && winnerId == win.user.id) {
           winner = win.user;
 
           loser = gameRoom.players.find(
@@ -567,7 +567,7 @@ export class GameService {
                 (player1) => player1.user.id != player.user.id,
               ),
               server,
-              socket,
+              socket.data.user.id,
             );
             socket.leave(gameRoom.gameRoomName);
             gameRoom.gameStatus = gameStatus.WAITINGPLAYER;
