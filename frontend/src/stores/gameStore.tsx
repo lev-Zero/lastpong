@@ -5,19 +5,24 @@ import { facts } from '@/interfaces/GameOptionsProps';
 import { getJwtToken } from '@/utils/getJwtToken';
 import { WS_SERVER_URL } from '@/utils/variables';
 import { GameBall } from '@/interfaces/GameRoomProps';
+import { GameUserProps } from '@/interfaces/GameUserProps';
 import Router from 'next/router';
 interface GameStoreProps {
   socket?: Socket;
   setSocket: (socket: Socket | undefined) => void;
   makeSocket: () => void;
+  disconnectSocket: () => void;
+
+  isSetting: number;
+  setIsSetting: (isSetting: number) => void;
   isReady: number;
   setIsReady: (isReady: number) => void;
   isFinished: number;
   setIsFinished: (isReady: number) => void;
   GameBall: GameBall;
   setGameBall: (GameBall: GameBall) => void;
-  disconnectSocket: () => void;
-
+  GameMeProps?: GameUserProps;
+  setGameMeProps: (GameMeProps: GameUserProps | undefined) => void;
   leftTouchBar: number;
   setLeftTouchBar: (leftTouchBar: number) => void;
   rightTouchBar: number;
@@ -33,13 +38,25 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   setSocket: (socket: Socket | undefined) => {
     set((state) => ({ ...state, socket: socket }));
   },
+
+  isSetting: 0,
+  setIsSetting: (isSetting: number) => {
+    set((state) => ({ ...state, isSetting: isSetting }));
+  },
+
   isReady: 0,
   setIsReady: (isReady: number) => {
     set((state) => ({ ...state, isReady: isReady }));
   },
+
   isFinished: 0,
   setIsFinished: (isFinished: number) => {
     set((state) => ({ ...state, isFinished: isFinished }));
+  },
+
+  GameMeProps: undefined,
+  setGameMeProps: (GameMeProps: GameUserProps | undefined) => {
+    set((state) => ({ ...state, GameMeProps: GameMeProps }));
   },
 
   leftTouchBar: 0,
@@ -122,15 +139,15 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       newSocket.on('randomGameMatch', async function (data) {
         const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`Ramdom Game Maching`);
-        await console.log(temp_room);
         await get().setRoom(temp_room);
         await console.log(`ROOM : `);
         await console.log(get().room);
+        await get().setIsSetting(1);
       });
+
       newSocket.on('readyGame', async function (data) {
         const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`READY GAME!`);
-        await console.log(temp_room);
         await get().setRoom(temp_room);
         await console.log(`ROOM : `);
         await console.log(get().room);
@@ -147,23 +164,20 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       });
 
       newSocket.on('touchBar', (data) => {
-        // console.log(get().room.players[0].user.id);
-        // console.log(get().room.players[1].user.id);
-        console.log(data.player);
-        console.log(data.touchBar);
-
         if (get().room.players[0].user.id === data.player) {
-          console.log('LEFT');
           get().setLeftTouchBar(data.touchBar);
         }
         if (get().room.players[1].user.id === data.player) {
-          console.log('RIGHT');
           get().setRightTouchBar(data.touchBar);
         }
       });
 
       newSocket.on('score', (data) => {
         get().setGameScore(data.score);
+      });
+
+      newSocket.on('gameOver', (data) => {
+        get().setIsFinished(1);
       });
 
       newSocket.onAny((data) => {

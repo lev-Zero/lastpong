@@ -12,7 +12,7 @@ export default function MatchInfo({ me, opp }: MatchInfoProps) {
   return (
     <Box bg="white" borderRadius={20} p={5}>
       <Flex>
-        <HStack>
+        <HStack padding={'10px'}>
           {/* <CustomAvatar url={""} size="md" /> */}
           <VStack>
             <Text fontSize="lg">{me.username}</Text>
@@ -20,7 +20,7 @@ export default function MatchInfo({ me, opp }: MatchInfoProps) {
           </VStack>
         </HStack>
         <Spacer />
-        <HStack>
+        <HStack padding={'10px'}>
           <VStack>
             <Text fontSize="lg">{opp.username}</Text>
             <Text fontSize="sm" color="opponent">{`RATING ${opp.rating}`}</Text>

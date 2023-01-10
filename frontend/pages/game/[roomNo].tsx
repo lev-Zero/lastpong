@@ -4,10 +4,8 @@ import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
-import { userStore } from '@/stores/userStore';
 import dynamic from 'next/dynamic';
 import p5Types from 'p5';
-import { GameRoomProps } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 
 import {
@@ -73,8 +71,24 @@ const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 });
 
 export default function GamePage() {
-  const { socket, room, GameBall, GameScore, leftTouchBar, rightTouchBar } = gameStore();
-  const { me } = userStore();
+  const {
+    socket,
+    room,
+    GameBall,
+    GameScore,
+    leftTouchBar,
+    rightTouchBar,
+    isFinished,
+    GameMeProps,
+    setGameScore,
+    setIsSetting,
+    setIsFinished,
+    setIsReady,
+    disconnectSocket,
+  } = gameStore();
+  const [winLose, setWinLose] = useState<boolean>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const router = useRouter();
   const [leftUser, setLeftUser] = useState<GameUserProps>({
     id: 0,
     rating: 1000,
@@ -91,20 +105,10 @@ export default function GamePage() {
     username42: '',
   });
 
-  const [meUser, setMeUser] = useState<GameUserProps>({
-    id: 0,
-    rating: 1000,
-    status: 0,
-    username: 'PLAYER_ME',
-    username42: '',
-  });
-
   useEffect(() => {
     if (room === undefined) return;
     else {
       if (room.players.length === 2) {
-        if (me.name === room.players[0].user.username) setMeUser(room.players[0].user);
-        if (me.name === room.players[1].user.username) setMeUser(room.players[1].user);
         setLeftUser(room.players[0].user);
         setRightUser(room.players[1].user);
       }
@@ -120,12 +124,43 @@ export default function GamePage() {
   useEffect(() => {
     if (socket === undefined) console.log('socket is undefined');
     else {
-      console.log('SOCKET EMIT START GAME!');
-      socket.emit('startGame', {
+      if (isFinished === 0) {
+        console.log('SOCKET EMIT START GAME!');
+        setGameScore([0, 0]);
+        socket.emit('startGame', {
+          gameRoomName: room.gameRoomName,
+        });
+        return;
+      }
+      if (GameMeProps !== undefined) {
+        if (GameMeProps.id === leftUser.id) {
+          if (GameScore[0] > GameScore[1]) setWinLose(true);
+          else setWinLose(false);
+        } else {
+          if (GameScore[1] > GameScore[0]) setWinLose(true);
+          else setWinLose(false);
+        }
+      }
+    }
+  }, [isFinished]);
+
+  useEffect(() => {
+    if (isFinished === 0) return;
+    else onOpen();
+  }, [winLose]);
+
+  function handleFinishBtnClicked() {
+    if (socket !== undefined) {
+      socket.emit('exitGameRoom', {
         gameRoomName: room.gameRoomName,
       });
+      setIsSetting(0);
+      setIsFinished(0);
+      setIsReady(0);
+      disconnectSocket();
+      router.push('/');
     }
-  });
+  }
 
   const draw = (p5: p5Types) => {
     p5.background(230);
@@ -182,37 +217,12 @@ export default function GamePage() {
         gameRoomName: room.gameRoomName,
       });
     }
-
     draw_p1_bar(p5);
     draw_p2_bar(p5);
     draw_score(p5);
     draw_ball(p5);
-    // p5.fill('white');
-    // twinkle(p5);
-    // if (data.countDown >= 0) {
-    //   draw_countDown(p5, data);
-    // } else {
-    //   draw_countDown2(p5, data);
-    // }
-    // p5.fill('white');
-    // draw_p1_bar(p5, data);
-    // draw_p2_bar(p5, data);
-
-    // if (data.leftUser.id === userId || data.rightUser.id === userId) {
-    //   let send = {
-    //     roomId: roomId,
-    //     m_y: p5.mouseY,
-    //   };
-    //   socket.emit('racket', send);
-    // }
-
-    // if (data.ball.x != 0) draw_ball(p5, data);
   };
 
-  const [winLose, setWinLose] = useState<boolean>();
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const router = useRouter();
   return (
     <>
       <Head>
@@ -238,18 +248,18 @@ export default function GamePage() {
                   <Flex w="100%" justifyContent="space-around" alignItems="center" bg="transparent">
                     <Text fontSize="400%">{winLose ? 'WIN' : 'LOSE'}</Text>
                   </Flex>
-                  <Text fontSize="200%">0 : 0{/* {p1Score} : {p2Score} */}</Text>
+                  <Text fontSize="200%">
+                    {GameScore[0]} : {GameScore[1]}
+                    {/* {p1Score} : {p2Score} */}
+                  </Text>
                 </VStack>
               </ModalBody>
               <ModalFooter>
                 <VStack mb={'7'}>
-                  {/* TODO:onclick 핸들러로 매치 잡는 기능 */}
                   <CustomButton
                     size="lg"
                     // onClick={onClose}
-                    onClick={() => {
-                      // router.push('/');
-                    }}
+                    onClick={handleFinishBtnClicked}
                     btnStyle={{
                       background: 'transparent',
                     }}
@@ -263,7 +273,7 @@ export default function GamePage() {
         </ModalContent>
       </Modal>
       {/* TODO: 버튼이 아니라 경기 결과에 따라서 winLose 상태 변경 로직이 필요 */}
-      <Button ml={'10%'} onClick={onOpen}>
+      {/* <Button ml={'10%'} onClick={onOpen}>
         GAME SET
       </Button>
       <Button
@@ -281,7 +291,7 @@ export default function GamePage() {
         }}
       >
         LOSE
-      </Button>
+      </Button> */}
     </>
   );
 }
