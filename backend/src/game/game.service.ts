@@ -105,7 +105,7 @@ export class GameService {
         players: [],
         spectators: [],
         facts: {
-          display: { width: 1920, height: 800 },
+          display: { width: 1920, height: 1080 },
           ball: { speed: 20, radius: 20 },
           touchBar: { width: 20, height: 200, x: 50 },
           score: { y: 15, max: 10 },
@@ -360,7 +360,7 @@ export class GameService {
     }
   }
 
-  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto): PositionDto | null {
+  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto) {
     try {
       const nextBallPositionX =
         gameRoom.playing.ball.position.x + gameRoom.playing.ball.velocity.x;
@@ -383,7 +383,9 @@ export class GameService {
           nextBallPosition.x + ballRadius > widthOnDisplay
         )
       ) {
-        if (gameRoom.players.length === 2) {
+        //player1
+        // 640 >= y >= 440
+        if (gameRoom.players.length == 2) {
           if (
             nextBallPosition.y >=
               gameRoom.players[0].touchBar - touchBarHeight / 2 &&
@@ -392,10 +394,6 @@ export class GameService {
           ) {
             if (nextBallPosition.x - ballRadius < gameRoom.facts.touchBar.x) {
               gameRoom.playing.ball.velocity.x *= -1;
-              nextBallPosition.x =
-                gameRoom.facts.touchBar.x +
-                gameRoom.facts.touchBar.width +
-                ballRadius;
               return this.updateBallPositionAndVelocity(
                 gameRoom.playing.ball.position.x,
                 gameRoom.playing.ball.position.y,
@@ -404,6 +402,8 @@ export class GameService {
             }
           }
 
+          //player 2
+          // 640 >= y >= 440
           if (
             nextBallPosition.y >=
               gameRoom.players[1].touchBar - touchBarHeight / 2 &&
@@ -415,11 +415,6 @@ export class GameService {
               widthOnDisplay - gameRoom.facts.touchBar.x
             ) {
               gameRoom.playing.ball.velocity.x *= -1;
-              nextBallPosition.x =
-                gameRoom.facts.display.width -
-                gameRoom.facts.touchBar.x -
-                gameRoom.facts.touchBar.width -
-                ballRadius;
               return this.updateBallPositionAndVelocity(
                 gameRoom.playing.ball.position.x,
                 gameRoom.playing.ball.position.y,
@@ -482,7 +477,12 @@ export class GameService {
   ): null {
     try {
       for (const player of gameRoom.players) {
-        if (player.score == gameRoom.facts.score.max) {
+        console.log(
+          player.user.username,
+          player.score,
+          gameRoom.facts.score.max,
+        );
+        if (Number(player.score) === Number(gameRoom.facts.score.max)) {
           if (socket.data.user.id == player.user.id)
             this.gameOver(gameRoom, player, server, socket);
         }
