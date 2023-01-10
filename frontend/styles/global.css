@@ -3,6 +3,11 @@
   src: url('fonts/KnewaveRegular.ttf');
 }
 
+@font-face {
+  font-family: 'nanum';
+  src: url('fonts/NanumSquareRoundEB.ttf');
+}
+
 html,
 body,
 body > div:first-child,
@@ -14,7 +19,7 @@ div#__next > div {
 }
 
 * {
-  font-family: 'Knewave';
+  font-family: 'Knewave', 'nanum';
   box-sizing: border-box;
 }
 
