@@ -25,7 +25,6 @@ import {
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { ReactElement } from 'react';
-import { Socket } from 'socket.io-client';
 import { gameStore } from '@/stores/gameStore';
 import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
@@ -67,7 +66,7 @@ export default function GameOptionsPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
+  const { gameSocket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -126,12 +125,12 @@ export default function GameOptionsPage() {
 
   async function handleMatchBtnClicked() {
     setTimeSpent(1);
-    if (socket === undefined) {
+    if (gameSocket === undefined) {
       console.log('socket is undefined');
       alert('Sockect is not working Critical ERROR!!');
       router.push('/');
     } else {
-      socket.emit('readyGame', {
+      gameSocket.emit('readyGame', {
         gameRoomName: room.gameRoomName,
         backgroundColor: valueInt1,
         mode: valueInt2,
@@ -194,7 +193,13 @@ export default function GameOptionsPage() {
           </CustomButton>
         </Box>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent bg="main" color="white">
           <Center>

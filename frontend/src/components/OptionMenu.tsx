@@ -2,6 +2,7 @@ import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { userStore } from '@/stores/userStore';
 import { MenuItem, MenuList, Text } from '@chakra-ui/react';
 import Link from 'next/link';
+import { chatStore } from '@/stores/chatStore';
 
 export interface OptionMenuProps {
   user: UserProps;
@@ -11,6 +12,7 @@ export interface OptionMenuProps {
 
 export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
   const { addFriend, deleteFriend } = userStore();
+  const { socket } = chatStore();
 
   return (
     <MenuList>
@@ -18,8 +20,18 @@ export function OptionMenu({ user, isFriend, isBlocked }: OptionMenuProps) {
         VIEW PROFILE
       </MenuItem>
       <MenuItem>
-        {user.status === UserStatus.ONLINE ? (
-          <Text>INVITE TO GAME</Text>
+        {user.status === UserStatus.ONLINE || user.status === UserStatus.INGAME ? (
+          <Text
+            onClick={() => {
+              if (socket !== undefined) {
+                socket.emit('createInviteRoom', {
+                  userId: user.id,
+                });
+              }
+            }}
+          >
+            INVITE TO GAME
+          </Text>
         ) : (
           <Text color="gray.200">INVITE TO GAME</Text>
         )}

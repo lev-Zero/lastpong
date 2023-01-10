@@ -72,7 +72,7 @@ const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 
 export default function GamePage() {
   const {
-    socket,
+    gameSocket,
     room,
     GameBall,
     GameScore,
@@ -122,12 +122,12 @@ export default function GamePage() {
   };
 
   useEffect(() => {
-    if (socket === undefined) console.log('socket is undefined');
+    if (gameSocket === undefined) console.log('socket is undefined');
     else {
       if (isFinished === 0) {
         console.log('SOCKET EMIT START GAME!');
         setGameScore([0, 0]);
-        socket.emit('startGame', {
+        gameSocket.emit('startGame', {
           gameRoomName: room.gameRoomName,
         });
         return;
@@ -147,6 +147,11 @@ export default function GamePage() {
   useEffect(() => {
     if (isFinished === 0) return;
     else {
+      if (gameSocket !== undefined) {
+        gameSocket.emit('exitGameRoom', {
+          gameRoomName: room.gameRoomName,
+        });
+      }
       onOpen();
       setIsSetting(0);
       setIsFinished(0);
@@ -156,13 +161,7 @@ export default function GamePage() {
   }, [winLose]);
 
   function handleFinishBtnClicked() {
-    if (socket !== undefined) {
-      socket.emit('exitGameRoom', {
-        gameRoomName: room.gameRoomName,
-      });
-
-      router.push('/');
-    }
+    router.push('/');
   }
 
   const draw = (p5: p5Types) => {
@@ -219,8 +218,8 @@ export default function GamePage() {
       p5obj.circle(GameBall.x, GameBall.y, room.facts.ball.radius);
     }
 
-    if (socket !== undefined) {
-      socket.emit('touchBar', {
+    if (gameSocket !== undefined) {
+      gameSocket.emit('touchBar', {
         touchBar: p5.mouseY,
         gameRoomName: room.gameRoomName,
       });
@@ -245,8 +244,14 @@ export default function GamePage() {
         {/* </Box> */}
       </Flex>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
+      <Modal
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        isCentered
+      >
+        <ModalOverlay backdropFilter="blur(10px)" />
         <ModalContent bg={winLose ? 'win' : 'lose'} color="white" borderRadius={30}>
           <Center>
             <VStack>
@@ -258,7 +263,6 @@ export default function GamePage() {
                   </Flex>
                   <Text fontSize="200%">
                     {GameScore[0]} : {GameScore[1]}
-                    {/* {p1Score} : {p2Score} */}
                   </Text>
                 </VStack>
               </ModalBody>
@@ -266,7 +270,6 @@ export default function GamePage() {
                 <VStack mb={'7'}>
                   <CustomButton
                     size="lg"
-                    // onClick={onClose}
                     onClick={handleFinishBtnClicked}
                     btnStyle={{
                       background: 'transparent',
