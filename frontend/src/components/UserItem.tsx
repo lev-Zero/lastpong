@@ -44,16 +44,14 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 
   useEffect(() => {
     scrollToBottom();
-    if (!isOpened) {
-      dmMsgList.forEach((msg, idx) => {
-        if (idx > lastIdx && msg.username === user.name && msg.targetUsername === me.name) {
-          setMsgCount((prev) => {
-            return prev + 1;
-          });
-          setLastIdx(idx);
+    dmMsgList.forEach((msg, idx) => {
+      if (idx > lastIdx && msg.username === user.name && msg.targetUsername === me.name) {
+        if (!isOpened) {
+          setMsgCount((prev) => prev + 1);
         }
-      });
-    }
+        setLastIdx(idx);
+      }
+    });
   }, [dmMsgList]);
 
   function getDmRoomNo() {
