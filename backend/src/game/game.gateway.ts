@@ -280,34 +280,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       let score: number[];
 
       if (gameRoom.gameStatus == gameStatus.GAMEPLAYING) {
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
           if (gameRoom.gameStatus != gameStatus.GAMEPLAYING) {
             clearInterval(interval);
           }
 
-          score = this.gameService.updateScore(gameRoom);
+          score = await this.gameService.updateScore(gameRoom);
           if (score)
             this.server
               .to(gameRoom.gameRoomName)
               .emit('score', { message: 'score', score });
 
-          this.gameService.isGameOver(gameRoom, this.server, socket);
+          await this.gameService.isGameOver(gameRoom, this.server, socket);
+          // new Promise(() =>
+          //   this.gameService.isGameOver(gameRoom, this.server, socket),
+          // );
 
-          ballPosition =
-            this.gameService.updateBallPositionAfterTouchBar(gameRoom);
+          ballPosition = await this.gameService.updateBallPositionAfterTouchBar(
+            gameRoom,
+          );
           if (ballPosition)
             this.server
               .to(gameRoom.gameRoomName)
               .emit('ball', { message: 'ball position', ballPosition });
 
           ballPosition =
-            this.gameService.updateBallPositionAferTouchTopOrBottom(gameRoom);
+            await this.gameService.updateBallPositionAferTouchTopOrBottom(
+              gameRoom,
+            );
           if (ballPosition)
             this.server
               .to(gameRoom.gameRoomName)
               .emit('ball', { message: 'ball position', ballPosition });
 
-          ballPosition = this.gameService.updateBallPositionAndVelocity(
+          ballPosition = await this.gameService.updateBallPositionAndVelocity(
             gameRoom.playing.ball.position.x,
             gameRoom.playing.ball.position.y,
             gameRoom,
