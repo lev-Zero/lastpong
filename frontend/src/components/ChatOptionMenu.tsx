@@ -9,7 +9,7 @@ export interface ChatOptionMenuProps extends OptionMenuProps {
 }
 
 export function ChatOptionMenu({ user, isFriend, isBlocked }: ChatOptionMenuProps) {
-  const { addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
+  const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
 
   return (
     <MenuList>
@@ -23,26 +23,32 @@ export function ChatOptionMenu({ user, isFriend, isBlocked }: ChatOptionMenuProp
           <Text color="gray.200">INVITE TO GAME</Text>
         )}
       </MenuItem>
-      <MenuItem>
-        {!isFriend ? (
-          <Text color="win" onClick={() => addFriend(user.name)}>
-            ADD FRIEND
-          </Text>
-        ) : (
-          <Text color="red" onClick={() => deleteFriend(user.name)}>
-            DELETE FRIEND
-          </Text>
-        )}
-        {!isBlocked ? (
-          <Text color="win" onClick={() => addBlock(user.name)}>
-            ADD FRIEND
-          </Text>
-        ) : (
-          <Text color="red" onClick={() => deleteBlock(user.name)}>
-            DELETE FRIEND
-          </Text>
-        )}
-      </MenuItem>
+      {user.name !== me.name ? (
+        <>
+          <MenuItem>
+            {!isFriend ? (
+              <Text color="win" onClick={() => addFriend(user.name)}>
+                ADD FRIEND
+              </Text>
+            ) : (
+              <Text color="red" onClick={() => deleteFriend(user.name)}>
+                DELETE FRIEND
+              </Text>
+            )}
+          </MenuItem>
+          <MenuItem>
+            {!isBlocked ? (
+              <Text color="red" onClick={() => addBlock(user.name)}>
+                BLOCK
+              </Text>
+            ) : (
+              <Text color="black" onClick={() => deleteBlock(user.name)}>
+                UNBLOCK
+              </Text>
+            )}
+          </MenuItem>
+        </>
+      ) : null}
     </MenuList>
   );
 }

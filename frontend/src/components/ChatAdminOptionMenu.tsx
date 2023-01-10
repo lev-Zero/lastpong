@@ -20,7 +20,7 @@ export function ChatAdminOptionMenu({
   isMuted,
   roomNo,
 }: ChatAdminOptionMenuProps) {
-  const { me, addFriend, deleteFriend } = userStore();
+  const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
   const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
 
   return (
@@ -71,17 +71,30 @@ export function ChatAdminOptionMenu({
         )}
       </MenuItem>
       {user.name !== me.name ? (
-        <MenuItem>
-          {!isFriend ? (
-            <Text color="win" onClick={() => addFriend(user.name)}>
-              ADD FRIEND
-            </Text>
-          ) : (
-            <Text color="red" onClick={() => deleteFriend(user.name)}>
-              DELETE FRIEND
-            </Text>
-          )}
-        </MenuItem>
+        <>
+          <MenuItem>
+            {!isFriend ? (
+              <Text color="win" onClick={() => addFriend(user.name)}>
+                ADD FRIEND
+              </Text>
+            ) : (
+              <Text color="red" onClick={() => deleteFriend(user.name)}>
+                DELETE FRIEND
+              </Text>
+            )}
+          </MenuItem>
+          <MenuItem>
+            {!isBlocked ? (
+              <Text color="red" onClick={() => addBlock(user.name)}>
+                BLOCK
+              </Text>
+            ) : (
+              <Text color="black" onClick={() => deleteBlock(user.name)}>
+                UNBLOCK
+              </Text>
+            )}
+          </MenuItem>
+        </>
       ) : null}
     </MenuList>
   );
