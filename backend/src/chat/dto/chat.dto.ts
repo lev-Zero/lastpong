@@ -29,6 +29,21 @@ export class ChatRoomDto {
   password: any;
 }
 
+export class UpdateStatusDto {
+  @IsNumber()
+  @IsNotEmpty()
+  chatRoomId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsIn([
+    chatRoomStatus.PRIVATE,
+    chatRoomStatus.PROTECTED,
+    chatRoomStatus.PUBLIC,
+  ])
+  status: number;
+}
+
 export class UpdatePwdDto {
   @IsNumber()
   @IsNotEmpty()

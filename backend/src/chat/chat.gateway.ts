@@ -36,6 +36,7 @@ import {
   InviteUserDto,
   ResponseInviteDto,
   UpdatePwdDto,
+  UpdateStatusDto,
 } from './dto/chat.dto';
 
 const socket_username = {};
@@ -230,6 +231,7 @@ export class ChatGateway
 
   /* --------------------------
 	|				updatePwd						|
+	|				updateStatus						|
 	---------------------------*/
   @SubscribeMessage('updatePwd')
   async updatePwd(
@@ -243,9 +245,26 @@ export class ChatGateway
       data = this.chatParameterSanitizer(validBody.newPwd);
       validBody.newPwd = data;
 
-      const user = await this.authService.findUserByRequestToken(socket);
-      await this.chatService.updatePwd(user.id, body);
+      await this.chatService.updatePwd(socket.data.user.id, validBody);
       socket.emit('updatePwd', { message: `채팅방 비밀번호 변경 완료` });
+    } catch (e) {
+      return new WsException(e.message);
+    }
+  }
+
+  @SubscribeMessage('updateStatus')
+  async updateStatus(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: UpdateStatusDto,
+  ): Promise<WsException | void> {
+    try {
+      const validBody = await this.chatParameterValidation(
+        body,
+        UpdateStatusDto,
+      );
+
+      await this.chatService.updateStatus(socket.data.user.id, validBody);
+      socket.emit('updateStatus', { message: `채팅방 상태 변경 완료` });
     } catch (e) {
       return new WsException(e.message);
     }
