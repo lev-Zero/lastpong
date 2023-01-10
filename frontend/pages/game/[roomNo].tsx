@@ -146,7 +146,13 @@ export default function GamePage() {
 
   useEffect(() => {
     if (isFinished === 0) return;
-    else onOpen();
+    else {
+      onOpen();
+      setIsSetting(0);
+      setIsFinished(0);
+      setIsReady(0);
+      disconnectSocket();
+    }
   }, [winLose]);
 
   function handleFinishBtnClicked() {
@@ -154,10 +160,7 @@ export default function GamePage() {
       socket.emit('exitGameRoom', {
         gameRoomName: room.gameRoomName,
       });
-      setIsSetting(0);
-      setIsFinished(0);
-      setIsReady(0);
-      disconnectSocket();
+
       router.push('/');
     }
   }
