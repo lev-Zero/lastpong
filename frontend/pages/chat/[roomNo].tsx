@@ -315,11 +315,8 @@ export default function ChatRoomPage() {
 
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
-  const [valueTitle, setValueTitle] = useState('');
   const [valuePassword, setValuePassword] = useState('');
   const [roomProtected, setRoomProtected] = useState(false);
-  const handleTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setValueTitle(event.target.value);
   const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValuePassword(event.target.value);
 
@@ -328,11 +325,7 @@ export default function ChatRoomPage() {
     setValuePassword('');
   };
 
-  const createChatRoom = () => {
-    if (valueTitle === '') {
-      alert('방 제목을 입력해주십시오.');
-      return;
-    }
+  const updateChatRoomPassword = () => {
     if (roomProtected && valuePassword === '') {
       alert('비밀번호를 입력해주십시오.');
       return;
@@ -341,20 +334,57 @@ export default function ChatRoomPage() {
       console.log('socket is undefined!');
       return;
     }
+    if (chatRoom === undefined || roomNo === undefined) {
+      return;
+    }
 
-    console.log('updateChatRoom을 해야 할 자리 (제작되면 연동)');
-    // socket.emit('createChatRoom', {
-    //   name: valueTitle,
-    //   status: roomProtected ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
-    //   password: valuePassword,
-    // });
-    // socket.once('createChatRoom', (res) => {
-    //   console.log(res);
-    //   console.log(roomProtected);
-    //   router.push(`/chat/${res.chatRoom.id}`);
-    // });
-    onSettingModalClose();
+    const newChatRoomStatus: ChatRoomStatus = !roomProtected
+      ? ChatRoomStatus.PUBLIC
+      : ChatRoomStatus.PROTECTED;
+
+    console.log('chatRoom.status', chatRoom.status);
+    console.log('newChatRoom.status', newChatRoomStatus);
+    console.log('valuePassword', valuePassword);
+
+    if (newChatRoomStatus !== chatRoom.status) {
+      socket.emit('updateStatus', { chatRoomId: roomNo, status: newChatRoomStatus }, console.log);
+      socket.once('updateStatus', ({ message }) => {
+        console.log(message);
+        if (newChatRoomStatus === ChatRoomStatus.PUBLIC) {
+          handleSettingModalClose();
+          return;
+        }
+        socket.emit('updatePwd', { chatRoomId: roomNo, newPwd: valuePassword }, console.log);
+        socket.once('updatePwd', ({ message }) => {
+          console.log(message);
+        });
+      });
+    }
+    if (newChatRoomStatus === ChatRoomStatus.PUBLIC) {
+      handleSettingModalClose();
+      return;
+    }
+    socket.emit('updatePwd', { chatRoomId: roomNo, newPwd: valuePassword }, console.log);
+    socket.once('updatePwd', ({ message }) => {
+      console.log(message);
+    });
+    handleSettingModalClose();
   };
+
+  function handleSettingModalClose() {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (roomNo === undefined) {
+      console.log('roomNo is undefined');
+      return;
+    }
+    socket.emit('chatRoomById', { chatRoomId: roomNo });
+    setRoomProtected(false);
+    setValuePassword('');
+    onSettingModalClose();
+  }
 
   return (
     <>
@@ -446,7 +476,7 @@ export default function ChatRoomPage() {
             </VStack>
           </Flex>
           {/* 방 설정 변경 */}
-          <Modal isOpen={isSettingModalOpen} onClose={onSettingModalClose} isCentered>
+          <Modal isOpen={isSettingModalOpen} onClose={handleSettingModalClose} isCentered>
             <ModalOverlay />
             <ModalContent bg="white" color="black" borderRadius={30}>
               <Center>
@@ -458,19 +488,12 @@ export default function ChatRoomPage() {
                     <ModalBody>
                       <HStack spacing={3}>
                         <VStack spacing={6}>
-                          <Text>TITLE</Text>
                           <HStack>
                             <Text>PASSWORD</Text>
                             <Checkbox onChange={handleRoomProtected} />
                           </HStack>
                         </VStack>
                         <VStack>
-                          <Input
-                            variant="outline"
-                            placeholder="enter title"
-                            onChange={handleTitle}
-                          />
-
                           <InputGroup size="md">
                             <Input
                               pr="4.5rem"
@@ -492,7 +515,7 @@ export default function ChatRoomPage() {
                     </ModalBody>
                     <ModalFooter>
                       <VStack mb={'7'}>
-                        <CustomButton size="lg" onClick={createChatRoom}>
+                        <CustomButton size="lg" onClick={updateChatRoomPassword}>
                           UPDATE
                         </CustomButton>
                       </VStack>
