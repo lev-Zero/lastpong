@@ -32,6 +32,7 @@ import RawUserItem from '@/components/RawUserItem';
 import { chatStore } from '@/stores/chatStore';
 import { useRouter } from 'next/router';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
+import { UserStatus } from '@/interfaces/UserProps';
 
 export default function ChatPage() {
   const { allUsers, getAllUsers } = allUserStore();
@@ -157,7 +158,6 @@ export default function ChatPage() {
                     if (!chatRoom.isProtected) {
                       joinChatRoom(chatRoom.id);
                     } else {
-                      // TODO:  비밀번호 입력 모달 제작하기
                       privChatRoomID.current = chatRoom.id;
                       privOnOpen();
                     }
@@ -181,9 +181,11 @@ export default function ChatPage() {
         </VStack>
         <VStack w="25%" h="90%" m={10} p={7} backgroundColor="white" borderRadius={'25px'}>
           <VStack w="100%" overflowY="scroll">
-            {/* 향후에 유저 상태에 따라 불러오는거 달라지면 이부분 filter 수정 */}
+            {/* TODO: BE에서 UserStatus 제대로 넘어오면, ONLINE인 사람만 표시하는 것으로 로직 변경 */}
             {allUsers
-              .filter((user) => user.status === 0)
+              .filter(
+                (user) => user.status === UserStatus.ONLINE || user.status === UserStatus.INGAME
+              )
               .map((user, index) => (
                 <Link key={index} href={`/user/${user.name}`}>
                   <Flex width={'200px'}>
@@ -238,8 +240,6 @@ export default function ChatPage() {
                 </ModalBody>
                 <ModalFooter>
                   <VStack mb={'7'}>
-                    {/* TODO:onclick 핸들러로 매치 잡는 기능 연결해야함 현재는 콘솔에 정보만 띄움 */}
-
                     <CustomButton size="lg" onClick={createChatRoom}>
                       CREATE
                     </CustomButton>
