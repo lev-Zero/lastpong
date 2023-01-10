@@ -91,6 +91,14 @@ export default function ChatPage() {
       console.log('socket is undefined!');
       return;
     }
+    if (valueTitle.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
+      alert('제목에는 한글/영어/숫자만 이용할 수 있습니다');
+      return;
+    }
+    if (roomProtected && valuePassword.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
+      alert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
+      return;
+    }
 
     socket.emit('createChatRoom', {
       name: valueTitle,

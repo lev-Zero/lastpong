@@ -330,6 +330,10 @@ export default function ChatRoomPage() {
       alert('비밀번호를 입력해주십시오.');
       return;
     }
+    if (roomProtected && valuePassword.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
+      alert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
+      return;
+    }
     if (socket === undefined) {
       console.log('socket is undefined!');
       return;
