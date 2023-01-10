@@ -87,7 +87,7 @@ export default function UserProfilePage() {
         loseScore: match.loserScore,
       };
     });
-    setMatchHistory(tmp);
+    setMatchHistory(tmp.reverse());
     console.log('tmp', tmp);
   }
 
@@ -156,7 +156,7 @@ export default function UserProfilePage() {
             <Divider border="1px" borderColor="main" my={10} />
             <WinLoseSum winCnt={winLose.winCnt} loseCnt={winLose.loseCnt} fontSize="3xl" />
             <VStack w="100%" my={10} maxH="15vh" overflowY="scroll">
-              {matchHistory.reverse().map((match, idx) => (
+              {matchHistory.map((match, idx) => (
                 <MatchHistory
                   key={idx}
                   winName={match.winName}
