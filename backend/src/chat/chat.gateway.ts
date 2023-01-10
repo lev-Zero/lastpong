@@ -240,9 +240,9 @@ export class ChatGateway
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(body, UpdatePwdDto);
-      let data = this.chatParameterSanitizer(validBody.oldPwd);
-      validBody.oldPwd = data;
-      data = this.chatParameterSanitizer(validBody.newPwd);
+      // let data = this.chatParameterSanitizer(validBody.oldPwd);
+      // validBody.oldPwd = data;
+      const data = this.chatParameterSanitizer(validBody.newPwd);
       validBody.newPwd = data;
 
       await this.chatService.updatePwd(socket.data.user.id, validBody);

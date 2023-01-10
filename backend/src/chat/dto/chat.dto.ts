@@ -49,9 +49,9 @@ export class UpdatePwdDto {
   @IsNotEmpty()
   chatRoomId: number;
 
-  @IsNotEmpty()
-  @IsString()
-  oldPwd: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // oldPwd: string;
 
   @IsNotEmpty()
   @IsString()

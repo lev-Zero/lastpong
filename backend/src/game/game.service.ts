@@ -477,12 +477,6 @@ export class GameService {
   ): Promise<void> {
     try {
       for (const player of gameRoom.players) {
-        console.log(
-          player.user.username,
-          player.score,
-          gameRoom.facts.score.max,
-          Number(player.score) === Number(gameRoom.facts.score.max),
-        );
         if (Number(player.score) === Number(gameRoom.facts.score.max)) {
           const sockets = await server.in(gameRoom.gameRoomName).fetchSockets();
           for (const so of sockets) {
