@@ -166,7 +166,7 @@ export default function GamePage() {
   }
 
   const draw = (p5: p5Types) => {
-    p5.background(230);
+    p5.background(230 - room.facts.gameOption.backgroundColor * 230);
     function draw_score(p5obj: p5Types) {
       p5obj.fill('red');
       p5obj.textSize(50);
@@ -174,7 +174,12 @@ export default function GamePage() {
       p5obj.textAlign(p5obj.CENTER);
       p5obj.text('VS', room.facts.display.width / 2, 60);
 
-      p5obj.fill('black');
+      if (room.facts.gameOption.backgroundColor === 0) {
+        p5obj.fill('black');
+      } else {
+        p5obj.fill('white');
+      }
+
       p5obj.textSize(50);
       p5obj.textAlign(p5obj.LEFT);
 
