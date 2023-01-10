@@ -17,6 +17,7 @@ import {
   ChatRoomDto,
   ChatRoomJoinDto,
   UpdatePwdDto,
+  UpdateStatusDto,
 } from './dto/chat.dto';
 import { ChatLog } from './entity/chatLog.entity';
 import { ChatDmLog } from './entity/chatDmLog.entity';
@@ -163,6 +164,7 @@ export class ChatService {
   // /*----------------------------------
   // |					udpatePwd					 |
   // |					checkPwd					 |
+  // |					udpateStatus					 |
   // ----------------------------------*/
 
   async updatePwd(userId: number, body: UpdatePwdDto): Promise<void> {
@@ -194,6 +196,45 @@ export class ChatService {
       const chatRoom = await this.findChatRoomById(id, [], true);
 
       return await bcrypt.compare(password, chatRoom.password);
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  async updateStatus(userId: number, body: UpdateStatusDto): Promise<void> {
+    try {
+      const user = await this.userService.findUserById(userId);
+      const chatRoom = await this.findChatRoomById(body.chatRoomId, ['owner']);
+
+      if (chatRoom.owner.id != user.id)
+        throw new WsException('방 주인만 방 status 수정 가능합니다.');
+      if (chatRoom.status === chatRoomStatus.PRIVATE)
+        throw new WsException('PRIVATE status인 방은 수정 할 수 없습니다');
+
+      if (body.status === chatRoomStatus.PRIVATE)
+        throw new WsException('PRIVATE로는 status 수정 할 수 없습니다');
+      else if (
+        chatRoom.status === chatRoomStatus.PROTECTED &&
+        body.status === chatRoomStatus.PUBLIC
+      ) {
+        await this.chatRoomRepository.update(chatRoom.id, {
+          status: body.status,
+          password: '',
+        });
+      } else if (
+        chatRoom.status === chatRoomStatus.PUBLIC &&
+        body.status === chatRoomStatus.PROTECTED
+      ) {
+        const password = await bcrypt.hash('0000', 10);
+        await this.chatRoomRepository.update(chatRoom.id, {
+          status: body.status,
+          password,
+        });
+      } else {
+        throw new WsException(
+          '현재 방과 같은 status 요청이거나, 유효하지 않는 status 요청입니다.',
+        );
+      }
     } catch (e) {
       throw new WsException(e.message);
     }
