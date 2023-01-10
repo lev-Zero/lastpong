@@ -28,9 +28,8 @@ export default function Header() {
   }, []);
 
   async function logout() {
-    //TODO: BE에서 /auth/logout 을 만들면 다시 활성화
-    // const json = await customFetch('GET', '/auth/logout');
-    // console.log(json);
+    const json = await customFetch('GET', '/auth/logout');
+    console.log(json);
     removeCookie('accessToken');
     router.push('/');
   }
