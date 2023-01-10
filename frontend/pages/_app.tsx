@@ -103,7 +103,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   // TODO: beforeunload일 때 처리 어떻게 하지..?
-  // const router = useRouter();
+  const router = useRouter();
   // useEffect(() => {
   //   function preventUnload(e: BeforeUnloadEvent) {
   //     e.preventDefault();
@@ -127,7 +127,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <ChakraProvider theme={theme}>
-      {getLayout(<Component {...pageProps} />)}
+      {getLayout(<Component {...pageProps} key={router.asPath} />)}
       <InviteModal />
     </ChakraProvider>
   );
