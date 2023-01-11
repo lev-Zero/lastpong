@@ -25,6 +25,7 @@ export function ChatAdminOptionMenu({
   const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
   const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
 
+  if (me.name === user.name) return null;
   return (
     <MenuList>
       {myRole !== ChatUserStatus.OWNER && role !== ChatUserStatus.COMMON ? null : (

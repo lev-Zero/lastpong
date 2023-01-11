@@ -11,6 +11,7 @@ export interface ChatOptionMenuProps extends OptionMenuProps {
 export function ChatOptionMenu({ user, isFriend, isBlocked }: ChatOptionMenuProps) {
   const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
 
+  if (me.name === user.name) return null;
   return (
     <MenuList>
       <MenuItem as={Link} href={`/user/${user.name}`}>
