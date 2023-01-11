@@ -29,7 +29,7 @@ export class BlockService {
         .catch(() => null);
 
       for (const friendInArray of friends) {
-        if (blockedUser.id == friendInArray.friend.id)
+        if (blockedUser.id === friendInArray.friend.id)
           throw new HttpException(
             '친구는 블락할 수 없습니다.',
             HttpStatus.BAD_REQUEST,
@@ -39,7 +39,7 @@ export class BlockService {
       const blocks = await this.findBlock(blockOfferUser.id).catch(() => null);
 
       for (const blockInArray of blocks) {
-        if (blockedUser.id == blockInArray.block.id)
+        if (blockedUser.id === blockInArray.block.id)
           throw new HttpException(
             '이미 블락된 유저입니다.',
             HttpStatus.BAD_REQUEST,
@@ -77,7 +77,7 @@ export class BlockService {
         .catch(() => null);
 
       for (const friendInArray of friends) {
-        if (blockedUser.id == friendInArray.friend.id)
+        if (blockedUser.id === friendInArray.friend.id)
           throw new HttpException(
             '친구는 블락할 수 없습니다.',
             HttpStatus.BAD_REQUEST,
@@ -87,7 +87,7 @@ export class BlockService {
       const blocks = await this.findBlock(blockOfferUser.id).catch(() => null);
 
       for (const blockInArray of blocks) {
-        if (blockedUser.id == blockInArray.block.id)
+        if (blockedUser.id === blockInArray.block.id)
           throw new HttpException(
             '이미 블락된 유저입니다.',
             HttpStatus.BAD_REQUEST,

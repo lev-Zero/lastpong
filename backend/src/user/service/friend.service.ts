@@ -27,7 +27,7 @@ export class FriendService {
       );
 
       for (const friendInArray of friends) {
-        if (friend.id == friendInArray.friend.id)
+        if (friend.id === friendInArray.friend.id)
           throw new HttpException('이미 친구입니다.', HttpStatus.BAD_REQUEST);
       }
 
@@ -57,7 +57,7 @@ export class FriendService {
       );
 
       for (const friendInArray of friends) {
-        if (friend.id == friendInArray.friend.id)
+        if (friend.id === friendInArray.friend.id)
           throw new HttpException('이미 친구입니다.', HttpStatus.BAD_REQUEST);
       }
 

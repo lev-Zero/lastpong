@@ -154,19 +154,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       for (const player of gameRoom.players) {
-        if (player.user.username == socket.data.user.username)
+        if (player.user.username === socket.data.user.username)
           throw new WsException('이미 참여중인 게임룸입니다.');
       }
 
       const result = this.gameService.joinGameRoom(socket, gameRoom);
       socket.join(result.gameRoom.gameRoomName);
 
-      if (result.user == PlayerType.PLAYER) {
+      if (result.user === PlayerType.PLAYER) {
         this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', {
           message: `${validBody.gameRoomName} 게임룸에 ${user.username} 플레이어가 들어왔습니다.`,
           gameRoom,
         });
-      } else if (result.user == PlayerType.SPECTATOR) {
+      } else if (result.user === PlayerType.SPECTATOR) {
         this.server.to(gameRoom.gameRoomName).emit('joinGameRoom', {
           message: `${validBody.gameRoomName} 게임룸에 ${user.username} 관찰자가 들어왔습니다.`,
           gameRoom,
@@ -262,7 +262,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
 
       let ballPosition;
-      if (gameRoom.gameStatus == gameStatus.COUNTDOWN) {
+      if (gameRoom.gameStatus === gameStatus.COUNTDOWN) {
         ballPosition = this.gameService.resetBallPosition(gameRoom);
         gameRoom.gameStatus = gameStatus.GAMEPLAYING;
       } else {
@@ -279,7 +279,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       let score: number[];
 
-      if (gameRoom.gameStatus == gameStatus.GAMEPLAYING) {
+      if (gameRoom.gameStatus === gameStatus.GAMEPLAYING) {
         const interval = setInterval(async () => {
           if (gameRoom.gameStatus != gameStatus.GAMEPLAYING) {
             clearInterval(interval);
