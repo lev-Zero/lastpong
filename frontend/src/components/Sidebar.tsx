@@ -27,7 +27,7 @@ import { chatStore } from '@/stores/chatStore';
 import { DmMsgProps } from '@/interfaces/MsgProps';
 
 export default function Sidebar() {
-  const { friends, fetchFriends, fetchBlockedUsers } = userStore();
+  const { friends, fetchFriends, fetchFriendsStatus, fetchBlockedUsers } = userStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchId, setSearchId] = useState<string>('');
   const { allUsers, getAllUsers } = allUserStore();
@@ -41,6 +41,14 @@ export default function Sidebar() {
     if (socket === undefined) {
       makeSocket();
     }
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      console.log('friends status refreshed');
+      fetchFriendsStatus();
+    }, 1000);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {

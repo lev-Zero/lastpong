@@ -18,6 +18,7 @@ interface userStoreProps {
   friends: UserProps[];
   setFriends: (friends: UserProps[]) => void;
   fetchFriends: () => void;
+  fetchFriendsStatus: () => void;
   addFriend: (name: string) => void;
   deleteFriend: (name: string) => void;
   blockedUsers: UserProps[];
@@ -104,6 +105,17 @@ export const userStore = create<userStoreProps>((set, get) => ({
         return;
       }
     }
+  },
+  fetchFriendsStatus: async () => {
+    const rawFriends = await customFetch('GET', '/user/friend');
+    if (rawFriends.length !== get().friends.length) {
+      return;
+    }
+    const friendsCpy = get().friends.slice();
+    friendsCpy.forEach((friend, idx) => {
+      friend.status = rawFriends[idx].friend.status;
+    });
+    get().setFriends(friendsCpy);
   },
   addFriend: async (name: string) => {
     try {
