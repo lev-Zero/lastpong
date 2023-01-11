@@ -14,7 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: Payload): any {
+  validate(
+    payload: Payload,
+  ): { userId: number; username: string } | HttpException {
     try {
       if (!payload.otpStatus || !payload.auth42Status)
         throw new HttpException(

@@ -537,7 +537,10 @@ export class GameService {
     }
   }
 
-  async exitGameRoom(server: any, socket: Socket): Promise<number[] | boolean> {
+  async exitGameRoom(
+    server: Server,
+    socket: Socket,
+  ): Promise<number[] | boolean> {
     try {
       const userId = socket.data.user.id;
       if (this.queue.indexOf(socket) != -1) {
