@@ -31,6 +31,9 @@ interface ChatStoreProps {
 
   isInvited: number;
   setIsInvited: (isInvited: number) => void;
+
+  dmIdxMap: Map<string, number>;
+  updateDmIdxMap: (targetName: string, lastIdx: number) => void;
 }
 
 export const chatStore = create<ChatStoreProps>((set, get) => ({
@@ -198,5 +201,12 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
   isInvited: 0,
   setIsInvited: (isInvited: number) => {
     set((state) => ({ ...state, isInvited: isInvited }));
+  },
+  dmIdxMap: new Map<string, number>(),
+  updateDmIdxMap: (targetName: string, lastIdx: number) => {
+    set((state) => ({
+      ...state,
+      dmIdxMap: get().dmIdxMap.set(targetName, lastIdx),
+    }));
   },
 }));
