@@ -148,6 +148,24 @@ export default function ChatPage() {
 
   const privChatRoomID = useRef(0);
 
+  function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (e.key === 'Enter') {
+      createChatRoom();
+    }
+  }
+  function handleEnterKeyDownPriv(e: React.KeyboardEvent<HTMLElement>, id: number) {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (e.key === 'Enter') {
+      joinPrivChatRoom(id);
+    }
+  }
   return (
     <>
       <Head>
@@ -231,7 +249,12 @@ export default function ChatPage() {
                       </HStack>
                     </VStack>
                     <VStack>
-                      <Input variant="outline" placeholder="enter title" onChange={handleTitle} />
+                      <Input
+                        variant="outline"
+                        placeholder="enter title"
+                        onChange={handleTitle}
+                        onKeyDown={handleEnterKeyDown}
+                      />
 
                       <InputGroup size="md">
                         <Input
@@ -242,6 +265,7 @@ export default function ChatPage() {
                           disabled={!roomProtected}
                           bg={!roomProtected ? 'gray.200' : 'white'}
                           value={valuePassword}
+                          onKeyDown={handleEnterKeyDown}
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -307,6 +331,7 @@ export default function ChatPage() {
                           // disabled={!roomPrivate}
                           // bg={!roomPrivate ? 'gray.200' : 'white'}
                           value={valuePasswordPriv}
+                          onKeyDown={(e) => handleEnterKeyDownPriv(e, privChatRoomID.current)}
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
