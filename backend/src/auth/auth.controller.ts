@@ -76,12 +76,13 @@ export class AuthController {
   async logout(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<HttpException> {
+  ): Promise<HttpException | string> {
     try {
       res.cookie('accessToken', '', {
         maxAge: 0,
       });
       await this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
+      return JSON.stringify({ status: 'logout' });
       res.status(201).json({ status: 'logout' }); //redirect
     } catch (e) {
       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
