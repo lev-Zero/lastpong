@@ -63,6 +63,7 @@ export default function ContextMenuHoc({
                   role={role}
                   isMuted={isMuted}
                   roomNo={roomNo}
+                  myRole={myChatUserStatus}
                 />
               ) : (
                 <ChatOptionMenu
