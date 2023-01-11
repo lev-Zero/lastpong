@@ -10,3 +10,8 @@ export class user42Dto {
   @IsString()
   profileUrl: string;
 }
+
+export class CodeDto {
+  @IsString()
+  code: string;
+}

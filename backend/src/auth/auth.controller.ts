@@ -19,6 +19,7 @@ import { Auth42Service } from 'src/auth/service/auth42.service';
 import { UserService } from 'src/user/service/user.service';
 import { userStatus } from 'src/user/enum/status.enum';
 import { Sanitizer } from 'class-sanitizer';
+import { CodeDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -181,7 +182,7 @@ export class AuthController {
   async loginOTP(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @Body('code') code: string,
+    @Body() body: CodeDto,
   ): Promise<void | HttpException> {
     try {
       let token;
@@ -205,7 +206,7 @@ export class AuthController {
         );
 
       if (payload.auth42Status) {
-        const codeData = this.authSanitizer(code);
+        const codeData = this.authSanitizer(body.code);
         const newToken = await this.auth42Service.loginOTP(payload, codeData);
 
         res.cookie('accessToken', newToken);
