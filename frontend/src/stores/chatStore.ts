@@ -34,6 +34,10 @@ interface ChatStoreProps {
 
   dmIdxMap: Map<string, number>;
   updateDmIdxMap: (targetName: string, lastIdx: number) => void;
+
+  roomNo: number | undefined;
+  updateRoomNo: (roomNo: number) => void;
+  resetRoomNo: () => void;
 }
 
 export const chatStore = create<ChatStoreProps>((set, get) => ({
@@ -207,6 +211,19 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
     set((state) => ({
       ...state,
       dmIdxMap: get().dmIdxMap.set(targetName, lastIdx),
+    }));
+  },
+  roomNo: undefined,
+  updateRoomNo: (roomNo: number) => {
+    set((state) => ({
+      ...state,
+      roomNo: roomNo,
+    }));
+  },
+  resetRoomNo: () => {
+    set((state) => ({
+      ...state,
+      roomNo: undefined,
     }));
   },
 }));
