@@ -25,9 +25,12 @@ export default function WatchPage() {
     }
     gameSocket.emit('joinGameRoom', { gameRoomName: name }, ({ error }: any) => {
       alert(error);
+      return;
     });
-    gameSocket.once('joinGameRoom', console.log);
-    console.log('routes to watchRoom');
+    gameSocket.once('joinGameRoom', (res) => {
+      console.log(res);
+      router.push(`/watch/${name}`);
+    });
   }
 
   function refreshGameRoomList() {
