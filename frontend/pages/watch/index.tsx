@@ -10,21 +10,21 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function WatchPage() {
   const [matchInfoList, setMatchInfoList] = useState<MatchInfoProps[]>([]);
-  const { socket, makeSocket } = gameStore();
+  const { gameSocket, makeSocket } = gameStore();
 
   useEffect(() => {
-    if (socket === undefined) {
+    if (gameSocket === undefined) {
       makeSocket();
     }
   }, []);
 
   useEffect(() => {
-    if (socket === undefined || !socket.connected) {
+    if (gameSocket === undefined || !gameSocket.connected) {
       console.log('socket is not ready');
       return;
     }
-    socket.emit('findGameRooms');
-    socket.once('findGameRooms', async ({ gameRoom }) => {
+    gameSocket.emit('findGameRooms');
+    gameSocket.once('findGameRooms', async ({ gameRoom }: any) => {
       const newMatchInfoList: MatchInfoProps[] = await Promise.all(
         gameRoom.map(async (room: any) => {
           if (room.players.length !== 2) {
@@ -40,7 +40,7 @@ export default function WatchPage() {
       );
       setMatchInfoList(newMatchInfoList);
     });
-  }, [socket?.connected]);
+  }, [gameSocket?.connected]);
 
   return (
     <>
