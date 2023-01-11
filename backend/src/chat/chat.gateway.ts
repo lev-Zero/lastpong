@@ -534,6 +534,8 @@ export class ChatGateway
         body,
         ChatRoomMessageDto,
       );
+      const data = this.chatParameterSanitizer(validBody.message);
+      validBody.message = data;
 
       const user = socket.data.user;
       const chatRoom = await this.chatService
@@ -1058,6 +1060,8 @@ export class ChatGateway
         body,
         ChatRoomDmMessageDto,
       );
+      const data = this.chatParameterSanitizer(validBody.message);
+      validBody.message = data;
 
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         validBody.chatRoomId,
@@ -1213,6 +1217,15 @@ export class ChatGateway
       const data3 = Sanitizer.stripLow(data2, true);
       const data4 = Sanitizer.trim(data3, ' ');
       return data4;
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  private chatMessageSanitizer(data: string): string {
+    try {
+      const data1 = Sanitizer.stripLow(data, true);
+      return data1;
     } catch (e) {
       throw new WsException(e.message);
     }
