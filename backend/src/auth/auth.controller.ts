@@ -73,15 +73,18 @@ export class AuthController {
 
   @Get('/logout')
   @UseGuards(JwtAuthGuard)
-  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<HttpException> {
     try {
       res.cookie('accessToken', '', {
         maxAge: 0,
       });
-      this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
-      res.send({ status: 'logout' }); //redirect
+      await this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
+      res.status(201).json({ status: 'logout' }); //redirect
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
