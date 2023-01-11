@@ -26,6 +26,8 @@ import {
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
+import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
+import { UserProps } from '@/interfaces/UserProps';
 
 const styles = {
   MainLayout: {
@@ -89,30 +91,27 @@ export default function GamePage() {
   const [winLose, setWinLose] = useState<boolean>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
-  const [leftUser, setLeftUser] = useState<GameUserProps>({
-    id: 0,
-    rating: 1000,
-    status: 0,
-    username: 'PLAYER1',
-    username42: '',
-  });
-
-  const [rightUser, setRightUser] = useState<GameUserProps>({
-    id: 0,
-    rating: 1000,
-    status: 0,
-    username: 'PLAYER2',
-    username42: '',
-  });
+  const [leftUser, setLeftUser] = useState<UserProps>();
+  const [rightUser, setRightUser] = useState<UserProps>();
 
   useEffect(() => {
-    if (room === undefined) return;
-    else {
-      if (room.players.length === 2) {
-        setLeftUser(room.players[0].user);
-        setRightUser(room.players[1].user);
+    async function fetchTwoUsers() {
+      if (room === undefined) {
+        console.log('room is undefined');
+        return;
       }
+      if (room.players.length !== 2) {
+        console.log('players are not 2 people');
+        return;
+      }
+      const rawLeftUser: RawUserProps = room.players[0].user;
+      const rawRightUser: RawUserProps = room.players[1].user;
+      const leftUser: UserProps = await convertRawUserToUser(rawLeftUser);
+      const rightUser: UserProps = await convertRawUserToUser(rawRightUser);
+      setLeftUser(leftUser);
+      setRightUser(rightUser);
     }
+    fetchTwoUsers();
   }, [room]);
 
   const setup = (p5: p5Types, canvasParentRef: Element) => {
@@ -122,27 +121,32 @@ export default function GamePage() {
   };
 
   useEffect(() => {
-    if (gameSocket === undefined) console.log('socket is undefined');
-    else {
-      if (isFinished === 0) {
-        console.log('SOCKET EMIT START GAME!');
-        setGameScore([0, 0]);
-        gameSocket.emit('startGame', {
-          gameRoomName: room.gameRoomName,
-        });
-        return;
-      }
-      if (GameMeProps !== undefined) {
-        if (GameMeProps.id === leftUser.id) {
-          if (GameScore[0] > GameScore[1]) setWinLose(true);
-          else setWinLose(false);
-        } else {
-          if (GameScore[1] > GameScore[0]) setWinLose(true);
-          else setWinLose(false);
-        }
+    if (gameSocket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (leftUser === undefined) {
+      console.log('left user is undefined');
+      return;
+    }
+    if (isFinished === 0) {
+      console.log('SOCKET EMIT START GAME!');
+      setGameScore([0, 0]);
+      gameSocket.emit('startGame', {
+        gameRoomName: room.gameRoomName,
+      });
+      return;
+    }
+    if (GameMeProps !== undefined) {
+      if (GameMeProps.id === leftUser.id) {
+        if (GameScore[0] > GameScore[1]) setWinLose(true);
+        else setWinLose(false);
+      } else {
+        if (GameScore[1] > GameScore[0]) setWinLose(true);
+        else setWinLose(false);
       }
     }
-  }, [isFinished]);
+  }, [isFinished, leftUser]);
 
   useEffect(() => {
     if (isFinished === 0) return;
@@ -153,8 +157,8 @@ export default function GamePage() {
         });
       }
       onOpen();
-      if (socket !== undefined) {
-        socket.emit('exitGameRoom', {
+      if (gameSocket !== undefined) {
+        gameSocket.emit('exitGameRoom', {
           gameRoomName: room.gameRoomName,
         });
       }
@@ -172,6 +176,9 @@ export default function GamePage() {
   const draw = (p5: p5Types) => {
     p5.background(230 - room.facts.gameOption.backgroundColor * 230);
     function draw_score(p5obj: p5Types) {
+      if (leftUser === undefined || rightUser === undefined) {
+        return;
+      }
       p5obj.fill('red');
       p5obj.textSize(50);
       p5obj.textFont('Knewave');
@@ -187,12 +194,12 @@ export default function GamePage() {
       p5obj.textSize(50);
       p5obj.textAlign(p5obj.LEFT);
 
-      p5obj.text(leftUser.username, 15, 60);
+      p5obj.text(leftUser.name.toUpperCase(), 15, 60);
       p5obj.text(GameScore[0], room.facts.display.width / 3 + 50, 60);
       p5obj.textAlign(p5obj.LEFT);
       p5obj.text(
-        rightUser.username,
-        room.facts.display.width - 30 * rightUser.username.length - 40,
+        rightUser.name.toUpperCase(),
+        room.facts.display.width - 30 * rightUser.name.length - 40,
         60
       );
       p5obj.text(GameScore[1], (2 * room.facts.display.width) / 3 - 100, 60);
