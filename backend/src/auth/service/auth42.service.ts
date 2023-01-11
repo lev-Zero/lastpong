@@ -56,7 +56,7 @@ export class Auth42Service {
   //     const auth42Status = true;
   //     let otpStatus = false;
 
-  //     if (findUser && user.auth42.otpOn == false) {
+  //     if (findUser && user.auth42.otpOn === false) {
   //       otpStatus = true;
   //     }
 
@@ -112,7 +112,7 @@ export class Auth42Service {
       const auth42Status = true;
       let otpStatus = true;
 
-      if (find42User && user.auth42.otpOn == true) {
+      if (find42User && user.auth42.otpOn === true) {
         otpStatus = false;
       }
 
@@ -254,7 +254,7 @@ export class Auth42Service {
       const auth42User = await this.auth42Repository.findOne({
         where: { userId: user.id },
       });
-      if (auth42User.otpOn == false) auth42User.otpOn = true;
+      if (auth42User.otpOn === false) auth42User.otpOn = true;
       await this.auth42Repository.save(auth42User);
       const result = { status: 'otpOn' };
       return result;
@@ -269,7 +269,7 @@ export class Auth42Service {
       const auth42User = await this.auth42Repository.findOne({
         where: { userId: user.id },
       });
-      if (auth42User.otpOn == true) auth42User.otpOn = false;
+      if (auth42User.otpOn === true) auth42User.otpOn = false;
       await this.auth42Repository.save(auth42User);
       const result = { status: 'otpOff' };
       return result;

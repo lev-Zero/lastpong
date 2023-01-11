@@ -466,7 +466,7 @@ export class ChatGateway
         ['joinedUser', 'owner'],
       );
 
-      if (chatRoom.owner.id == offerUser.id) {
+      if (chatRoom.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoom.name).fetchSockets();
         for (const so of sockets) {
           // await this.userService.updateStatus(
@@ -541,7 +541,7 @@ export class ChatGateway
         .catch(() => null);
 
       for (const mutedUser of chatRoom.mutedUser) {
-        if (mutedUser.user.id == user.id) {
+        if (mutedUser.user.id === user.id) {
           const currentTime = new Date();
           if (mutedUser.endTime > currentTime)
             throw new WsException('이 방에서 당신은 Mute 상태입니다.');
@@ -991,7 +991,7 @@ export class ChatGateway
         ['joinedDmUser', 'owner'],
       );
 
-      if (chatRoomDm.owner.id == offerUser.id) {
+      if (chatRoomDm.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoomDm.name).fetchSockets();
         for (const so of sockets) {
           // await this.userService.updateStatus(
@@ -1076,7 +1076,7 @@ export class ChatGateway
 
       if (
         isBlockedUser.blockOfferUser.find(
-          (user) => user.blockedUser.id == me.id,
+          (user) => user.blockedUser.id === me.id,
         )
       ) {
         socket.emit('blocked', { message: 'you are blocked user' });
@@ -1162,7 +1162,7 @@ export class ChatGateway
         targetId: validBody.targetId,
         response: validBody.response,
       });
-      if (validBody.response == false) {
+      if (validBody.response === false) {
         const host = await this.userService.findUserById(validBody.hostId);
         const target = await this.userService.findUserById(validBody.targetId);
         const hostSocket: Socket = socket_username[host.username];
@@ -1174,7 +1174,7 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-  //response == true 이면
+  //response === true 이면
   //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
   //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
   @SubscribeMessage('inviteGameRoomInfo')

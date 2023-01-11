@@ -70,7 +70,7 @@ export class AuthService {
         );
       const payload = this.verifyJWT(token);
       if (!payload) return null;
-      if (payload.auth42Status == false || payload.otpStatus == false)
+      if (payload.auth42Status === false || payload.otpStatus === false)
         return null;
 
       const user = await this.userService

@@ -156,7 +156,7 @@ export class AuthController {
             HttpStatus.BAD_REQUEST,
           );
 
-        if (auth42.otpOn == false) {
+        if (auth42.otpOn === false) {
           return JSON.stringify({ status: 'otpOff' });
         } else {
           // if (!auth42.otp) {
