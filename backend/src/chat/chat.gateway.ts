@@ -12,7 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Sanitizer } from 'class-sanitizer';
 import { validate } from 'class-validator';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
 import { userStatus } from 'src/user/enum/status.enum';
@@ -53,7 +53,7 @@ export class ChatGateway
   ) {}
 
   @WebSocketServer()
-  public server: any;
+  public server: Server;
 
   /* --------------------------
 	|				handleConnection 		|
@@ -322,8 +322,8 @@ export class ChatGateway
 
   @SubscribeMessage('chatRoomByName')
   async findChatRoomByName(
-    socket: Socket,
-    body: ChatRoomNameDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomNameDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -356,8 +356,8 @@ export class ChatGateway
 
   @SubscribeMessage('chatRoomByUserId')
   async findChatRoomByUserId(
-    socket: Socket,
-    body: ChatRoomUserIdDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomUserIdDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -466,7 +466,7 @@ export class ChatGateway
         ['joinedUser', 'owner'],
       );
 
-      if (chatRoom.owner.id == offerUser.id) {
+      if (chatRoom.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoom.name).fetchSockets();
         for (const so of sockets) {
           // await this.userService.updateStatus(
@@ -534,6 +534,8 @@ export class ChatGateway
         body,
         ChatRoomMessageDto,
       );
+      const data = this.chatMessageSanitizer(validBody.message);
+      validBody.message = data;
 
       const user = socket.data.user;
       const chatRoom = await this.chatService
@@ -541,7 +543,7 @@ export class ChatGateway
         .catch(() => null);
 
       for (const mutedUser of chatRoom.mutedUser) {
-        if (mutedUser.user.id == user.id) {
+        if (mutedUser.user.id === user.id) {
           const currentTime = new Date();
           if (mutedUser.endTime > currentTime)
             throw new WsException('이 방에서 당신은 Mute 상태입니다.');
@@ -616,8 +618,8 @@ export class ChatGateway
 
   @SubscribeMessage('removeAdmin')
   async removeAdminUser(
-    socket: Socket,
-    body: ChatRoomIdUserIdDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -700,8 +702,8 @@ export class ChatGateway
   //시간상관없이 조건 풀어주는로직
   @SubscribeMessage('removeMute')
   async removeMutedUser(
-    socket: Socket,
-    body: ChatRoomIdUserIdDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -744,8 +746,8 @@ export class ChatGateway
 
   @SubscribeMessage('addBan')
   async addBannedUser(
-    socket: Socket,
-    body: ChatRoomIdUserIdDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdUserIdDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -899,8 +901,8 @@ export class ChatGateway
 
   @SubscribeMessage('chatRoomDmById')
   async findChatRoomDmById(
-    socket: Socket,
-    body: ChatRoomIdDmDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomIdDmDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -943,8 +945,8 @@ export class ChatGateway
 
   @SubscribeMessage('chatRoomDmByUserId')
   async findChatRoomDmByUserId(
-    socket: Socket,
-    body: ChatRoomDmUserIdDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomDmUserIdDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -973,8 +975,8 @@ export class ChatGateway
   //owner가 body.id를 남으로 하면 강퇴, 지가 지꺼쓰면퇴정
   @SubscribeMessage('leaveDm')
   async leaveChatRoomDm(
-    socket: Socket,
-    body: ChatRoomleaveDmDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomleaveDmDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -991,7 +993,7 @@ export class ChatGateway
         ['joinedDmUser', 'owner'],
       );
 
-      if (chatRoomDm.owner.id == offerUser.id) {
+      if (chatRoomDm.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoomDm.name).fetchSockets();
         for (const so of sockets) {
           // await this.userService.updateStatus(
@@ -1050,14 +1052,16 @@ export class ChatGateway
 
   @SubscribeMessage('directMessage')
   async sendMessageDM(
-    socket: Socket,
-    body: ChatRoomDmMessageDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: ChatRoomDmMessageDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
         body,
         ChatRoomDmMessageDto,
       );
+      const data = this.chatMessageSanitizer(validBody.message);
+      validBody.message = data;
 
       const chatRoomDm = await this.chatService.findChatRoomDmById(
         validBody.chatRoomId,
@@ -1076,7 +1080,7 @@ export class ChatGateway
 
       if (
         isBlockedUser.blockOfferUser.find(
-          (user) => user.blockedUser.id == me.id,
+          (user) => user.blockedUser.id === me.id,
         )
       ) {
         socket.emit('blocked', { message: 'you are blocked user' });
@@ -1162,7 +1166,7 @@ export class ChatGateway
         targetId: validBody.targetId,
         response: validBody.response,
       });
-      if (validBody.response == false) {
+      if (validBody.response === false) {
         const host = await this.userService.findUserById(validBody.hostId);
         const target = await this.userService.findUserById(validBody.targetId);
         const hostSocket: Socket = socket_username[host.username];
@@ -1174,13 +1178,13 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-  //response == true 이면
+  //response === true 이면
   //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
   //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
   @SubscribeMessage('inviteGameRoomInfo')
   async inviteGameRoomInfo(
-    socket: Socket,
-    body: InviteGameRoomInfoDto,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: InviteGameRoomInfoDto,
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(
@@ -1206,7 +1210,7 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-  private chatParameterSanitizer(data: string) {
+  private chatParameterSanitizer(data: string): string {
     try {
       const data1 = Sanitizer.blacklist(data, ' ');
       const data2 = Sanitizer.escape(data1);
@@ -1218,7 +1222,16 @@ export class ChatGateway
     }
   }
 
-  private async chatParameterValidation(body: any, type: any) {
+  private chatMessageSanitizer(data: string): string {
+    try {
+      const data1 = Sanitizer.stripLow(data, true);
+      return data1;
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+  }
+
+  private async chatParameterValidation(body: any, type: any): Promise<any> {
     try {
       const data = new type();
       for (const key of Object.keys(body)) {

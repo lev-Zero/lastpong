@@ -197,7 +197,7 @@ export class UserService {
   async updateStatus(userId: number, status: userStatus): Promise<void> {
     try {
       const user = await this.findUserById(userId);
-      if (user.status == status) return;
+      if (user.status === status) return;
       await this.userRepository.update(user.id, { status });
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

@@ -56,7 +56,7 @@ export class GameService {
       const gameRoom = this.gameRooms.get(gameRoomName);
       if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
       for (const player of gameRoom.players) {
-        if (player.user.id == userId) return player;
+        if (player.user.id === userId) return player;
       }
       return null;
     } catch (e) {
@@ -68,7 +68,7 @@ export class GameService {
     const gameRoom = this.gameRooms.get(gameRoomName);
     if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
     for (const spectatorId of gameRoom.spectators) {
-      if (spectatorId == userId) return spectatorId;
+      if (spectatorId === userId) return spectatorId;
     }
     return null;
   }
@@ -77,12 +77,12 @@ export class GameService {
     try {
       for (const gameRoom of this.gameRooms) {
         for (const player of gameRoom[1].players) {
-          if (player.user.id == userId) return gameRoom[0];
+          if (player.user.id === userId) return gameRoom[0];
         }
       }
       for (const gameRoom of this.gameRooms) {
         for (const spectatorId of gameRoom[1].spectators) {
-          if (spectatorId == userId) return gameRoom[0];
+          if (spectatorId === userId) return gameRoom[0];
         }
       }
       return null;
@@ -131,13 +131,13 @@ export class GameService {
   }
 
   joinGameRoom(
-    @ConnectedSocket() socket: Socket,
+    socket: Socket,
     gameRoom: GameRoomDto,
   ): { gameRoom: GameRoomDto; user: PlayerType } {
     try {
       let user: PlayerType = PlayerType.SPECTATOR;
       let gamePlayer: GamePlayerDto;
-      if (gameRoom.gameStatus == gameStatus.WAITINGPLAYER) {
+      if (gameRoom.gameStatus === gameStatus.WAITINGPLAYER) {
         gamePlayer = {
           user: socket.data.user,
           gameRoomName: gameRoom.gameRoomName,
@@ -148,11 +148,11 @@ export class GameService {
 
         gameRoom.players.push(gamePlayer);
         user = PlayerType.PLAYER;
-        if (gameRoom.players.length == 2) {
+        if (gameRoom.players.length === 2) {
           gameRoom.gameStatus = gameStatus.GAMESTART;
         }
       } else {
-        if (gameRoom.gameStatus == gameStatus.GAMEPLAYING) {
+        if (gameRoom.gameStatus === gameStatus.GAMEPLAYING) {
           if (!gameRoom.spectators) gameRoom.spectators = [];
           gameRoom.spectators.push(socket.data.user.id);
         } else {
@@ -189,7 +189,7 @@ export class GameService {
         throw new WsException(`${gameRoomName}에 해당 플레이어는 없습니다.`);
 
       for (const player of gameRoom.players) {
-        if (player.user.username == findPlayer.user.username) {
+        if (player.user.username === findPlayer.user.username) {
           player.gameOption = gameOption;
           break;
         }
@@ -214,7 +214,7 @@ export class GameService {
       else if (player1Rating > player2Rating) lowerRatingUser = 1;
       else lowerRatingUser = 2;
 
-      if (lowerRatingUser == 2) {
+      if (lowerRatingUser === 2) {
         const selectRandomOption: number = Math.round(Math.random());
 
         gameRoom.facts.gameOption.backgroundColor =
@@ -223,21 +223,21 @@ export class GameService {
         gameRoom.facts.gameOption.mode =
           gameRoom.players[selectRandomOption].gameOption.mode;
 
-        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+        if (gameRoom.facts.gameOption.mode === Mode.SPEEDUPBALL) {
           gameRoom.facts.ball.speed = 40;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+        } else if (gameRoom.facts.gameOption.mode === Mode.SPEEDDOWNBALL) {
           gameRoom.facts.ball.speed = 15;
         }
 
-        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+        if (gameRoom.facts.gameOption.mode === Mode.SIZEUPBALL) {
           gameRoom.facts.ball.radius = 40;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+        } else if (gameRoom.facts.gameOption.mode === Mode.SIZEDOWNBALL) {
           gameRoom.facts.ball.radius = 10;
         }
 
-        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+        if (gameRoom.facts.gameOption.mode === Mode.SIZEUPTOUCHBAR) {
           gameRoom.facts.touchBar.height = 300;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+        } else if (gameRoom.facts.gameOption.mode === Mode.SIZEDOWNTOUCHBAR)
           gameRoom.facts.touchBar.height = 150;
       } else {
         gameRoom.facts.gameOption.backgroundColor =
@@ -246,21 +246,21 @@ export class GameService {
         gameRoom.facts.gameOption.mode =
           gameRoom.players[lowerRatingUser].gameOption.mode;
 
-        if (gameRoom.facts.gameOption.mode == Mode.SPEEDUPBALL) {
+        if (gameRoom.facts.gameOption.mode === Mode.SPEEDUPBALL) {
           gameRoom.facts.ball.speed = 40;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SPEEDDOWNBALL) {
+        } else if (gameRoom.facts.gameOption.mode === Mode.SPEEDDOWNBALL) {
           gameRoom.facts.ball.speed = 15;
         }
 
-        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPBALL) {
+        if (gameRoom.facts.gameOption.mode === Mode.SIZEUPBALL) {
           gameRoom.facts.ball.radius = 40;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNBALL) {
+        } else if (gameRoom.facts.gameOption.mode === Mode.SIZEDOWNBALL) {
           gameRoom.facts.ball.radius = 10;
         }
 
-        if (gameRoom.facts.gameOption.mode == Mode.SIZEUPTOUCHBAR) {
+        if (gameRoom.facts.gameOption.mode === Mode.SIZEUPTOUCHBAR) {
           gameRoom.facts.touchBar.height = 300;
-        } else if (gameRoom.facts.gameOption.mode == Mode.SIZEDOWNTOUCHBAR)
+        } else if (gameRoom.facts.gameOption.mode === Mode.SIZEDOWNTOUCHBAR)
           gameRoom.facts.touchBar.height = 150;
       }
 
@@ -306,11 +306,11 @@ export class GameService {
       let radian = Math.random();
       let dir: string = Math.floor(Math.random() * 10) % 2 ? 'odd' : 'even';
 
-      if (dir == 'odd') radian += Math.PI;
+      if (dir === 'odd') radian += Math.PI;
 
       dir = Math.floor(Math.random() * 10) % 2 ? 'odd' : 'even';
 
-      if (dir == 'odd') radian -= Math.PI;
+      if (dir === 'odd') radian -= Math.PI;
 
       gameRoom.playing.ball.speed = gameRoom.facts.ball.speed;
 
@@ -385,7 +385,7 @@ export class GameService {
       ) {
         //player1
         // 640 >= y >= 440
-        if (gameRoom.players.length == 2) {
+        if (gameRoom.players.length === 2) {
           if (
             nextBallPosition.y >=
               gameRoom.players[0].touchBar - touchBarHeight / 2 &&
@@ -473,14 +473,14 @@ export class GameService {
   async isGameOver(
     gameRoom: GameRoomDto,
     server: Server,
-    @ConnectedSocket() socket: Socket,
+    socket: Socket,
   ): Promise<void> {
     try {
       for (const player of gameRoom.players) {
         if (Number(player.score) === Number(gameRoom.facts.score.max)) {
           const sockets = await server.in(gameRoom.gameRoomName).fetchSockets();
           for (const so of sockets) {
-            if (so.data.user.id == player.user.id)
+            if (so.data.user.id === player.user.id)
               await this.gameOver(gameRoom, player, server, so.data.user.id);
           }
         }
@@ -499,10 +499,10 @@ export class GameService {
     try {
       let winner;
       let loser;
-      if (gameRoom.gameStatus == gameStatus.GAMEPLAYING) {
+      if (gameRoom.gameStatus === gameStatus.GAMEPLAYING) {
         gameRoom.gameStatus = gameStatus.GAMEOVER;
 
-        if (gameRoom.players.length == 2 && winnerId == win.user.id) {
+        if (gameRoom.players.length === 2 && winnerId === win.user.id) {
           winner = win.user;
 
           loser = gameRoom.players.find(
@@ -513,8 +513,8 @@ export class GameService {
           let loserScore;
 
           for (const player of gameRoom.players) {
-            if (player.user.id == winner.id) winnerScore = player.score;
-            if (player.user.id == loser.id) loserScore = player.score;
+            if (player.user.id === winner.id) winnerScore = player.score;
+            if (player.user.id === loser.id) loserScore = player.score;
           }
           await this.matchService.updateRank(winner, loser);
 
@@ -537,7 +537,10 @@ export class GameService {
     }
   }
 
-  async exitGameRoom(server: any, socket: Socket): Promise<number[] | boolean> {
+  async exitGameRoom(
+    server: Server,
+    socket: Socket,
+  ): Promise<number[] | boolean> {
     try {
       const userId = socket.data.user.id;
       if (this.queue.indexOf(socket) != -1) {
@@ -554,7 +557,7 @@ export class GameService {
         }
 
         for (const player of gameRoom.players) {
-          if (player.user.id == userId) {
+          if (player.user.id === userId) {
             await this.gameOver(
               gameRoom,
               gameRoom.players.find(
@@ -582,9 +585,9 @@ export class GameService {
 |				isPlayerInAnyGameRoom			|
 ---------------------------*/
 
-  randomGameMatching(@ConnectedSocket() socket: Socket): null | GameRoomDto {
+  randomGameMatching(socket: Socket): null | GameRoomDto {
     try {
-      if (this.queue.find((playerSockets) => playerSockets == socket)) {
+      if (this.queue.find((playerSockets) => playerSockets === socket)) {
         throw new WsException('이미 queue에서 다른 유저 기다리는 중입니다');
       }
       if (this.isPlayerInAnyGameRoom(socket.data.user.id)) {
@@ -616,7 +619,7 @@ export class GameService {
     try {
       for (const gameRoom of this.gameRooms.values()) {
         for (const player of gameRoom.players) {
-          if (player.user.id == MyId) return player;
+          if (player.user.id === MyId) return player;
         }
       }
       return null;
@@ -624,7 +627,7 @@ export class GameService {
       throw new WsException(e.message);
     }
   }
-  removeSocketInQueue(@ConnectedSocket() socket: Socket): null {
+  removeSocketInQueue(socket: Socket): null {
     try {
       if (this.queue.indexOf(socket) != -1) {
         this.queue.splice(this.queue.indexOf(socket), 1);

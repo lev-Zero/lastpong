@@ -20,21 +20,21 @@ import CustomAvatar from './CustomAvatar';
 import { OptionMenu } from './OptionMenu';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 import RawUserItem from './RawUserItem';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
 import { MsgProps } from '@/interfaces/MsgProps';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
-  const { dmMsgList } = chatStore();
+  const { dmMsgList, dmIdxMap, updateDmIdxMap } = chatStore();
   const [msg, setMsg] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [dmRoomNo, setDmRoomNo] = useState<number>();
+
   const { me } = userStore();
   const { socket } = chatStore();
   const [msgCount, setMsgCount] = useState<number>(0);
   const [isOpened, setIsOpened] = useState<boolean>(false);
-  const [lastIdx, setLastIdx] = useState<number>(-1);
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
     if (messageBoxRef.current) {
@@ -44,12 +44,22 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 
   useEffect(() => {
     scrollToBottom();
+
+    let tmpIdx = dmIdxMap.get(user.name);
+    if (tmpIdx === undefined || tmpIdx === null) {
+      updateDmIdxMap(user.name, -1);
+      tmpIdx = -1;
+    }
     dmMsgList.forEach((msg, idx) => {
-      if (idx > lastIdx && msg.username === user.name && msg.targetUsername === me.name) {
+      if (idx > tmpIdx! && msg.username === user.name && msg.targetUsername === me.name) {
         if (!isOpened) {
           setMsgCount((prev) => prev + 1);
         }
-        setLastIdx(idx);
+
+        console.log('Here2');
+
+        updateDmIdxMap(user.name, idx);
+        console.log('Here3');
       }
     });
   }, [dmMsgList]);
@@ -66,6 +76,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         socket.once('chatRoomDmById', ({ chatRoomDm }) => {
           const joinedDmUsers = chatRoomDm.joinedDmUser;
           if (joinedDmUsers.some(({ user: opp }: any) => opp.id === user.id)) {
+            console.log(`유저 둘 사이에 ${chatRoomDm.id}번 DM 방이 만들어져 있습니다`);
             setDmRoomNo(chatRoomDm.id);
           }
         });
@@ -232,7 +243,21 @@ export default function ContextMenuHoc({ user, msgNum }: RawUserItemProps) {
           renderMenu={() => <OptionMenu user={user} isFriend={isFriend} />}
         >
           {(ref) => (
-            <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+            <Box
+              ref={ref}
+              w="100%"
+              position="relative"
+              px={3}
+              py={1}
+              _hover={{
+                background: 'white',
+                color: 'teal.500',
+              }}
+              _active={{
+                background: 'white',
+                color: 'blue.500',
+              }}
+            >
               <PopoverHoc user={user} msgNum={msgNum} />
             </Box>
           )}

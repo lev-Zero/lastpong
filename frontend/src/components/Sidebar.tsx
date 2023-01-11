@@ -27,7 +27,7 @@ import { chatStore } from '@/stores/chatStore';
 import { DmMsgProps } from '@/interfaces/MsgProps';
 
 export default function Sidebar() {
-  const { friends, fetchFriends, fetchBlockedUsers } = userStore();
+  const { friends, fetchFriends, fetchFriendsStatus, fetchBlockedUsers } = userStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchId, setSearchId] = useState<string>('');
   const { allUsers, getAllUsers } = allUserStore();
@@ -44,11 +44,20 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
+    const id = setInterval(() => {
+      // console.log('friends status refreshed');
+      fetchFriendsStatus();
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
     if (socket === undefined || !socket.connected) {
       return;
     }
     socket.on('join', console.log);
     socket.on('directMessage', ({ user, targetUser, message }) => {
+      console.log('directMessage on', { user, targetUser, message });
       addDmMsg(user.username, targetUser.user.username, message);
     });
 

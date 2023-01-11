@@ -10,6 +10,7 @@ export interface ChatAdminOptionMenuProps extends ChatOptionMenuProps {
   role: ChatUserStatus;
   isMuted: boolean;
   roomNo: number | undefined;
+  myRole: ChatUserStatus;
 }
 
 export function ChatAdminOptionMenu({
@@ -19,47 +20,56 @@ export function ChatAdminOptionMenu({
   role,
   isMuted,
   roomNo,
+  myRole,
 }: ChatAdminOptionMenuProps) {
   const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
   const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
 
+  if (me.name === user.name) return null;
   return (
     <MenuList>
-      <MenuItem>
-        {role === ChatUserStatus.COMMON ? (
-          <Text onClick={() => giveAdmin(roomNo, user.id)}>GIVE ADMIN</Text>
-        ) : (
-          <Text color="red" onClick={() => removeAdmin(roomNo, user.id)}>
-            REMOVE ADMIN
-          </Text>
-        )}
-      </MenuItem>
-      <MenuItem>
-        {!isMuted ? (
-          <Text
-            onClick={() => {
-              muteUser(roomNo, user.id);
-            }}
-          >
-            MUTE 1 MIN
-          </Text>
-        ) : (
-          <Text
-            color="black"
-            onClick={() => {
-              removeMute(roomNo, user.id);
-            }}
-          >
-            UNMUTE
-          </Text>
-        )}
-      </MenuItem>
-      <MenuItem>
-        <Text color="red" onClick={() => addBan(roomNo, user.id)}>
-          BAN USER
-        </Text>
-      </MenuItem>
-      <MenuDivider />
+      {myRole !== ChatUserStatus.OWNER && role !== ChatUserStatus.COMMON ? null : (
+        <>
+          <MenuItem>
+            {role === ChatUserStatus.COMMON ? (
+              <Text onClick={() => giveAdmin(roomNo, user.id)}>GIVE ADMIN</Text>
+            ) : (
+              <Text color="red" onClick={() => removeAdmin(roomNo, user.id)}>
+                REMOVE ADMIN
+              </Text>
+            )}
+          </MenuItem>
+
+          <MenuItem>
+            {!isMuted ? (
+              <Text
+                onClick={() => {
+                  muteUser(roomNo, user.id);
+                }}
+              >
+                MUTE 1 MIN
+              </Text>
+            ) : (
+              <Text
+                color="black"
+                onClick={() => {
+                  removeMute(roomNo, user.id);
+                }}
+              >
+                UNMUTE
+              </Text>
+            )}
+          </MenuItem>
+
+          <MenuItem>
+            <Text color="red" onClick={() => addBan(roomNo, user.id)}>
+              BAN USER
+            </Text>
+          </MenuItem>
+
+          <MenuDivider />
+        </>
+      )}
       <MenuItem as={Link} href={`/user/${user.name}`}>
         VIEW PROFILE
       </MenuItem>

@@ -92,7 +92,12 @@ export default function HomePage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Flex height={'100%'} flexDir={'column'} alignItems="center" justifyContent={'center'}>
-        <Image src="/HowToPlay.png" height="90%" alt="How To Play LastPong" />
+        <Image
+          src="/HowToPlay.png"
+          height="90%"
+          alt="How To Play LastPong"
+          pointerEvents={'none'}
+        />
         <CustomButton
           size="2xl"
           onClick={handleMatchBtnClicked}

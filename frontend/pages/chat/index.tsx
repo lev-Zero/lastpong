@@ -62,6 +62,7 @@ export default function ChatPage() {
   const { socket, makeSocket, refreshChatRoomList, chatRoomList } = chatStore();
   const router = useRouter();
 
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     getAllUsers();
     if (socket === undefined) {
@@ -148,6 +149,29 @@ export default function ChatPage() {
 
   const privChatRoomID = useRef(0);
 
+  function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (e.key === 'Enter') {
+      createChatRoom();
+    }
+  }
+  function handleEnterKeyDownPriv(e: React.KeyboardEvent<HTMLElement>, id: number) {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (e.key === 'Enter') {
+      joinPrivChatRoom(id);
+    }
+  }
+
+  useEffect(() => {
+    if (roomProtected === false) return;
+    if (inputRef.current !== null) inputRef.current.focus();
+  }, [roomProtected]);
   return (
     <>
       <Head>
@@ -162,6 +186,12 @@ export default function ChatPage() {
               {chatRoomList.map((chatRoom, idx) => (
                 <Box
                   key={idx}
+                  _hover={{
+                    color: 'teal.500',
+                  }}
+                  _active={{
+                    color: 'blue.500',
+                  }}
                   onClick={() => {
                     if (!chatRoom.isProtected) {
                       joinChatRoom(chatRoom.id);
@@ -182,7 +212,13 @@ export default function ChatPage() {
             </SimpleGrid>
           </Box>
           <Box>
-            <CustomButton size="lg" onClick={onOpen}>
+            <CustomButton
+              size="lg"
+              onClick={() => {
+                onOpen();
+                // if (inputRef.current !== null) inputRef.current.focus();
+              }}
+            >
               CREATE
             </CustomButton>
           </Box>
@@ -206,7 +242,16 @@ export default function ChatPage() {
       </Flex>
 
       {/* 방생성 모달 파트 */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+          setValuePassword('');
+          setValueTitle('');
+          setRoomProtected(false);
+        }}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent bg="white" color="black" borderRadius={30}>
           <Center>
@@ -225,7 +270,13 @@ export default function ChatPage() {
                       </HStack>
                     </VStack>
                     <VStack>
-                      <Input variant="outline" placeholder="enter title" onChange={handleTitle} />
+                      <Input
+                        variant="outline"
+                        placeholder="enter title"
+                        onChange={handleTitle}
+                        onKeyDown={handleEnterKeyDown}
+                        autoFocus
+                      />
 
                       <InputGroup size="md">
                         <Input
@@ -236,6 +287,9 @@ export default function ChatPage() {
                           disabled={!roomProtected}
                           bg={!roomProtected ? 'gray.200' : 'white'}
                           value={valuePassword}
+                          onKeyDown={handleEnterKeyDown}
+                          ref={inputRef}
+                          autoFocus
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -301,6 +355,8 @@ export default function ChatPage() {
                           // disabled={!roomPrivate}
                           // bg={!roomPrivate ? 'gray.200' : 'white'}
                           value={valuePasswordPriv}
+                          onKeyDown={(e) => handleEnterKeyDownPriv(e, privChatRoomID.current)}
+                          autoFocus
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>

@@ -116,7 +116,7 @@ export class ChatService {
     targetId: number,
   ): Promise<ChatRoomDm> {
     try {
-      if (userId == targetId)
+      if (userId === targetId)
         throw new WsException('나 자신과는 대화할 수 없습니다.');
 
       const user = await this.userService.findUserById(userId);
@@ -172,7 +172,7 @@ export class ChatService {
       const user = await this.userService.findUserById(userId);
       const chatRoom = await this.findChatRoomById(body.chatRoomId, ['owner']);
 
-      if (chatRoom.status == chatRoomStatus.PUBLIC)
+      if (chatRoom.status === chatRoomStatus.PUBLIC)
         throw new WsException('이 방은 PUBLIC 입니다.');
       if (chatRoom.owner.id != user.id)
         throw new WsException('방 주인만 방 비밀번호 수정 가능합니다.');
@@ -503,16 +503,18 @@ export class ChatService {
           '방 주인만 다른 유저를 admin으로 지정할 수 있습니다.',
         );
 
-      if (targetUser.id == chatRoom.owner.id)
+      if (targetUser.id === chatRoom.owner.id)
         throw new WsException('방 주인은 이미 admin 입니다.');
 
-      if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
+      if (!chatRoom.joinedUser.find((user1) => user1.user.id === targetUser.id))
         throw new WsException('타겟유저는 이 방에 없습니다.');
 
-      if (chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id))
+      if (chatRoom.adminUser.find((admin) => admin.user.id === targetUser.id))
         throw new WsException('타겟유저는 이미 admin입니다.');
 
-      if (!chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
+      if (
+        !chatRoom.adminUser.find((admin) => admin.user.id === targetUser.id)
+      ) {
         this.adminUserRepository.create({
           user: targetUser,
           chatRoom: chatRoom,
@@ -546,17 +548,19 @@ export class ChatService {
           '방 주인만 다른 유저를 admin으로 지정할 수 있습니다.',
         );
 
-      if (targetUser.id == chatRoom.owner.id)
+      if (targetUser.id === chatRoom.owner.id)
         throw new WsException('방주인을 admin 지정취소 할 수 없습니다.');
 
-      if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
+      if (!chatRoom.joinedUser.find((user1) => user1.user.id === targetUser.id))
         throw new WsException('타겟유저는 이 방에 없습니다.');
 
-      if (!chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
+      if (
+        !chatRoom.adminUser.find((admin) => admin.user.id === targetUser.id)
+      ) {
         throw new WsException('타겟유저는 어드민이 아닙니다.');
       }
 
-      if (chatRoom.adminUser.find((admin) => admin.user.id == targetUser.id)) {
+      if (chatRoom.adminUser.find((admin) => admin.user.id === targetUser.id)) {
         this.directRemoveAdminUser(targetUser.id, chatRoom.id);
       }
     } catch (e) {
@@ -598,16 +602,16 @@ export class ChatService {
         'owner',
       ]);
 
-      if (chatRoom.owner.id == targetUser.id)
+      if (chatRoom.owner.id === targetUser.id)
         throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
-      if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
+      if (!chatRoom.joinedUser.find((user1) => user1.user.id === targetUser.id))
         throw new WsException('타겟유저는 이 방에 없습니다.');
 
-      if (chatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
+      if (chatRoom.adminUser.find((admin) => admin.user.id === targetUserId))
         throw new WsException('타겟유저는 admin 입니다.');
 
-      if (!chatRoom.adminUser.find((admin) => admin.user.id == me.id))
+      if (!chatRoom.adminUser.find((admin) => admin.user.id === me.id))
         throw new WsException('당신은 admin이 아닙니다.');
 
       const isMutedUser = await this.mutedUserRepository
@@ -624,7 +628,7 @@ export class ChatService {
         await this.mutedUserRepository.save(muted);
       } else {
         if (
-          chatRoom.mutedUser.find((user1) => user1.user.id == targetUser.id)
+          chatRoom.mutedUser.find((user1) => user1.user.id === targetUser.id)
         ) {
           throw new WsException('유저는 이미 mute 상태 입니다');
         }
@@ -649,16 +653,18 @@ export class ChatService {
         'owner',
       ]);
 
-      if (chatRoom.owner.id == targetUser.id)
+      if (chatRoom.owner.id === targetUser.id)
         throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
-      if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id))
+      if (!chatRoom.joinedUser.find((user1) => user1.user.id === targetUser.id))
         throw new WsException('타겟유저는 이 방에 없습니다.');
 
-      if (!chatRoom.adminUser.find((admin) => admin.user.id == me.id))
+      if (!chatRoom.adminUser.find((admin) => admin.user.id === me.id))
         throw new WsException('당신은 admin이 아닙니다.');
 
-      if (!chatRoom.mutedUser.find((muted) => muted.user.id == targetUser.id)) {
+      if (
+        !chatRoom.mutedUser.find((muted) => muted.user.id === targetUser.id)
+      ) {
         throw new WsException('타겟유저는 mute상태가 아닙니다.');
       }
 
@@ -708,17 +714,21 @@ export class ChatService {
         'owner',
       ]);
 
-      if (findChatRoom.owner.id == targetUser.id)
+      if (findChatRoom.owner.id === targetUser.id)
         throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
       if (
-        !findChatRoom.joinedUser.find((user1) => user1.user.id == targetUser.id)
+        !findChatRoom.joinedUser.find(
+          (user1) => user1.user.id === targetUser.id,
+        )
       )
         throw new WsException('타겟유저는 이 방에 없습니다.');
 
-      if (findChatRoom.adminUser.find((admin) => admin.user.id == targetUserId))
+      if (
+        findChatRoom.adminUser.find((admin) => admin.user.id === targetUserId)
+      )
         throw new WsException('타겟유저는 admin 입니다.');
-      if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
+      if (!findChatRoom.adminUser.find((admin) => admin.user.id === me.id))
         throw new WsException('당신은 admin이 아닙니다.');
 
       const isBannedUser = await this.bannedUserRepository
@@ -736,14 +746,14 @@ export class ChatService {
         await this.bannedUserRepository.save(banned);
 
         for (const joinedUser of findChatRoom.joinedUser)
-          if (joinedUser.user.id == targetUser.id) {
+          if (joinedUser.user.id === targetUser.id) {
             await this.removeJoinedUser(targetUser.id, chatRoomId);
             break;
           }
       } else {
         if (
           findChatRoom.bannedUser.find(
-            (user1) => user1.user.id == targetUser.id,
+            (user1) => user1.user.id === targetUser.id,
           )
         ) {
           throw new WsException('타겟유저는 이미 ban상태 입니다.');
@@ -769,10 +779,10 @@ export class ChatService {
         'owner',
       ]);
 
-      if (findChatRoom.owner.id == targetUser.id)
+      if (findChatRoom.owner.id === targetUser.id)
         throw new WsException('방 주인은 타겟유저로 만들 수 없습니다.');
 
-      if (!findChatRoom.adminUser.find((admin) => admin.user.id == me.id))
+      if (!findChatRoom.adminUser.find((admin) => admin.user.id === me.id))
         throw new WsException('당신은 admin이 아닙니다.');
 
       const isBannedUser = await this.bannedUserRepository.findOne({
@@ -831,7 +841,7 @@ export class ChatService {
       }
 
       for (const banned of findChatRoom.bannedUser)
-        if (banned.user.id == user.id) {
+        if (banned.user.id === user.id) {
           const time = new Date();
           if (banned.endTime > time)
             throw new WsException('유저는 방에서 밴당했습니다.');
@@ -839,7 +849,7 @@ export class ChatService {
             await this.directRemoveBannedUser(banned.user.id, findChatRoom.id);
         }
 
-      if (findChatRoom.joinedUser.find((user1) => user1.user.id == user.id))
+      if (findChatRoom.joinedUser.find((user1) => user1.user.id === user.id))
         throw new WsException('유저는 이미 방에 있습니다.');
 
       await this.joinedUserRepository.create({
@@ -876,11 +886,11 @@ export class ChatService {
       ]);
       const offerUser = await this.userService.findUserById(offerUserId);
 
-      if (!chatRoom.joinedUser.find((user1) => user1.user.id == targetUserId))
+      if (!chatRoom.joinedUser.find((user1) => user1.user.id === targetUserId))
         throw new WsException('타겟유저는 방에 없습니다.');
 
       if (offerUserId) {
-        if (!chatRoom.joinedUser.find((user1) => user1.user.id == offerUserId))
+        if (!chatRoom.joinedUser.find((user1) => user1.user.id === offerUserId))
           throw new WsException('요청유저는 방에 없습니다.');
       }
 
@@ -899,12 +909,12 @@ export class ChatService {
         if (isAdmintargetUser)
           throw new WsException('타겟유저는 admin 입니다.');
 
-        if (targetUser.id == chatRoom.owner.id) {
+        if (targetUser.id === chatRoom.owner.id) {
           throw new WsException('방 주인을 쫓아낼 수는 없습니다.');
         }
 
         for (const joinedUser of chatRoom.joinedUser)
-          if (joinedUser.user.id == targetUser.id) {
+          if (joinedUser.user.id === targetUser.id) {
             await this.removeJoinedUser(targetUser.id, chatRoomId);
             break;
           }
@@ -913,7 +923,7 @@ export class ChatService {
         offerUserId === targetUser.id &&
         offerUserId !== chatRoom.owner.id
       ) {
-        if (chatRoom.adminUser.find((admin) => admin.user.id == offerUserId))
+        if (chatRoom.adminUser.find((admin) => admin.user.id === offerUserId))
           await this.directRemoveAdminUser(offerUserId, chatRoom.id);
         return await this.removeJoinedUser(targetUser.id, chatRoomId);
       } else if (
@@ -986,12 +996,12 @@ export class ChatService {
       const offerUser = await this.userService.findUserById(offerUserId);
 
       if (offerUser.id && offerUser.id != targetUser.id) {
-        if (targetUser.id == chatRoomDm.owner.id) {
+        if (targetUser.id === chatRoomDm.owner.id) {
           throw new WsException('방 주인을 쫓아낼 수는 없습니다.');
         }
 
         for (const joinedUser of chatRoomDm.joinedDmUser)
-          if (joinedUser.user.id == targetUser.id) {
+          if (joinedUser.user.id === targetUser.id) {
             await this.removeJoinedDmUser(targetUser.id, chatRoomId);
             break;
           }
@@ -1060,7 +1070,7 @@ export class ChatService {
       if (!chatRoom)
         throw new WsException('메시지 보낸 채팅룸은 존재하지 않습니다');
 
-      if (!chatRoom.joinedUser.find((joined) => joined.user.id == user.id))
+      if (!chatRoom.joinedUser.find((joined) => joined.user.id === user.id))
         throw new WsException('메시지 보낸 유저는 이 방에 없습니다.');
       const log = {
         message: body.message,
@@ -1089,7 +1099,7 @@ export class ChatService {
       if (!chatRoomDm)
         throw new WsException('메시지 보낸 채팅룸은 존재하지 않습니다');
 
-      if (!chatRoomDm.joinedDmUser.find((joined) => joined.user.id == user.id))
+      if (!chatRoomDm.joinedDmUser.find((joined) => joined.user.id === user.id))
         throw new WsException('메시지 보낸 유저는 이 방에 없습니다.');
       const log = {
         message: body.message,

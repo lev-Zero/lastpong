@@ -19,6 +19,7 @@ import { Auth42Service } from 'src/auth/service/auth42.service';
 import { UserService } from 'src/user/service/user.service';
 import { userStatus } from 'src/user/enum/status.enum';
 import { Sanitizer } from 'class-sanitizer';
+import { CodeDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -59,6 +60,7 @@ export class AuthController {
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
         res.cookie('accessToken42', data.accessToken42);
+        this.userService.updateStatus(req.user.userId, userStatus.ONLINE);
 
         res.status(301).redirect(`${process.env.FRONTEND_URL}/auth/login/otp`);
       } else {
@@ -71,15 +73,19 @@ export class AuthController {
 
   @Get('/logout')
   @UseGuards(JwtAuthGuard)
-  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<HttpException | string> {
     try {
       res.cookie('accessToken', '', {
         maxAge: 0,
       });
-      this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
-      res.send({ status: 'logout' }); //redirect
+      await this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
+      return JSON.stringify({ status: 'logout' });
+      res.status(201).json({ status: 'logout' }); //redirect
     } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -155,7 +161,7 @@ export class AuthController {
             HttpStatus.BAD_REQUEST,
           );
 
-        if (auth42.otpOn == false) {
+        if (auth42.otpOn === false) {
           return JSON.stringify({ status: 'otpOff' });
         } else {
           // if (!auth42.otp) {
@@ -181,8 +187,8 @@ export class AuthController {
   async loginOTP(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @Body('code') code: string,
-  ): Promise<void | HttpException> {
+    @Body() body: CodeDto,
+  ): Promise<string | HttpException> {
     try {
       let token;
       if (req.headers.authorization) {
@@ -205,12 +211,13 @@ export class AuthController {
         );
 
       if (payload.auth42Status) {
-        const codeData = this.authSanitizer(code);
+        const codeData = this.authSanitizer(body.code);
         const newToken = await this.auth42Service.loginOTP(payload, codeData);
 
         res.cookie('accessToken', newToken);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
-        res.send({ token: newToken });
+        return JSON.stringify({ token: newToken });
+        // res.send({ token: newToken });
       } else {
         throw new HttpException(
           'AUTH42가 유효하지 않습니다.',

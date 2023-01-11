@@ -39,6 +39,7 @@ import { Readable } from 'typeorm/platform/PlatformTools';
 import { Auth42Service } from 'src/auth/service/auth42.service';
 
 import { Sanitizer } from 'class-sanitizer';
+import { userStatus } from './enum/status.enum';
 
 @Controller('user')
 export class UserController {
@@ -68,30 +69,35 @@ export class UserController {
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
+    this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U2');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
+    this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U3');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
+    this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U4');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
+    this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U5');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
+    this.userService.updateStatus(user.userId, userStatus.ONLINE);
   }
 
   //http://localhost:3000/user/test/delete/fakeuser
@@ -176,7 +182,11 @@ export class UserController {
   async findAvatarById(
     @Param('userId', ParseIntPipe) userId: number,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const avatar = await this.avatarService
         .findAvatarById(userId)
@@ -200,7 +210,11 @@ export class UserController {
   async findAvatarByName(
     @Param('name') name: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const data = this.userParameterSanitizer(name);
       const avatar = await this.avatarService
@@ -226,7 +240,11 @@ export class UserController {
   async findAvatarMe(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const avatar = await this.avatarService
         .findAvatarById(req.user.userId)

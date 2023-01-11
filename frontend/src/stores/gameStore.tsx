@@ -134,7 +134,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   },
 
   makeSocket: () => {
-    const newSocket = io(`http://localhost:3000/game`, {
+    const newSocket = io(`${WS_SERVER_URL}/game`, {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -160,6 +160,10 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         await get().setIsReady(1);
       });
 
+      newSocket.on('joinGameRoom', ({ gameRoom }) => {
+        get().setRoom(gameRoom);
+      });
+
       newSocket.on('wait', (data) => {
         console.log('WAIT :');
         console.log(data);
@@ -170,6 +174,11 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       });
 
       newSocket.on('touchBar', (data) => {
+        if (get().room.players.length !== 2) {
+          console.log('players are not 2 people');
+          return;
+        }
+
         if (get().room.players[0].user.id === data.player) {
           get().setLeftTouchBar(data.touchBar);
         }
@@ -199,10 +208,10 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         get().setIsSetting(1);
       });
 
-      newSocket.onAny((data) => {
-        console.log('ANY DATA : ');
-        console.log(data);
-      });
+      // newSocket.onAny((data) => {
+      //   console.log('ANY DATA : ');
+      //   console.log(data);
+      // });
     });
     newSocket.on('disconnection', () => {
       console.log('socket is disconnected!!!!');
