@@ -30,6 +30,11 @@ export default function BasicIdPage() {
       }
     }
   }
+  function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
+    if (e.key === 'Enter') {
+      submitUsername();
+    }
+  }
 
   return (
     <VStack spacing={14}>
@@ -44,6 +49,7 @@ export default function BasicIdPage() {
           maxLength={10}
           textTransform="uppercase"
           onChange={handleChange}
+          onKeyDown={handleEnterKeyDown}
         />
       </Box>
       <CustomButton size="lg" onClick={submitUsername}>
