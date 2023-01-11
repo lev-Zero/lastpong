@@ -126,7 +126,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   },
 
   makeSocket: () => {
-    const newSocket = io(`http://localhost:3000/game`, {
+    const newSocket = io(`${WS_SERVER_URL}/game`, {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
