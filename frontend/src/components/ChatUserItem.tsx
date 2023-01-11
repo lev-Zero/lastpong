@@ -76,7 +76,17 @@ export default function ContextMenuHoc({
           )}
         >
           {(ref) => (
-            <Box ref={ref} w="100%" position="relative" px={3} py={1}>
+            <Box
+              ref={ref}
+              w="100%"
+              position="relative"
+              px={3}
+              py={1}
+              _hover={{
+                background: 'white',
+                color: 'teal.500',
+              }}
+            >
               <ChatUserItem
                 myChatUserStatus={myChatUserStatus}
                 user={user}
