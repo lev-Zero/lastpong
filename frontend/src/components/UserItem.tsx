@@ -66,6 +66,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         socket.once('chatRoomDmById', ({ chatRoomDm }) => {
           const joinedDmUsers = chatRoomDm.joinedDmUser;
           if (joinedDmUsers.some(({ user: opp }: any) => opp.id === user.id)) {
+            console.log(`유저 둘 사이에 ${chatRoomDm.id}번 DM 방이 만들어져 있습니다`);
             setDmRoomNo(chatRoomDm.id);
           }
         });

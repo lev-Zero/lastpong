@@ -76,10 +76,10 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
           console.log(get().InviteData);
         }
       });
-      newSocket.onAny((data) => {
-        console.log('ANY DATA : ');
-        console.log(data);
-      });
+      // newSocket.onAny((data) => {
+      //   console.log('ANY DATA : ');
+      //   console.log(data);
+      // });
     });
     get().setSocket(newSocket);
   },

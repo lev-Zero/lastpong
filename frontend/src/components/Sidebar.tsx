@@ -57,6 +57,7 @@ export default function Sidebar() {
     }
     socket.on('join', console.log);
     socket.on('directMessage', ({ user, targetUser, message }) => {
+      console.log('directMessage on', { user, targetUser, message });
       addDmMsg(user.username, targetUser.user.username, message);
     });
 
