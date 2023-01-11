@@ -25,13 +25,19 @@ export function OptionMenu({ user, isFriend }: OptionMenuProps) {
           <Text
             onClick={() => {
               console.log('CHECK Invite');
-              if (socket !== undefined && socket.connected !== false) {
-                console.log('Invite Game Friends');
-                socket.emit('createInviteRoom', {
-                  userId: user.id,
-                });
-                setIsInvited(2);
+              if (socket === undefined) {
+                console.log('createInviteRoom : socket undefind');
+                return;
               }
+              if (socket.connected === false) {
+                console.log('createInviteRoom : socket connected FALSE');
+                return;
+              }
+              console.log('EMIT CHAT : createInviteRoom');
+              socket.emit('createInviteRoom', {
+                userId: user.id,
+              });
+              setIsInvited(2);
             }}
           >
             INVITE TO GAME

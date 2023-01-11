@@ -62,7 +62,27 @@ function InviteModal() {
   }, [isInvited]);
 
   useEffect(() => {
-    if (isCreated === 0 || gameSocket === undefined || socket === undefined) return;
+    if (socket === undefined) {
+      console.log('inviteGameRoomInfo : socket undefind');
+      return;
+    }
+    if (socket.connected === false) {
+      console.log('inviteGameRoomInfo : socket connected FALSE');
+      return;
+    }
+    if (gameSocket === undefined) {
+      console.log('joinGameRoom : gameSocket undefind');
+      return;
+    }
+    if (gameSocket.connected === false) {
+      console.log('joinGameRoom : gameSocket connected FALSE');
+      return;
+    }
+    if (isCreated === 0) {
+      console.log('inviteGameRoomInfo: Create Message Not Yet..');
+      return;
+    }
+
     console.log('EMIT CHAT : inviteGameRoomInfo');
     console.log(room.gameRoomName);
     sleep(300).then(() => {
@@ -138,7 +158,14 @@ function InvitedModal() {
   }, [isInvited]);
 
   function handleMatchBtnClicked() {
-    if (socket === undefined) return;
+    if (socket === undefined) {
+      console.log('responseInvite : socket undefind');
+      return;
+    }
+    if (socket.connected === false) {
+      console.log('responseInvite : socket connected FALSE');
+      return;
+    }
     if (isInvited !== 1 || InviteData === undefined) return;
     sleep(300).then(() => {
       console.log('EMIT CHAT : responseInvite TRUE');
@@ -153,7 +180,14 @@ function InvitedModal() {
   }
 
   function handleMatchCancelBtnClicked() {
-    if (socket === undefined) return;
+    if (socket === undefined) {
+      console.log('responseInvite : socket undefind');
+      return;
+    }
+    if (socket.connected === false) {
+      console.log('responseInvite : socket connected FALSE');
+      return;
+    }
     if (isInvited !== 1 || InviteData === undefined) return;
     console.log('EMIT CHAT : responseInvite FALSE');
     sleep(300).then(() => {
