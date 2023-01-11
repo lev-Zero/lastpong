@@ -7,6 +7,7 @@ import { WS_SERVER_URL } from '@/utils/variables';
 import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 import Router from 'next/router';
+import { chatStore } from './chatStore';
 interface GameStoreProps {
   gameSocket?: Socket;
   setSocket: (gameSocket: Socket | undefined) => void;
@@ -15,6 +16,8 @@ interface GameStoreProps {
 
   isSetting: number;
   setIsSetting: (isSetting: number) => void;
+  isCreated: number;
+  setIsCreated: (isCreated: number) => void;
   isReady: number;
   setIsReady: (isReady: number) => void;
   isFinished: number;
@@ -42,6 +45,11 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   isSetting: 0,
   setIsSetting: (isSetting: number) => {
     set((state) => ({ ...state, isSetting: isSetting }));
+  },
+
+  isCreated: 0,
+  setIsCreated: (isCreated: number) => {
+    set((state) => ({ ...state, isCreated: isCreated }));
   },
 
   isReady: 0,
@@ -140,8 +148,6 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`Ramdom Game Maching`);
         await get().setRoom(temp_room);
-        await console.log(`ROOM : `);
-        await console.log(get().room);
         await get().setIsSetting(1);
       });
 
@@ -189,8 +195,22 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         get().setIsFinished(1);
       });
 
+      newSocket.on('createGameRoom', async (data) => {
+        console.log('CREATE GAME ROOM');
+        await get().setRoom(data.gameRoom);
+        await get().setIsCreated(1);
+      });
+
+      newSocket.on('joinGameRoom', async (data) => {
+        console.log('JOIN GAME ROOM');
+        await get().setRoom(data.gameRoom);
+        chatStore.getState().setIsInvited(0);
+        get().setIsSetting(1);
+      });
+
       // newSocket.onAny((data) => {
-      //   console.log('ANY DATA : ', data);
+      //   console.log('ANY DATA : ');
+      //   console.log(data);
       // });
     });
     newSocket.on('disconnection', () => {

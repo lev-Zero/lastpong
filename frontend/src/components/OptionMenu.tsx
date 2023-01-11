@@ -9,9 +9,9 @@ export interface OptionMenuProps {
   isFriend: boolean;
 }
 
-
 export function OptionMenu({ user, isFriend }: OptionMenuProps) {
   const { me, addFriend, deleteFriend } = userStore();
+  const { socket, setIsInvited } = chatStore();
 
   return (
     <MenuList>
@@ -19,13 +19,18 @@ export function OptionMenu({ user, isFriend }: OptionMenuProps) {
         VIEW PROFILE
       </MenuItem>
       <MenuItem>
-        {user.status === UserStatus.ONLINE || user.status === UserStatus.INGAME ? (
+        {user.status === UserStatus.OFFLINE ||
+        user.status === UserStatus.ONLINE ||
+        user.status === UserStatus.INGAME ? (
           <Text
             onClick={() => {
-              if (socket !== undefined) {
+              console.log('CHECK Invite');
+              if (socket !== undefined && socket.connected !== false) {
+                console.log('Invite Game Friends');
                 socket.emit('createInviteRoom', {
                   userId: user.id,
                 });
+                setIsInvited(2);
               }
             }}
           >

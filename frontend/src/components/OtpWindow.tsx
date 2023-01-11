@@ -30,14 +30,18 @@ export default function OtpWindow({ src }: OtpWindowProps) {
   async function verifyOtpCode(code: string) {
     try {
       const json = await customFetch('POST', '/auth/login/otp', { code });
+      if (json.status === 400) {
+        console.log(json.response);
+        setBgColor(false);
+        setTimeout(() => setBgColor(true), 500);
+        setReInput(false);
+        return;
+      }
       removeCookie('accessToken');
       setCookie('accessToken', json.token);
       router.push('/');
     } catch (e) {
       console.log(e);
-      setBgColor(false);
-      setTimeout(() => setBgColor(true), 500);
-      setReInput(false);
     }
   }
 
