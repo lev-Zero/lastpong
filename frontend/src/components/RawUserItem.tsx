@@ -24,6 +24,14 @@ export default function RawUserItem({ user, msgNum }: RawUserItemProps) {
         bg="gray.100"
         border="2px"
         borderRadius={20}
+        _hover={{
+          background: 'white',
+          color: 'teal.500',
+        }}
+        _active={{
+          background: 'white',
+          color: 'blue.500',
+        }}
       >
         <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
         <Spacer />

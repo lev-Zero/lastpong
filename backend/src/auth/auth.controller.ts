@@ -188,7 +188,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() body: CodeDto,
-  ): Promise<void | HttpException> {
+  ): Promise<string | HttpException> {
     try {
       let token;
       if (req.headers.authorization) {
@@ -216,7 +216,8 @@ export class AuthController {
 
         res.cookie('accessToken', newToken);
         this.userService.updateStatus(payload.id, userStatus.ONLINE);
-        res.send({ token: newToken });
+        return JSON.stringify({ token: newToken });
+        // res.send({ token: newToken });
       } else {
         throw new HttpException(
           'AUTH42가 유효하지 않습니다.',
