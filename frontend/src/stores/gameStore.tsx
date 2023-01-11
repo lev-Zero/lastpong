@@ -8,8 +8,8 @@ import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 import Router from 'next/router';
 interface GameStoreProps {
-  socket?: Socket;
-  setSocket: (socket: Socket | undefined) => void;
+  gameSocket?: Socket;
+  setSocket: (gameSocket: Socket | undefined) => void;
   makeSocket: () => void;
   disconnectSocket: () => void;
 
@@ -18,7 +18,7 @@ interface GameStoreProps {
   isReady: number;
   setIsReady: (isReady: number) => void;
   isFinished: number;
-  setIsFinished: (isReady: number) => void;
+  setIsFinished: (isFinished: number) => void;
   GameBall: GameBall;
   setGameBall: (GameBall: GameBall) => void;
   GameMeProps?: GameUserProps;
@@ -26,7 +26,7 @@ interface GameStoreProps {
   leftTouchBar: number;
   setLeftTouchBar: (leftTouchBar: number) => void;
   rightTouchBar: number;
-  setRightTouchBar: (leftTouchBar: number) => void;
+  setRightTouchBar: (rightTouchBar: number) => void;
   GameScore: number[];
   setGameScore: (GameScore: number[]) => void;
   room: GameRoomProps;
@@ -34,9 +34,9 @@ interface GameStoreProps {
 }
 
 export const gameStore = create<GameStoreProps>((set, get) => ({
-  socket: undefined,
-  setSocket: (socket: Socket | undefined) => {
-    set((state) => ({ ...state, socket: socket }));
+  gameSocket: undefined,
+  setSocket: (gameSocket: Socket | undefined) => {
+    set((state) => ({ ...state, gameSocket: gameSocket }));
   },
 
   isSetting: 0,
@@ -193,7 +193,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   },
 
   disconnectSocket: () => {
-    const tempSocket = get().socket;
+    const tempSocket = get().gameSocket;
     if (tempSocket !== undefined) tempSocket.disconnect();
     get().setSocket(undefined);
   },

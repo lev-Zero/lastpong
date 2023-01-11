@@ -39,6 +39,43 @@ type AppPropsWithLayout = AppProps & {
 
 function InviteModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isInvited, InviteData, setIsInvited } = chatStore();
+
+  useEffect(() => {
+    if (isInvited === 2 || isInvited === 3) {
+      onOpen();
+    } else return;
+  }, [isInvited]);
+
+  return (
+    <Modal
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+      isOpen={isOpen}
+      onClose={onClose}
+      isCentered
+    >
+      <ModalOverlay />
+      <ModalContent bg="main" color="white">
+        <Center>
+          <VStack>
+            <ModalHeader>Inviting the other person</ModalHeader>
+            <ModalBody fontSize="6xl">...</ModalBody>
+            <ModalFooter>
+              {/* <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
+                  CANCEL
+                </CustomButton> */}
+            </ModalFooter>
+          </VStack>
+        </Center>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function InvitedModal() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isInvited, InviteData, setIsInvited, socket } = chatStore();
 
   const invitingDummyUser: UserProps = {
     id: 1,
@@ -48,9 +85,34 @@ function InviteModal() {
     rating: 1028,
   };
 
+  useEffect(() => {
+    if (isInvited === 1) {
+      console.log(InviteData);
+      onOpen();
+    } else return;
+  }, [isInvited]);
+
+  function handleMatchCancelBtnClicked() {
+    if (isInvited === 1) {
+      if (socket !== undefined) {
+        // socket.emit('responseInviteToHost', {
+        // })
+        setIsInvited(0);
+        console.log('socket is disconnected');
+      }
+    }
+    onClose();
+  }
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
-      <ModalOverlay />
+    <Modal
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+      isOpen={isOpen}
+      onClose={onClose}
+      isCentered
+    >
+      <ModalOverlay backdropFilter="blur(10px) " />
       <ModalContent bg="win" color="white" borderRadius={30}>
         <Center>
           <VStack>
@@ -83,7 +145,9 @@ function InviteModal() {
                 </CustomButton>
                 <CustomButton
                   size="lg"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                  }}
                   btnStyle={{
                     background: 'transparent',
                   }}
@@ -129,6 +193,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     <ChakraProvider theme={theme}>
       {getLayout(<Component {...pageProps} key={router.asPath} />)}
       <InviteModal />
+      <InvitedModal />
     </ChakraProvider>
   );
 }

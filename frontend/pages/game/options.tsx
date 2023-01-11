@@ -47,7 +47,7 @@ export default function GameOptionsPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
+  const { gameSocket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -136,12 +136,12 @@ export default function GameOptionsPage() {
 
   async function handleMatchBtnClicked() {
     setTimeSpent(1);
-    if (socket === undefined) {
+    if (gameSocket === undefined) {
       console.log('socket is undefined');
       alert('Sockect is not working Critical ERROR!!');
       router.push('/');
     } else {
-      socket.emit('readyGame', {
+      gameSocket.emit('readyGame', {
         gameRoomName: room.gameRoomName,
         backgroundColor: valueInt1,
         mode: valueInt2,
@@ -154,6 +154,7 @@ export default function GameOptionsPage() {
   // TODO : READY 했을 때 구역 disabled 되도록 변경
   return (
     <>
+
       {leftUser === undefined || rightUser === undefined ? (
         <Spinner />
       ) : (

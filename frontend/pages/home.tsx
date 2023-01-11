@@ -25,7 +25,7 @@ import { useRouter } from 'next/router';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket, room, isSetting, setIsSetting, makeSocket, disconnectSocket } = gameStore();
+  const { gameSocket, room, isSetting, setIsSetting, makeSocket, disconnectSocket } = gameStore();
   const router = useRouter();
 
   function sleep(ms: number) {
@@ -39,24 +39,24 @@ export default function HomePage() {
 
   async function handleMatchBtnClicked() {
     setTimeSpent(1);
-    if (socket === undefined || socket.connected === false) {
+    if (gameSocket === undefined || gameSocket.connected === false) {
       console.log('socket is not Working');
       alert('socket is not Working');
     } else {
       onOpen();
       sleep(2000).then(() => {
-        console.log(socket);
+        console.log(gameSocket);
         console.log('EMIT : Random Game Match');
-        socket.emit('randomGameMatch');
+        gameSocket.emit('randomGameMatch');
       });
     }
   }
 
   function handleMatchCancelBtnClicked() {
     if (room.gameRoomName === '') {
-      if (socket !== undefined) {
-        socket.emit('removeSocketInQueue');
-        socket.removeAllListeners();
+      if (gameSocket !== undefined) {
+        gameSocket.emit('removeSocketInQueue');
+        gameSocket.removeAllListeners();
         disconnectSocket();
         setIsSetting(0);
         console.log('socket is disconnected');
@@ -66,7 +66,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    if (socket === undefined || isSetting === 0) {
+    if (gameSocket === undefined || isSetting === 0) {
       return;
     }
     console.log(`FIND Room : ${room.gameRoomName}`);
@@ -76,12 +76,12 @@ export default function HomePage() {
 
   useEffect(() => {
     sleep(300).then(() => {
-      if (socket === undefined || socket.connected === false) {
-        console.log('Socket Making');
+      if (gameSocket === undefined || gameSocket.connected === false) {
+        console.log('Socket Making!');
         makeSocket();
       }
     });
-  }, [socket]);
+  }, [gameSocket]);
 
   return (
     <>
@@ -101,7 +101,13 @@ export default function HomePage() {
           MATCH
         </CustomButton>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent bg="main" color="white">
           <Center>
