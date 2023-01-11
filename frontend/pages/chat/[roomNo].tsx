@@ -25,7 +25,14 @@ import {
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import React, { ReactElement, useState, useRef, useEffect, LegacyRef } from 'react';
+import React, {
+  ReactElement,
+  useState,
+  useRef,
+  useEffect,
+  LegacyRef,
+  useLayoutEffect,
+} from 'react';
 import { userStore } from '@/stores/userStore';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { MsgProps } from '@/interfaces/MsgProps';
@@ -38,7 +45,8 @@ import { CustomButton } from '@/components/CustomButton';
 
 export default function ChatRoomPage() {
   const router = useRouter();
-  const [roomNo, setRoomNo] = useState<number>();
+  // const [roomNo, setRoomNo] = useState<number>();
+  const { roomNo, updateRoomNo, resetRoomNo } = chatStore();
   const [msg, setMsg] = useState<string>('');
   const { me, blockedUsers } = userStore();
   const [myChatUserStatus, setMyChatUserStatus] = useState<ChatUserStatus>(ChatUserStatus.COMMON);
@@ -65,6 +73,27 @@ export default function ChatRoomPage() {
     }
   };
 
+  // useLayoutEffect(() => {
+  //   console.log('chatRoom Mounted!');
+  //   return () => {
+  //     if (socket === undefined) {
+  //       console.log('socket is undefined');
+  //       return;
+  //     }
+  //     console.log('roomNo', roomNo);
+  //     console.log('socket', socket);
+  //     socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
+
+  //     socket.off('join');
+  //     socket.off('admin');
+  //     socket.off('ban');
+  //     socket.off('mute');
+  //     socket.off('leave');
+  //     resetRoomNo();
+  //     console.log('chatRoom unMounted!');
+  //   };
+  // }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [msgList]);
@@ -73,7 +102,9 @@ export default function ChatRoomPage() {
     if (!router.isReady) {
       return;
     }
-    setRoomNo(parseInt(router.query.roomNo as string));
+    // setRoomNo(parseInt(router.query.roomNo as string));
+    if (parseInt(router.query.roomNo as string) !== undefined)
+      updateRoomNo(parseInt(router.query.roomNo as string));
   }, [router.isReady]);
 
   useEffect(() => {
@@ -252,6 +283,7 @@ export default function ChatRoomPage() {
 
     return () => {
       socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
+      resetRoomNo();
       socket.off('join');
       socket.off('admin');
       socket.off('ban');
