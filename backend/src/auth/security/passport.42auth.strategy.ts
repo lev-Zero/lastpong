@@ -18,8 +18,15 @@ export class Auth42Strategy extends PassportStrategy(Strategy) {
   async validate(
     accessToken: string,
     refreshToken: string,
-    profile,
-  ): Promise<any> {
+    profile: any,
+  ): Promise<
+    | {
+        username: string;
+        profileUrl: string | null;
+        accessToken42: string;
+      }
+    | HttpException
+  > {
     try {
       const user = {
         username: profile.username,

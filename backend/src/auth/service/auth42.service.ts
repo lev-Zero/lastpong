@@ -77,7 +77,12 @@ export class Auth42Service {
   // }
 
   //테스트
-  async login(data): Promise<any> {
+  async login(data): Promise<{
+    token: string;
+    profileUrl: string | null;
+    otpStatus: boolean;
+    accessToken42: string;
+  }> {
     try {
       const find42User = await this.userService
         .find42UserByName(data.username)
