@@ -60,6 +60,7 @@ export class AuthController {
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
         res.cookie('accessToken42', data.accessToken42);
+        this.userService.updateStatus(req.user.userId, userStatus.ONLINE);
 
         res.status(301).redirect(`${process.env.FRONTEND_URL}/auth/login/otp`);
       } else {
