@@ -26,7 +26,7 @@ export class ChatRoomDto {
   status: number;
 
   @IsOptional()
-  password: any;
+  password: string | null;
 }
 
 export class UpdateStatusDto {

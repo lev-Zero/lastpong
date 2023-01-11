@@ -12,7 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Sanitizer } from 'class-sanitizer';
 import { validate } from 'class-validator';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
 import { userStatus } from 'src/user/enum/status.enum';
@@ -53,7 +53,7 @@ export class ChatGateway
   ) {}
 
   @WebSocketServer()
-  public server: any;
+  public server: Server;
 
   /* --------------------------
 	|				handleConnection 		|
@@ -1206,7 +1206,7 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-  private chatParameterSanitizer(data: string) {
+  private chatParameterSanitizer(data: string): string {
     try {
       const data1 = Sanitizer.blacklist(data, ' ');
       const data2 = Sanitizer.escape(data1);
@@ -1218,7 +1218,7 @@ export class ChatGateway
     }
   }
 
-  private async chatParameterValidation(body: any, type: any) {
+  private async chatParameterValidation(body: any, type: any): Promise<any> {
     try {
       const data = new type();
       for (const key of Object.keys(body)) {

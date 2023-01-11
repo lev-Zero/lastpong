@@ -176,7 +176,11 @@ export class UserController {
   async findAvatarById(
     @Param('userId', ParseIntPipe) userId: number,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const avatar = await this.avatarService
         .findAvatarById(userId)
@@ -200,7 +204,11 @@ export class UserController {
   async findAvatarByName(
     @Param('name') name: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const data = this.userParameterSanitizer(name);
       const avatar = await this.avatarService
@@ -226,7 +234,11 @@ export class UserController {
   async findAvatarMe(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any | HttpException> {
+  ): Promise<
+    | StreamableFile
+    | { profilePhoto: string; profileUrl: string }
+    | HttpException
+  > {
     try {
       const avatar = await this.avatarService
         .findAvatarById(req.user.userId)
