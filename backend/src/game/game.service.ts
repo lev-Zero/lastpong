@@ -131,7 +131,7 @@ export class GameService {
   }
 
   joinGameRoom(
-    @ConnectedSocket() socket: Socket,
+    socket: Socket,
     gameRoom: GameRoomDto,
   ): { gameRoom: GameRoomDto; user: PlayerType } {
     try {
@@ -473,7 +473,7 @@ export class GameService {
   async isGameOver(
     gameRoom: GameRoomDto,
     server: Server,
-    @ConnectedSocket() socket: Socket,
+    socket: Socket,
   ): Promise<void> {
     try {
       for (const player of gameRoom.players) {
@@ -585,7 +585,7 @@ export class GameService {
 |				isPlayerInAnyGameRoom			|
 ---------------------------*/
 
-  randomGameMatching(@ConnectedSocket() socket: Socket): null | GameRoomDto {
+  randomGameMatching(socket: Socket): null | GameRoomDto {
     try {
       if (this.queue.find((playerSockets) => playerSockets == socket)) {
         throw new WsException('이미 queue에서 다른 유저 기다리는 중입니다');
@@ -627,7 +627,7 @@ export class GameService {
       throw new WsException(e.message);
     }
   }
-  removeSocketInQueue(@ConnectedSocket() socket: Socket): null {
+  removeSocketInQueue(socket: Socket): null {
     try {
       if (this.queue.indexOf(socket) != -1) {
         this.queue.splice(this.queue.indexOf(socket), 1);
