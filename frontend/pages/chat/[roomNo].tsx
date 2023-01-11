@@ -66,25 +66,6 @@ export default function ChatRoomPage() {
   };
 
   useEffect(() => {
-    console.log('chatRoom Mounted!');
-    return () => {
-      console.log('chatRoom unMounted!');
-
-      if (socket === undefined) {
-        console.log('socket is undefined');
-        return;
-      }
-
-      socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
-      socket.off('join');
-      socket.off('admin');
-      socket.off('ban');
-      socket.off('mute');
-      socket.off('leave');
-    };
-  }, []);
-
-  useEffect(() => {
     scrollToBottom();
   }, [msgList]);
 
@@ -270,6 +251,7 @@ export default function ChatRoomPage() {
     });
 
     return () => {
+      socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
       socket.off('join');
       socket.off('admin');
       socket.off('ban');
@@ -284,7 +266,7 @@ export default function ChatRoomPage() {
       return;
     }
 
-    socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
+    // socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
     router.push('/chat');
   }
 
