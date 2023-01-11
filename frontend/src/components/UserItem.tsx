@@ -20,21 +20,21 @@ import CustomAvatar from './CustomAvatar';
 import { OptionMenu } from './OptionMenu';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 import RawUserItem from './RawUserItem';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
 import { MsgProps } from '@/interfaces/MsgProps';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
-  const { dmMsgList } = chatStore();
+  const { dmMsgList, dmIdxMap, updateDmIdxMap } = chatStore();
   const [msg, setMsg] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [dmRoomNo, setDmRoomNo] = useState<number>();
+
   const { me } = userStore();
   const { socket } = chatStore();
   const [msgCount, setMsgCount] = useState<number>(0);
   const [isOpened, setIsOpened] = useState<boolean>(false);
-  const [lastIdx, setLastIdx] = useState<number>(-1);
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
     if (messageBoxRef.current) {
@@ -44,12 +44,22 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 
   useEffect(() => {
     scrollToBottom();
+
+    let tmpIdx = dmIdxMap.get(user.name);
+    if (tmpIdx === undefined || tmpIdx === null) {
+      updateDmIdxMap(user.name, -1);
+      tmpIdx = -1;
+    }
     dmMsgList.forEach((msg, idx) => {
-      if (idx > lastIdx && msg.username === user.name && msg.targetUsername === me.name) {
+      if (idx > tmpIdx! && msg.username === user.name && msg.targetUsername === me.name) {
         if (!isOpened) {
           setMsgCount((prev) => prev + 1);
         }
-        setLastIdx(idx);
+
+        console.log('Here2');
+
+        updateDmIdxMap(user.name, idx);
+        console.log('Here3');
       }
     });
   }, [dmMsgList]);
