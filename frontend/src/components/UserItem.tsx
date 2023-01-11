@@ -216,7 +216,6 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
 export default function ContextMenuHoc({ user, msgNum }: RawUserItemProps) {
   const { friends } = userStore();
   const [isFriend, setIsFriend] = useState<boolean>();
-  const [isBlocked, setIsBlocked] = useState<boolean>(false); // TODO: 추후 로직 추가
 
   useEffect(() => {
     setIsFriend(friends.some((friend) => friend.id === user.id));
@@ -224,13 +223,13 @@ export default function ContextMenuHoc({ user, msgNum }: RawUserItemProps) {
 
   return (
     <>
-      {isFriend === undefined || isBlocked === undefined ? (
+      {isFriend === undefined ? (
         <Box w="100%" position="relative" px={3} py={1}>
           <PopoverHoc user={user} msgNum={msgNum} />
         </Box>
       ) : (
         <ContextMenu<HTMLDivElement>
-          renderMenu={() => <OptionMenu user={user} isFriend={isFriend} isBlocked={isBlocked} />}
+          renderMenu={() => <OptionMenu user={user} isFriend={isFriend} />}
         >
           {(ref) => (
             <Box ref={ref} w="100%" position="relative" px={3} py={1}>

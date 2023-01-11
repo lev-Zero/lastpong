@@ -40,7 +40,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const [roomNo, setRoomNo] = useState<number>();
   const [msg, setMsg] = useState<string>('');
-  const { me } = userStore();
+  const { me, blockedUsers } = userStore();
   const [myChatUserStatus, setMyChatUserStatus] = useState<ChatUserStatus>(ChatUserStatus.COMMON);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,7 +49,7 @@ export default function ChatRoomPage() {
   const { socket } = chatStore();
 
   const [msgList, setMsgList] = useState<MsgProps[]>([]);
-  const [mutedTime, setMutedTime] = useState<Date>(new Date()); // FIXME: mute는 동시에 여러명도 당할 수 있음.
+  const [mutedTime, setMutedTime] = useState<Date>(new Date());
 
   const messageBoxRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +85,11 @@ export default function ChatRoomPage() {
       return;
     }
     socket.on('message', (res) => {
+      // Block한 유저가 단체 채팅방에서 보낸 메시지는 표시하지 않음
+      console.log('blockedUsers!', blockedUsers); // FIXME: blockedUsers가 바뀌었는데 왜 여기선 반영 안되는지...?
+      if (blockedUsers.some(({ name }) => name === res.user.username)) {
+        return;
+      }
       setMsgList((prev) => {
         return [
           ...prev,
@@ -311,11 +316,8 @@ export default function ChatRoomPage() {
 
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
-  const [valueTitle, setValueTitle] = useState('');
   const [valuePassword, setValuePassword] = useState('');
   const [roomProtected, setRoomProtected] = useState(false);
-  const handleTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setValueTitle(event.target.value);
   const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValuePassword(event.target.value);
 
@@ -324,33 +326,70 @@ export default function ChatRoomPage() {
     setValuePassword('');
   };
 
-  const createChatRoom = () => {
-    if (valueTitle === '') {
-      alert('방 제목을 입력해주십시오.');
-      return;
-    }
+  const updateChatRoomPassword = () => {
     if (roomProtected && valuePassword === '') {
       alert('비밀번호를 입력해주십시오.');
+      return;
+    }
+    if (roomProtected && valuePassword.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
+      alert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
       return;
     }
     if (socket === undefined) {
       console.log('socket is undefined!');
       return;
     }
+    if (chatRoom === undefined || roomNo === undefined) {
+      return;
+    }
 
-    console.log('updateChatRoom을 해야 할 자리 (제작되면 연동)');
-    // socket.emit('createChatRoom', {
-    //   name: valueTitle,
-    //   status: roomProtected ? ChatRoomStatus.PROTECTED : ChatRoomStatus.PUBLIC,
-    //   password: valuePassword,
-    // });
-    // socket.once('createChatRoom', (res) => {
-    //   console.log(res);
-    //   console.log(roomProtected);
-    //   router.push(`/chat/${res.chatRoom.id}`);
-    // });
-    onSettingModalClose();
+    const newChatRoomStatus: ChatRoomStatus = !roomProtected
+      ? ChatRoomStatus.PUBLIC
+      : ChatRoomStatus.PROTECTED;
+
+    console.log('chatRoom.status', chatRoom.status);
+    console.log('newChatRoom.status', newChatRoomStatus);
+    console.log('valuePassword', valuePassword);
+
+    if (newChatRoomStatus !== chatRoom.status) {
+      socket.emit('updateStatus', { chatRoomId: roomNo, status: newChatRoomStatus }, console.log);
+      socket.once('updateStatus', ({ message }) => {
+        console.log(message);
+        if (newChatRoomStatus === ChatRoomStatus.PUBLIC) {
+          handleSettingModalClose();
+          return;
+        }
+        socket.emit('updatePwd', { chatRoomId: roomNo, newPwd: valuePassword }, console.log);
+        socket.once('updatePwd', ({ message }) => {
+          console.log(message);
+        });
+      });
+    }
+    if (newChatRoomStatus === ChatRoomStatus.PUBLIC) {
+      handleSettingModalClose();
+      return;
+    }
+    socket.emit('updatePwd', { chatRoomId: roomNo, newPwd: valuePassword }, console.log);
+    socket.once('updatePwd', ({ message }) => {
+      console.log(message);
+    });
+    handleSettingModalClose();
   };
+
+  function handleSettingModalClose() {
+    if (socket === undefined) {
+      console.log('socket is undefined');
+      return;
+    }
+    if (roomNo === undefined) {
+      console.log('roomNo is undefined');
+      return;
+    }
+    socket.emit('chatRoomById', { chatRoomId: roomNo });
+    setRoomProtected(false);
+    setValuePassword('');
+    onSettingModalClose();
+  }
 
   return (
     <>
@@ -442,7 +481,7 @@ export default function ChatRoomPage() {
             </VStack>
           </Flex>
           {/* 방 설정 변경 */}
-          <Modal isOpen={isSettingModalOpen} onClose={onSettingModalClose} isCentered>
+          <Modal isOpen={isSettingModalOpen} onClose={handleSettingModalClose} isCentered>
             <ModalOverlay />
             <ModalContent bg="white" color="black" borderRadius={30}>
               <Center>
@@ -454,19 +493,12 @@ export default function ChatRoomPage() {
                     <ModalBody>
                       <HStack spacing={3}>
                         <VStack spacing={6}>
-                          <Text>TITLE</Text>
                           <HStack>
                             <Text>PASSWORD</Text>
                             <Checkbox onChange={handleRoomProtected} />
                           </HStack>
                         </VStack>
                         <VStack>
-                          <Input
-                            variant="outline"
-                            placeholder="enter title"
-                            onChange={handleTitle}
-                          />
-
                           <InputGroup size="md">
                             <Input
                               pr="4.5rem"
@@ -488,7 +520,7 @@ export default function ChatRoomPage() {
                     </ModalBody>
                     <ModalFooter>
                       <VStack mb={'7'}>
-                        <CustomButton size="lg" onClick={createChatRoom}>
+                        <CustomButton size="lg" onClick={updateChatRoomPassword}>
                           UPDATE
                         </CustomButton>
                       </VStack>

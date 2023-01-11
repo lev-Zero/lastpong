@@ -53,7 +53,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
-      await this.userService.updateStatus(user.id, userStatus.INGAME);
+      // await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       socket.data.user = user;
       socket_username[user.username] = socket;
@@ -73,7 +73,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const gameRoomName = this.gameService.findGameRoomOfUser(user.id);
       if (gameRoomName) await this.exitGameRoom(socket, { gameRoomName });
 
-      await this.userService.updateStatus(user.id, userStatus.ONLINE);
+      // await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       this.gameService.removeSocketInQueue(socket);
       socket.emit('disconnection', { message: `${user.username} 연결해제` });
@@ -375,7 +375,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
             .emit('exitGameRoom', { message: `관찰자가 게임룸에서 나갑니다.` });
         socket.emit('exitGameRoom', { message: `게임룸에서 나왔습니다.` });
         // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
-        await this.userService.updateStatus(user.id, userStatus.INGAME);
+        await this.userService.updateStatus(user.id, userStatus.ONLINE);
       } else {
         throw new WsException('해당룸에 당신은 존재하지 않습니다.');
       }

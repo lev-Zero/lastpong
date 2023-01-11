@@ -27,7 +27,7 @@ import { chatStore } from '@/stores/chatStore';
 import { DmMsgProps } from '@/interfaces/MsgProps';
 
 export default function Sidebar() {
-  const { friends, fetchFriends } = userStore();
+  const { friends, fetchFriends, fetchBlockedUsers } = userStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchId, setSearchId] = useState<string>('');
   const { allUsers, getAllUsers } = allUserStore();
@@ -64,6 +64,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     fetchFriends();
+    fetchBlockedUsers();
   }, []);
   const { me } = userStore();
 

@@ -1,25 +1,46 @@
 import MatchInfo from '@/components/MatchInfo';
+import { MatchInfoProps } from '@/interfaces/MatchInfoProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
+import { gameStore } from '@/stores/gameStore';
+import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { Box, SimpleGrid } from '@chakra-ui/react';
 import Head from 'next/head';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 
 export default function WatchPage() {
-  const me: UserProps = {
-    id: 1,
-    name: 'yopark',
-    imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.INGAME,
-    rating: 1028,
-  };
-  const opp: UserProps = {
-    id: 1,
-    name: 'pongmaster',
-    imgUrl: 'https://bit.ly/dan-abramov',
-    status: UserStatus.INGAME,
-    rating: 2510,
-  };
+  const [matchInfoList, setMatchInfoList] = useState<MatchInfoProps[]>([]);
+  const { socket, makeSocket } = gameStore();
+
+  useEffect(() => {
+    if (socket === undefined) {
+      makeSocket();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (socket === undefined || !socket.connected) {
+      console.log('socket is not ready');
+      return;
+    }
+    socket.emit('findGameRooms');
+    socket.once('findGameRooms', async ({ gameRoom }) => {
+      const newMatchInfoList: MatchInfoProps[] = await Promise.all(
+        gameRoom.map(async (room: any) => {
+          if (room.players.length !== 2) {
+            console.log('players are not 2 people');
+            return;
+          }
+          const rawP1: RawUserProps = room.players[0].user;
+          const rawP2: RawUserProps = room.players[1].user;
+          const p1: UserProps = await convertRawUserToUser(rawP1);
+          const p2: UserProps = await convertRawUserToUser(rawP2);
+          return { me: p1, opp: p2 };
+        })
+      );
+      setMatchInfoList(newMatchInfoList);
+    });
+  }, [socket?.connected]);
 
   return (
     <>
@@ -30,18 +51,9 @@ export default function WatchPage() {
       </Head>
       <Box maxH="100%" overflowY="scroll">
         <SimpleGrid m={20} columns={2} spacing={5}>
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
-          <MatchInfo me={me} opp={opp} />
+          {matchInfoList.map((matchInfo, idx) => (
+            <MatchInfo key={idx} me={matchInfo.me} opp={matchInfo.opp} />
+          ))}
         </SimpleGrid>
       </Box>
     </>

@@ -153,6 +153,11 @@ export default function GamePage() {
         });
       }
       onOpen();
+      if (socket !== undefined) {
+        socket.emit('exitGameRoom', {
+          gameRoomName: room.gameRoomName,
+        });
+      }
       setIsSetting(0);
       setIsFinished(0);
       setIsReady(0);
@@ -161,7 +166,7 @@ export default function GamePage() {
   }, [winLose]);
 
   function handleFinishBtnClicked() {
-    router.push('/');
+    router.push('/home');
   }
 
   const draw = (p5: p5Types) => {

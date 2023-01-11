@@ -6,10 +6,9 @@ import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
 import { removeCookie, setCookie } from 'typescript-cookie';
 import { useEffect } from 'react';
+import { customFetch } from '@/utils/customFetch';
 
 export default function Header() {
-  // TODO: 클릭 시 useOtp가 변경되게 만들려면 zustand에서 user를 꺼내서 써야한다. 그렇지 않으면 리렌더링이 발생하지 않는다.
-
   const { me, fetchMe, useOtp, fetchUseOtp, toggleUseOtp } = userStore();
   const router = useRouter();
 
@@ -28,7 +27,9 @@ export default function Header() {
     }
   }, []);
 
-  function logout() {
+  async function logout() {
+    const json = await customFetch('GET', '/auth/logout');
+    console.log(json);
     removeCookie('accessToken');
     router.push('/');
   }

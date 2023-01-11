@@ -25,8 +25,9 @@ import {
 import { CustomButton } from '@/components/CustomButton';
 import CustomAvatar from '@/components/CustomAvatar';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
-import { chatStore } from '@/stores/chatStore';
-import { Socket } from 'socket.io';
+import { customFetch } from '@/utils/customFetch';
+import { getCookie, removeCookie } from 'typescript-cookie';
+import { useRouter } from 'next/router';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -165,9 +166,32 @@ function InvitedModal() {
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
+  // TODO: beforeunload일 때 처리 어떻게 하지..?
+  const router = useRouter();
+  // useEffect(() => {
+  //   function preventUnload(e: BeforeUnloadEvent) {
+  //     e.preventDefault();
+  //     e.returnValue = '';
+  //   }
+  //   async function logout() {
+  //     const json = await customFetch('GET', '/auth/logout');
+  //     console.log(json);
+  //     removeCookie('accessToken');
+  //     router.push('/');
+  //   }
+  //   window.addEventListener('beforeunload', preventUnload);
+
+  //   return () => {
+  //     window.removeEventListener('beforeunload', preventUnload);
+  //     if (getCookie('accessToken') !== undefined) {
+  //       logout();
+  //     }
+  //   };
+  // }, []);
+
   return (
     <ChakraProvider theme={theme}>
-      {getLayout(<Component {...pageProps} />)}
+      {getLayout(<Component {...pageProps} key={router.asPath} />)}
       <InviteModal />
       <InvitedModal />
     </ChakraProvider>

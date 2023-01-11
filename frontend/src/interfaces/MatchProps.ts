@@ -1,6 +1,6 @@
 export interface MatchHistoryProps {
-    myName: string;
-    myScore: number;
-    oppName: string;
-    oppScore: number;
+  winName: string;
+  winScore: number;
+  loseName: string;
+  loseScore: number;
 }

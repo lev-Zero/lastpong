@@ -15,8 +15,8 @@ export default function BasicIdPage() {
     setUsername(e.currentTarget.value.toLowerCase());
   }
   async function submitUsername() {
-    if (username.search(/\W|\s/g) > -1) {
-      alert('영문자와 숫자만 이용할 수 있습니다');
+    if (username.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
+      alert('한글/영어/숫자만 이용할 수 있습니다');
       return;
     }
     try {

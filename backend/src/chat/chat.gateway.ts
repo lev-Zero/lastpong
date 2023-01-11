@@ -76,7 +76,7 @@ export class ChatGateway
       }
 
       // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
-      await this.userService.updateStatus(user.id, userStatus.INGAME);
+      // await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       await this.chatService.deleteChatRoomIfOwner(user.id);
       const initChatRooms = await this.chatService
@@ -131,7 +131,7 @@ export class ChatGateway
     try {
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
-      else await this.userService.updateStatus(user.id, userStatus.ONLINE);
+      // else await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       const disconnectUser = await this.userService.findUserById(user.id);
 
@@ -240,9 +240,9 @@ export class ChatGateway
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(body, UpdatePwdDto);
-      let data = this.chatParameterSanitizer(validBody.oldPwd);
-      validBody.oldPwd = data;
-      data = this.chatParameterSanitizer(validBody.newPwd);
+      // let data = this.chatParameterSanitizer(validBody.oldPwd);
+      // validBody.oldPwd = data;
+      const data = this.chatParameterSanitizer(validBody.newPwd);
       validBody.newPwd = data;
 
       await this.chatService.updatePwd(socket.data.user.id, validBody);
@@ -426,7 +426,7 @@ export class ChatGateway
       ]);
 
       // await this.userService.updateStatus(user.id, userStatus.CHATROOM);
-      await this.userService.updateStatus(user.id, userStatus.INGAME);
+      // await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       socket.join(chatRoom.name);
 
@@ -473,7 +473,7 @@ export class ChatGateway
           //   targetUser.id,
           //   userStatus.CHATCHANNEL,
           // );
-          await this.userService.updateStatus(so.data.id, userStatus.INGAME);
+          // await this.userService.updateStatus(so.data.id, userStatus.INGAME);
           so.emit('leave', {
             message: `owner가 ${chatRoom.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoom,
@@ -511,7 +511,7 @@ export class ChatGateway
 
         const targetUserSocket = socket_username[targetUser.username];
         // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-        await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
+        // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoom.name);
       }
     } catch (e) {
@@ -774,7 +774,7 @@ export class ChatGateway
       targetUserSocket.leave(chatRoom.name);
 
       // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-      await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
+      // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
 
       chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
@@ -998,7 +998,7 @@ export class ChatGateway
           //   targetUser.id,
           //   userStatus.CHATCHANNEL,
           // );
-          await this.userService.updateStatus(so.data.id, userStatus.INGAME);
+          // await this.userService.updateStatus(so.data.id, userStatus.INGAME);
           so.emit('leaveDm', {
             message: `owner가 ${chatRoomDm.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoomDm,
@@ -1036,7 +1036,7 @@ export class ChatGateway
 
         const targetUserSocket = socket_username[targetUser.username];
         // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-        await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
+        // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoomDm.name);
       }
     } catch (e) {
@@ -1188,7 +1188,7 @@ export class ChatGateway
         InviteGameRoomInfoDto,
       );
 
-      socket.to(validBody.inviteGameRoomName).emit('inviteGameRoomInfo', {
+      socket.to(validBody.randomInviteRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
         randomInviteRoomName: validBody.randomInviteRoomName,
         hostId: validBody.hostId,
