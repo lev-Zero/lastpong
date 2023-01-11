@@ -50,6 +50,7 @@ export default function BasicIdPage() {
           textTransform="uppercase"
           onChange={handleChange}
           onKeyDown={handleEnterKeyDown}
+          autoFocus
         />
       </Box>
       <CustomButton size="lg" onClick={submitUsername}>

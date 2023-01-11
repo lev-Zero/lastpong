@@ -62,6 +62,7 @@ export default function ChatPage() {
   const { socket, makeSocket, refreshChatRoomList, chatRoomList } = chatStore();
   const router = useRouter();
 
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     getAllUsers();
     if (socket === undefined) {
@@ -166,6 +167,11 @@ export default function ChatPage() {
       joinPrivChatRoom(id);
     }
   }
+
+  useEffect(() => {
+    if (roomProtected === false) return;
+    if (inputRef.current !== null) inputRef.current.focus();
+  }, [roomProtected]);
   return (
     <>
       <Head>
@@ -206,7 +212,13 @@ export default function ChatPage() {
             </SimpleGrid>
           </Box>
           <Box>
-            <CustomButton size="lg" onClick={onOpen}>
+            <CustomButton
+              size="lg"
+              onClick={() => {
+                onOpen();
+                // if (inputRef.current !== null) inputRef.current.focus();
+              }}
+            >
               CREATE
             </CustomButton>
           </Box>
@@ -230,7 +242,16 @@ export default function ChatPage() {
       </Flex>
 
       {/* 방생성 모달 파트 */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+          setValuePassword('');
+          setValueTitle('');
+          setRoomProtected(false);
+        }}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent bg="white" color="black" borderRadius={30}>
           <Center>
@@ -254,6 +275,7 @@ export default function ChatPage() {
                         placeholder="enter title"
                         onChange={handleTitle}
                         onKeyDown={handleEnterKeyDown}
+                        autoFocus
                       />
 
                       <InputGroup size="md">
@@ -266,6 +288,8 @@ export default function ChatPage() {
                           bg={!roomProtected ? 'gray.200' : 'white'}
                           value={valuePassword}
                           onKeyDown={handleEnterKeyDown}
+                          ref={inputRef}
+                          autoFocus
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -332,6 +356,7 @@ export default function ChatPage() {
                           // bg={!roomPrivate ? 'gray.200' : 'white'}
                           value={valuePasswordPriv}
                           onKeyDown={(e) => handleEnterKeyDownPriv(e, privChatRoomID.current)}
+                          autoFocus
                         />
                         <InputRightElement width="4.5rem">
                           <Button h="1.75rem" size="sm" onClick={handleClick}>
