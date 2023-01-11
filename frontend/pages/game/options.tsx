@@ -86,7 +86,8 @@ export default function GameOptionsPage() {
       const rightUser: UserProps = await convertRawUserToUser(rawRightUser);
       setLeftUser(leftUser);
       setRightUser(rightUser);
-      if (me.id === leftUser.id) { // FIXME: meUser를 GameUserProps에 맞추려고 하다보니 생긴 코드입니다... UserProps로 통일해야 합니다.
+      if (me.id === leftUser.id) {
+        // FIXME: meUser를 GameUserProps에 맞추려고 하다보니 생긴 코드입니다... UserProps로 통일해야 합니다.
         setMeUser({
           id: rawLeftUser.id,
           rating: rawLeftUser.rating,
@@ -122,7 +123,7 @@ export default function GameOptionsPage() {
       if (GameMeProps.rating <= rightUser.rating) setMyTurn(true);
       else setMyTurn(false);
     } else if (GameMeProps.username === rightUser.name) {
-      if (GameMeProps.rating <= rightUser.rating) setMyTurn(true);
+      if (GameMeProps.rating <= leftUser.rating) setMyTurn(true);
       else setMyTurn(false);
     }
   }, [GameMeProps, leftUser, rightUser]);
@@ -154,7 +155,6 @@ export default function GameOptionsPage() {
   // TODO : READY 했을 때 구역 disabled 되도록 변경
   return (
     <>
-
       {leftUser === undefined || rightUser === undefined ? (
         <Spinner />
       ) : (
