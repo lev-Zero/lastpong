@@ -154,6 +154,10 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         await get().setIsReady(1);
       });
 
+      newSocket.on('joinGameRoom', ({ gameRoom }) => {
+        get().setRoom(gameRoom);
+      });
+
       newSocket.on('wait', (data) => {
         console.log('WAIT :');
         console.log(data);
@@ -164,6 +168,11 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       });
 
       newSocket.on('touchBar', (data) => {
+        if (get().room.players.length !== 2) {
+          console.log('players are not 2 people');
+          return;
+        }
+
         if (get().room.players[0].user.id === data.player) {
           get().setLeftTouchBar(data.touchBar);
         }
@@ -180,10 +189,9 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         get().setIsFinished(1);
       });
 
-      newSocket.onAny((data) => {
-        console.log('ANY DATA : ');
-        console.log(data);
-      });
+      // newSocket.onAny((data) => {
+      //   console.log('ANY DATA : ', data);
+      // });
     });
     newSocket.on('disconnection', () => {
       console.log('socket is disconnected!!!!');
