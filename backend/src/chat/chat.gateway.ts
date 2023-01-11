@@ -534,7 +534,7 @@ export class ChatGateway
         body,
         ChatRoomMessageDto,
       );
-      const data = this.chatParameterSanitizer(validBody.message);
+      const data = this.chatMessageSanitizer(validBody.message);
       validBody.message = data;
 
       const user = socket.data.user;
@@ -1060,7 +1060,7 @@ export class ChatGateway
         body,
         ChatRoomDmMessageDto,
       );
-      const data = this.chatParameterSanitizer(validBody.message);
+      const data = this.chatMessageSanitizer(validBody.message);
       validBody.message = data;
 
       const chatRoomDm = await this.chatService.findChatRoomDmById(
