@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import Head from "next/head";
 import BasicLayout from '@/layouts/BasicLayout';
 import { useRef, useState } from 'react';
@@ -64,7 +64,7 @@ export default function BasicAvatarPage() {
     }
   };
 
-  const onClickNext = async (event: React.MouseEvent<HTMLElement>) => {
+  const goNext = async () => {
     const jwtToken: string = `Bearer ${getJwtToken()}`;
     const formData = new FormData();
     if (imageFile) {
@@ -83,6 +83,25 @@ export default function BasicAvatarPage() {
     console.log(json);
     router.push('/');
   };
+
+  useEffect(() => {
+    const keyDownHandler = (event: KeyboardEvent) => {
+      console.log('User pressed: ', event.key);
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+
+        // 👇️ your logic here
+        goNext();
+      }
+    };
+
+    document.addEventListener('keydown', keyDownHandler);
+
+    return () => {
+      document.removeEventListener('keydown', keyDownHandler);
+    };
+  }, []);
 
   return (
     <>
@@ -129,7 +148,7 @@ export default function BasicAvatarPage() {
                 name="profile_img"
                 onChange={onChangeInput}
               />
-              <Button style={styles.ThemaButton} onClick={onClickNext}>
+              <Button style={styles.ThemaButton} onClick={goNext}>
                 NEXT
               </Button>
             </form>
