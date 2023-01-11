@@ -52,7 +52,21 @@ export default function WatchPage() {
       <Box maxH="100%" overflowY="scroll">
         <SimpleGrid m={20} columns={2} spacing={5}>
           {matchInfoList.map((matchInfo, idx) => (
-            <MatchInfo key={idx} me={matchInfo.me} opp={matchInfo.opp} />
+            <Box
+              key={idx}
+              _hover={{
+                color: 'teal.500',
+                borderColor: 'teal.500',
+              }}
+              _active={{
+                color: 'blue.500',
+                borderColor: 'blue.500',
+              }}
+              borderRadius={20}
+              border={'2px'}
+            >
+              <MatchInfo me={matchInfo.me} opp={matchInfo.opp} />
+            </Box>
           ))}
         </SimpleGrid>
       </Box>

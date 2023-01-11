@@ -162,6 +162,12 @@ export default function ChatPage() {
               {chatRoomList.map((chatRoom, idx) => (
                 <Box
                   key={idx}
+                  _hover={{
+                    color: 'teal.500',
+                  }}
+                  _active={{
+                    color: 'blue.500',
+                  }}
                   onClick={() => {
                     if (!chatRoom.isProtected) {
                       joinChatRoom(chatRoom.id);
