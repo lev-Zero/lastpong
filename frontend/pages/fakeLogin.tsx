@@ -13,12 +13,12 @@ export default function FakeLogin() {
   const router = useRouter();
 
   async function createFakeUsers() {
-    try {
-      const json = await customFetch('GET', '/user/test/create/fakeuser');
-      console.log(json);
-    } catch (e) {
-      console.log('이미 생성되었습니다.');
+    const text = await customFetch('GET', '/user/test/read/fakeuser/fake_U1');
+    if (text !== '') {
+      console.log('fakeUser가 이미 만들어져 있습니다');
+      return;
     }
+    await customFetch('GET', '/user/test/create/fakeuser');
   }
 
   async function loginFakeUser(id: string) {
@@ -36,9 +36,7 @@ export default function FakeLogin() {
       };
 
       setMe(user);
-
-      console.log('set user : ', user);
-      console.log(json);
+      console.log(`fake_U${id}로 로그인 중...`);
       router.push('/home');
     } catch (e) {
       console.log('에러 발생');
