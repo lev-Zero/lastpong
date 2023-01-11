@@ -45,7 +45,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      console.log('friends status refreshed');
+      // console.log('friends status refreshed');
       fetchFriendsStatus();
     }, 1000);
     return () => clearInterval(id);
