@@ -23,6 +23,7 @@ import {
   Text,
   Box,
   HStack,
+  Spacer,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
@@ -36,7 +37,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexDir: 'row',
-    backgroundColor: 'gold',
   } as React.CSSProperties,
 
   PlayerLayout: {
@@ -169,39 +169,78 @@ export default function GamePage() {
   }
 
   const draw = (p5: p5Types) => {
-    p5.background(230 - room.facts.gameOption.backgroundColor * 230);
+    if (room.facts.gameOption.backgroundColor === 0) {
+      p5.background('white');
+      p5.fill('black');
+      p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
+      p5.fill('white');
+      p5.rect(2, 2, room.facts.display.width - 4, room.facts.display.height - 4);
+    } else {
+      p5.background('black');
+      p5.fill('white');
+      p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
+      p5.fill('black');
+      p5.rect(7, 7, room.facts.display.width - 14, room.facts.display.height - 14);
+    }
     function draw_score(p5obj: p5Types) {
       if (leftUser === undefined || rightUser === undefined) {
         return;
       }
-      p5obj.fill('red');
-      p5obj.textSize(50);
-      p5obj.textFont('Knewave');
-      p5obj.textAlign(p5obj.CENTER);
-      p5obj.text('VS', room.facts.display.width / 2, 60);
+      // p5obj.fill('red');
+      // p5obj.textSize(50);
+      // p5obj.textFont('Knewave');
+      // p5obj.textAlign(p5obj.CENTER);
+      // p5obj.text('VS', room.facts.display.width / 2, 60);
 
+      if (room.facts.gameOption.backgroundColor === 0) {
+        p5obj.fill('black');
+        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
+        p5obj.fill('white');
+        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 298);
+        p5obj.fill('black');
+        p5obj.strokeWeight(3);
+        p5obj.line(
+          room.facts.display.width / 2,
+          0,
+          room.facts.display.width / 2,
+          room.facts.display.height
+        );
+        p5obj.strokeWeight(2);
+      } else {
+        p5obj.fill('white');
+        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
+        p5obj.fill('black');
+        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 290);
+        p5obj.fill('white');
+        p5obj.strokeWeight(8);
+        p5obj.stroke(255, 255, 255);
+        p5obj.line(
+          room.facts.display.width / 2,
+          0,
+          room.facts.display.width / 2,
+          room.facts.display.height
+        );
+        p5obj.strokeWeight(2);
+      }
+
+      p5obj.textSize(70);
+      p5obj.textAlign(p5obj.LEFT);
+
+      // p5obj.text(leftUser.name.toUpperCase(), 15, 60);
+      p5obj.textFont('Bungee');
+      p5obj.text(GameScore[0], room.facts.display.width / 3 + 50, 90);
+
+      p5obj.textAlign(p5obj.LEFT);
+      //
+      p5obj.text(GameScore[1], (2 * room.facts.display.width) / 3 - 100, 90);
+    }
+
+    function draw_p1_bar(p5obj: p5Types) {
       if (room.facts.gameOption.backgroundColor === 0) {
         p5obj.fill('black');
       } else {
         p5obj.fill('white');
       }
-
-      p5obj.textSize(50);
-      p5obj.textAlign(p5obj.LEFT);
-
-      p5obj.text(leftUser.name.toUpperCase(), 15, 60);
-      p5obj.text(GameScore[0], room.facts.display.width / 3 + 50, 60);
-      p5obj.textAlign(p5obj.LEFT);
-      p5obj.text(
-        rightUser.name.toUpperCase(),
-        room.facts.display.width - 30 * rightUser.name.length - 40,
-        60
-      );
-      p5obj.text(GameScore[1], (2 * room.facts.display.width) / 3 - 100, 60);
-    }
-
-    function draw_p1_bar(p5obj: p5Types) {
-      p5obj.fill(51, 255, 51);
       p5obj.rect(
         room.facts.touchBar.x,
         leftTouchBar - room.facts.touchBar.height / 2,
@@ -211,7 +250,11 @@ export default function GamePage() {
     }
 
     function draw_p2_bar(p5obj: p5Types) {
-      p5obj.fill(234, 30, 81);
+      if (room.facts.gameOption.backgroundColor === 0) {
+        p5obj.fill('black');
+      } else {
+        p5obj.fill('white');
+      }
       p5obj.rect(
         room.facts.display.width - room.facts.touchBar.width - room.facts.touchBar.x,
         rightTouchBar - room.facts.touchBar.height / 2,
@@ -221,7 +264,11 @@ export default function GamePage() {
     }
 
     function draw_ball(p5obj: p5Types) {
-      p5obj.fill(255, 255, 0);
+      if (room.facts.gameOption.backgroundColor === 0) {
+        p5obj.fill('black');
+      } else {
+        p5obj.fill('white');
+      }
       p5obj.circle(GameBall.x, GameBall.y, room.facts.ball.radius);
     }
 
@@ -244,11 +291,36 @@ export default function GamePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <Flex style={styles.MainLayout}>
+      {/* if (room.facts.gameOption.backgroundColor === 0) {
+        p5obj.fill('black');
+      } else {
+        p5obj.fill('white');
+      } */}
+      <Flex
+        style={styles.MainLayout}
+        bgColor={room.facts.gameOption.backgroundColor === 0 ? 'white' : 'black'}
+      >
         {/* <Box style={styles.GameLayout}> */}
-        <Sketch setup={setup} draw={draw} />
-        {/* </Box> */}
+        <VStack>
+          <Flex width={'full'} justifyContent="space-around" mb={8}>
+            <Text
+              fontFamily={'Bungee'}
+              fontSize={'6xl'}
+              color={room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white'}
+            >
+              {leftUser?.name.toUpperCase()}
+            </Text>
+            <Text
+              fontFamily={'Bungee'}
+              fontSize={'6xl'}
+              color={room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white'}
+            >
+              {rightUser?.name.toUpperCase()}
+            </Text>
+          </Flex>
+          <Sketch setup={setup} draw={draw} />
+          {/* </Box> */}
+        </VStack>
       </Flex>
 
       <Modal
