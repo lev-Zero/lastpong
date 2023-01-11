@@ -8,6 +8,11 @@
   src: url('fonts/NanumSquareRoundEB.ttf');
 }
 
+@font-face {
+  font-family: 'bungee';
+  src: url('fonts/Bungee-Regular.ttf');
+}
+
 html,
 body,
 body > div:first-child,
