@@ -28,6 +28,7 @@ import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import { customFetch } from '@/utils/customFetch';
 import { getCookie, removeCookie } from 'typescript-cookie';
 import { useRouter } from 'next/router';
+import { chatStore } from '@/stores/chatStore';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
