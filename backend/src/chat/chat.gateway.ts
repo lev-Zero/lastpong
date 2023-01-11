@@ -1188,7 +1188,7 @@ export class ChatGateway
         InviteGameRoomInfoDto,
       );
 
-      socket.to(validBody.inviteGameRoomName).emit('inviteGameRoomInfo', {
+      socket.to(validBody.randomInviteRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
         randomInviteRoomName: validBody.randomInviteRoomName,
         hostId: validBody.hostId,
