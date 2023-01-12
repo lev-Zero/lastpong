@@ -11,7 +11,7 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function WatchPage() {
   const [matchInfoList, setMatchInfoList] = useState<MatchInfoProps[]>([]);
-  const { gameSocket, makeSocket } = gameStore();
+  const { socket: gameSocket, makeSocket } = gameStore();
   const router = useRouter();
 
   function watchGameRoom(name: string | undefined) {

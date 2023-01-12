@@ -1,16 +1,14 @@
 import create from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import { GameRoomProps } from '@/interfaces/GameRoomProps';
-import { facts } from '@/interfaces/GameOptionsProps';
 import { getJwtToken } from '@/utils/getJwtToken';
 import { WS_SERVER_URL } from '@/utils/variables';
 import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
-import Router from 'next/router';
 import { chatStore } from './chatStore';
 interface GameStoreProps {
-  gameSocket?: Socket;
-  setSocket: (gameSocket: Socket | undefined) => void;
+  socket?: Socket;
+  setSocket: (socket: Socket | undefined) => void;
   makeSocket: () => void;
   disconnectSocket: () => void;
 
@@ -22,15 +20,15 @@ interface GameStoreProps {
   setIsReady: (isReady: number) => void;
   isFinished: number;
   setIsFinished: (isFinished: number) => void;
-  GameBall: GameBall;
+  gameBall: GameBall;
   setGameBall: (GameBall: GameBall) => void;
-  GameMeProps?: GameUserProps;
+  gameMeProps?: GameUserProps;
   setGameMeProps: (GameMeProps: GameUserProps | undefined) => void;
   leftTouchBar: number;
   setLeftTouchBar: (leftTouchBar: number) => void;
   rightTouchBar: number;
   setRightTouchBar: (rightTouchBar: number) => void;
-  GameScore: number[];
+  gameScore: number[];
   setGameScore: (GameScore: number[]) => void;
   room: GameRoomProps;
   setRoom: (gameRoomList: GameRoomProps) => void;
@@ -41,55 +39,55 @@ function sleep(ms: number) {
 }
 
 export const gameStore = create<GameStoreProps>((set, get) => ({
-  gameSocket: undefined,
-  setSocket: (gameSocket: Socket | undefined) => {
-    set((state) => ({ ...state, gameSocket: gameSocket }));
+  socket: undefined,
+  setSocket: (socket: Socket | undefined) => {
+    set((state) => ({ ...state, socket }));
   },
 
   isSetting: 0,
   setIsSetting: (isSetting: number) => {
-    set((state) => ({ ...state, isSetting: isSetting }));
+    set((state) => ({ ...state, isSetting }));
   },
 
   isCreated: 0,
   setIsCreated: (isCreated: number) => {
-    set((state) => ({ ...state, isCreated: isCreated }));
+    set((state) => ({ ...state, isCreated }));
   },
 
   isReady: 0,
   setIsReady: (isReady: number) => {
-    set((state) => ({ ...state, isReady: isReady }));
+    set((state) => ({ ...state, isReady }));
   },
 
   isFinished: 0,
   setIsFinished: (isFinished: number) => {
-    set((state) => ({ ...state, isFinished: isFinished }));
+    set((state) => ({ ...state, isFinished }));
   },
 
-  GameMeProps: undefined,
-  setGameMeProps: (GameMeProps: GameUserProps | undefined) => {
-    set((state) => ({ ...state, GameMeProps: GameMeProps }));
+  gameMeProps: undefined,
+  setGameMeProps: (gameMeProps: GameUserProps | undefined) => {
+    set((state) => ({ ...state, gameMeProps }));
   },
 
   leftTouchBar: 0,
   setLeftTouchBar: (leftTouchBar: number) => {
-    set((state) => ({ ...state, leftTouchBar: leftTouchBar }));
+    set((state) => ({ ...state, leftTouchBar }));
   },
   rightTouchBar: 0,
   setRightTouchBar: (rightTouchBar: number) => {
-    set((state) => ({ ...state, rightTouchBar: rightTouchBar }));
+    set((state) => ({ ...state, rightTouchBar }));
   },
 
-  GameBall: {
+  gameBall: {
     x: 0,
     y: 0,
   },
-  setGameBall: (GameBall: GameBall) => {
-    set((state) => ({ ...state, GameBall: GameBall }));
+  setGameBall: (gameBall: GameBall) => {
+    set((state) => ({ ...state, gameBall }));
   },
-  GameScore: [0, 0],
-  setGameScore: (GameScore: number[]) => {
-    set((state) => ({ ...state, GameScore: GameScore }));
+  gameScore: [0, 0],
+  setGameScore: (gameScore: number[]) => {
+    set((state) => ({ ...state, gameScore }));
   },
   room: {
     facts: {
@@ -226,7 +224,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
 
   disconnectSocket: () => {
     console.log('SOCKET ME : DISCONNECTING');
-    const tempSocket = get().gameSocket;
+    const tempSocket = get().socket;
     if (tempSocket !== undefined) tempSocket.disconnect();
     get().setSocket(undefined);
   },

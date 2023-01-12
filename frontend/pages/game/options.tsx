@@ -47,7 +47,7 @@ export default function GameOptionsPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { gameSocket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
+  const { socket: gameSocket, room, isReady, gameMeProps, setGameMeProps } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
@@ -116,17 +116,17 @@ export default function GameOptionsPage() {
   }, [meUser]);
 
   useEffect(() => {
-    if (GameMeProps === undefined || leftUser === undefined || rightUser === undefined) {
+    if (gameMeProps === undefined || leftUser === undefined || rightUser === undefined) {
       return;
     }
-    if (GameMeProps.username === leftUser.name) {
-      if (GameMeProps.rating <= rightUser.rating) setMyTurn(true);
+    if (gameMeProps.username === leftUser.name) {
+      if (gameMeProps.rating <= rightUser.rating) setMyTurn(true);
       else setMyTurn(false);
-    } else if (GameMeProps.username === rightUser.name) {
-      if (GameMeProps.rating <= leftUser.rating) setMyTurn(true);
+    } else if (gameMeProps.username === rightUser.name) {
+      if (gameMeProps.rating <= leftUser.rating) setMyTurn(true);
       else setMyTurn(false);
     }
-  }, [GameMeProps, leftUser, rightUser]);
+  }, [gameMeProps, leftUser, rightUser]);
 
   useEffect(() => {
     if (isReady === 0) return;

@@ -20,7 +20,7 @@ import { useRouter } from 'next/router';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { gameSocket, room, isSetting, setIsSetting, disconnectSocket } = gameStore();
+  const { socket: gameSocket, room, isSetting, setIsSetting, disconnectSocket } = gameStore();
   const router = useRouter();
   const [intervalId, setIntervalId] = useState<NodeJS.Timer>();
 

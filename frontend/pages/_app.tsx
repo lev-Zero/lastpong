@@ -7,7 +7,6 @@ import {
   Center,
   ChakraProvider,
   Flex,
-  Image,
   Modal,
   ModalBody,
   ModalContent,
@@ -19,7 +18,6 @@ import {
   Text,
   Box,
   HStack,
-  Link,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import CustomAvatar from '@/components/CustomAvatar';
@@ -44,8 +42,15 @@ function sleep(ms: number) {
 function InviteModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { socket, isInvited, InviteData, setIsInvited } = chatStore();
-  const { gameSocket, room, isSetting, isCreated, setIsCreated, makeSocket, disconnectSocket } =
-    gameStore();
+  const {
+    socket: gameSocket,
+    room,
+    isSetting,
+    isCreated,
+    setIsCreated,
+    makeSocket,
+    disconnectSocket,
+  } = gameStore();
 
   useEffect(() => {
     if (isInvited === 0) onClose();
@@ -261,7 +266,8 @@ function InvitedModal() {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
-  const { gameSocket, makeSocket } = gameStore();
+  const { socket: gameSocket, makeSocket } = gameStore();
+
   useEffect(() => {
     sleep(300).then(() => {
       if (gameSocket === undefined || gameSocket.connected === false) {
@@ -273,26 +279,6 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   // TODO: beforeunload일 때 처리 어떻게 하지..?
   const router = useRouter();
-  // useEffect(() => {
-  //   function preventUnload(e: BeforeUnloadEvent) {
-  //     e.preventDefault();
-  //     e.returnValue = '';
-  //   }
-  //   async function logout() {
-  //     const json = await customFetch('GET', '/auth/logout');
-  //     console.log(json);
-  //     removeCookie('accessToken');
-  //     router.push('/');
-  //   }
-  //   window.addEventListener('beforeunload', preventUnload);
-
-  //   return () => {
-  //     window.removeEventListener('beforeunload', preventUnload);
-  //     if (getCookie('accessToken') !== undefined) {
-  //       logout();
-  //     }
-  //   };
-  // }, []);
 
   return (
     <ChakraProvider theme={theme}>

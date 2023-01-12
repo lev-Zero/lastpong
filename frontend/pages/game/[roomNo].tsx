@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
 import dynamic from 'next/dynamic';
 import p5Types from 'p5';
-import { GameUserProps } from '@/interfaces/GameUserProps';
 
 import {
-  Button,
   Center,
   Flex,
   Modal,
@@ -21,9 +19,6 @@ import {
   useDisclosure,
   VStack,
   Text,
-  Box,
-  HStack,
-  Spacer,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
@@ -74,14 +69,14 @@ const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 
 export default function GamePage() {
   const {
-    gameSocket,
+    socket: gameSocket,
     room,
-    GameBall,
-    GameScore,
+    gameBall,
+    gameScore,
     leftTouchBar,
     rightTouchBar,
     isFinished,
-    GameMeProps,
+    gameMeProps,
     setGameScore,
     setIsSetting,
     setIsFinished,
@@ -137,12 +132,12 @@ export default function GamePage() {
       });
       return;
     }
-    if (GameMeProps !== undefined) {
-      if (GameMeProps.id === leftUser.id) {
-        if (GameScore[0] > GameScore[1]) setWinLose(true);
+    if (gameMeProps !== undefined) {
+      if (gameMeProps.id === leftUser.id) {
+        if (gameScore[0] > gameScore[1]) setWinLose(true);
         else setWinLose(false);
       } else {
-        if (GameScore[1] > GameScore[0]) setWinLose(true);
+        if (gameScore[1] > gameScore[0]) setWinLose(true);
         else setWinLose(false);
       }
     }
@@ -228,11 +223,14 @@ export default function GamePage() {
 
       // p5obj.text(leftUser.name.toUpperCase(), 15, 60);
       p5obj.textFont('Bungee');
-      p5obj.text(GameScore[0], room.facts.display.width / 3 + 50, 90);
+      p5obj.text(String(gameScore[0]).padStart(2, '0'), room.facts.display.width / 3 + 50, 90);
 
       p5obj.textAlign(p5obj.LEFT);
-      //
-      p5obj.text(GameScore[1], (2 * room.facts.display.width) / 3 - 100, 90);
+      p5obj.text(
+        String(gameScore[1]).padStart(2, '0'),
+        (2 * room.facts.display.width) / 3 - 100,
+        90
+      );
     }
 
     function draw_p1_bar(p5obj: p5Types) {
@@ -269,7 +267,7 @@ export default function GamePage() {
       } else {
         p5obj.fill('white');
       }
-      p5obj.circle(GameBall.x, GameBall.y, room.facts.ball.radius);
+      p5obj.circle(gameBall.x, gameBall.y, room.facts.ball.radius);
     }
 
     if (gameSocket !== undefined) {
@@ -341,7 +339,7 @@ export default function GamePage() {
                     <Text fontSize="400%">{winLose ? 'WIN' : 'LOSE'}</Text>
                   </Flex>
                   <Text fontSize="200%">
-                    {GameScore[0]} : {GameScore[1]}
+                    {gameScore[0]} : {gameScore[1]}
                   </Text>
                 </VStack>
               </ModalBody>
