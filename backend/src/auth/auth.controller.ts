@@ -83,7 +83,6 @@ export class AuthController {
       });
       await this.userService.updateStatus(req.user.userId, userStatus.OFFLINE);
       return JSON.stringify({ status: 'logout' });
-      res.status(201).json({ status: 'logout' }); //redirect
     } catch (e) {
       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

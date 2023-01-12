@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 
 import { userStatus } from '../enum/status.enum';
-import { user42Dto } from 'src/auth/dto/auth.dto';
+import { User42Dto } from 'src/auth/dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -172,7 +172,7 @@ export class UserService {
     }
   }
 
-  async createUser(data: user42Dto): Promise<User> {
+  async createUser(data: User42Dto): Promise<User> {
     try {
       const user = await this.userRepository.create({
         username: '',

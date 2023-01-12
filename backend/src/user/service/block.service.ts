@@ -51,11 +51,7 @@ export class BlockService {
         blockedUser,
       });
 
-      try {
-        await this.blockRepository.save(newBlock);
-      } catch (e) {
-        throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-      }
+      await this.blockRepository.save(newBlock);
       return newBlock;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
@@ -98,11 +94,8 @@ export class BlockService {
         blockOfferUser,
         blockedUser,
       });
-      try {
-        await this.blockRepository.save(newBlock);
-      } catch (e) {
-        throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-      }
+      await this.blockRepository.save(newBlock);
+
       return newBlock;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);

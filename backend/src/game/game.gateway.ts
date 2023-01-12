@@ -449,7 +449,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('removeSocketInQueue')
-  removeSocketInQueue(@ConnectedSocket() socket): WsException | null {
+  removeSocketInQueue(@ConnectedSocket() socket: Socket): WsException | void {
     try {
       this.removeSocketInQueue(socket);
       socket.emit('removeSocketInQueue', { message: 'removeSocketInQueue' });
@@ -485,7 +485,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         throw new WsException(JSON.stringify(errorArray));
       } else {
-        console.log('validation succeed');
+        // console.log('validation succeed');
       }
       return data;
     } catch (e) {
