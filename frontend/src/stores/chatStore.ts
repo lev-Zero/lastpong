@@ -1,15 +1,13 @@
 import { DmMsgProps } from './../interfaces/MsgProps';
-import { UserProps } from '@/interfaces/UserProps';
 import { userStore } from './userStore';
 import { ChatRoomItemProps } from '@/interfaces/ChatRoomItemProps';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { getJwtToken } from '@/utils/getJwtToken';
 import { WS_SERVER_URL } from '@/utils/variables';
-import { useRouter } from 'next/router';
 import { io, Socket } from 'socket.io-client';
 
 import create from 'zustand';
-import { GameInviteProps, convertGameInviteProps } from '@/interfaces/GameInviteProps';
+import { GameInviteProps } from '@/interfaces/GameInviteProps';
 import { gameStore } from './gameStore';
 
 interface ChatStoreProps {
@@ -27,8 +25,8 @@ interface ChatStoreProps {
   dmMsgList: DmMsgProps[];
   addDmMsg: (username: string, targetUsername: string, text: string) => void;
 
-  InviteData: GameInviteProps | undefined;
-  setInviteData: (InviteData: GameInviteProps) => void;
+  inviteData: GameInviteProps | undefined;
+  setInviteData: (inviteData: GameInviteProps) => void;
 
   isInvited: number;
   setIsInvited: (isInvited: number) => void;
@@ -54,70 +52,32 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       },
     });
 
-    newSocket.on('connection', (data) => {
-      newSocket.on('createInviteRoom', (data) => {
-        console.log('ON CHAT : createInviteRoom');
-        console.log(data);
-      });
-      newSocket.on('requestInvite', async (data) => {
-        console.log('ON CHAT : requestInvite');
-        await get().setInviteData(data);
-        console.log('INVITE DATA');
-        console.log(get().InviteData);
-
-        sleep(300).then(() => {
-          if (userStore.getState().me.id === data.hostId) {
-            get().setIsInvited(2);
-          } else {
-            get().setIsInvited(1);
-          }
-        });
-      });
-      newSocket.on('responseInvite', (data) => {
-        console.log('ON CHAT : responseInvite');
-        console.log(data);
-      });
-      newSocket.on('responseInviteToHost', async (data) => {
-        console.log(data);
-        console.log('ON CHAT : responseInviteToHost');
-        if (data.response === false) {
-          console.log('FALSE RESPONSE');
-          sleep(300).then(() => {
-            get().setIsInvited(0);
-          });
-        } else {
-          if (userStore.getState().me.id === data.hostId) {
-            sleep(300).then(() => {
-              get().setIsInvited(3);
-              get().setInviteData(data);
-            });
-          }
-        }
-      });
-
-      function sleep(ms: number) {
-        return new Promise((r) => setTimeout(r, ms));
-      }
-      newSocket.on('inviteGameRoomInfo', (data) => {
-        console.log('ON CHAT : inviteGameRoomInfo');
-        sleep(500).then(() => {
-          if (
-            gameStore.getState().gameSocket !== undefined &&
-            gameStore.getState().gameSocket?.connected === true
-          ) {
-            console.log('EMIT GAME : joinGameRoom');
-            gameStore.getState().gameSocket?.emit('joinGameRoom', {
-              gameRoomName: data.gameRoomName,
-            });
-          }
-        });
-      });
-
-      // newSocket.onAny((data) => {
-      //   console.log('ANY DATA : ');
-      //   console.log(data);
-      // });
+    newSocket.on('connection', console.log);
+    newSocket.on('createInviteRoom', console.log);
+    newSocket.on('requestInvite', (res) => {
+      get().setInviteData(res);
+      get().setIsInvited(userStore.getState().me.id === res.hostId ? 2 : 1);
     });
+    newSocket.on('responseInvite', console.log);
+    newSocket.on('responseInviteToHost', (res) => {
+      if (!res.response) {
+        get().setIsInvited(0);
+        return;
+      }
+      if (userStore.getState().me.id === res.hostId) {
+        get().setIsInvited(3);
+        get().setInviteData(res);
+      }
+    });
+    newSocket.on('inviteGameRoomInfo', (res) => {
+      const gameSocket: Socket | undefined = gameStore.getState().socket;
+      if (gameSocket === undefined || !gameSocket.connected) {
+        console.log('gameSocket is not ready');
+        return;
+      }
+      gameSocket.emit('joinGameRoom', { gameRoomName: res.gameRoomName });
+    });
+
     get().setSocket(newSocket);
   },
   chatRoomList: [],
@@ -223,14 +183,14 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       dmMsgList: [...get().dmMsgList, { username, targetUsername, text }],
     }));
   },
-  InviteData: undefined,
-  setInviteData: (InviteData: GameInviteProps | undefined) => {
-    set((state) => ({ ...state, InviteData: InviteData }));
+  inviteData: undefined,
+  setInviteData: (inviteData: GameInviteProps | undefined) => {
+    set((state) => ({ ...state, inviteData }));
   },
 
   isInvited: 0,
   setIsInvited: (isInvited: number) => {
-    set((state) => ({ ...state, isInvited: isInvited }));
+    set((state) => ({ ...state, isInvited }));
   },
   dmIdxMap: new Map<string, number>(),
   updateDmIdxMap: (targetName: string, lastIdx: number) => {

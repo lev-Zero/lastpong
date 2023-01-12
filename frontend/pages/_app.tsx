@@ -18,6 +18,7 @@ import {
   Text,
   Box,
   HStack,
+  Spinner,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import CustomAvatar from '@/components/CustomAvatar';
@@ -39,18 +40,10 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function InviteModal() {
+function InvitingModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { socket, isInvited, InviteData, setIsInvited } = chatStore();
-  const {
-    socket: gameSocket,
-    room,
-    isSetting,
-    isCreated,
-    setIsCreated,
-    makeSocket,
-    disconnectSocket,
-  } = gameStore();
+  const { socket: chatSocket, isInvited, inviteData } = chatStore();
+  const { socket: gameSocket, room, isCreated, setIsCreated } = gameStore();
 
   useEffect(() => {
     if (isInvited === 0) onClose();
@@ -67,68 +60,49 @@ function InviteModal() {
   }, [isInvited]);
 
   useEffect(() => {
-    if (socket === undefined) {
-      console.log('inviteGameRoomInfo : socket undefind');
+    if (chatSocket === undefined || !chatSocket.connected) {
+      console.log('chatSocket is not ready');
       return;
     }
-    if (socket.connected === false) {
-      console.log('inviteGameRoomInfo : socket connected FALSE');
-      return;
-    }
-    if (gameSocket === undefined) {
-      console.log('joinGameRoom : gameSocket undefind');
-      return;
-    }
-    if (gameSocket.connected === false) {
-      console.log('joinGameRoom : gameSocket connected FALSE');
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
       return;
     }
     if (isCreated === 0) {
       console.log('inviteGameRoomInfo: Create Message Not Yet..');
       return;
     }
-
-    console.log('EMIT CHAT : inviteGameRoomInfo');
-    console.log(room.gameRoomName);
-    sleep(300).then(() => {
-      if (InviteData === undefined) return;
-      socket.emit('inviteGameRoomInfo', {
-        randomInviteRoomName: InviteData.randomInviteRoomName,
-        inviteGameRoomName: room.gameRoomName,
-        hostId: InviteData?.hostId,
-        targetId: InviteData?.targetId,
-      });
+    if (inviteData === undefined) {
+      console.log('inviteData is undefined');
+      return;
+    }
+    chatSocket.emit('inviteGameRoomInfo', {
+      randomInviteRoomName: inviteData.randomInviteRoomName,
+      inviteGameRoomName: room.gameRoomName,
+      hostId: inviteData.hostId,
+      targetId: inviteData.targetId,
     });
-    sleep(300).then(() => {
-      console.log('EMIT GAME : joinGameRoom');
-      gameSocket.emit('joinGameRoom', {
-        gameRoomName: room.gameRoomName,
-      });
-      setIsCreated(0);
+    gameSocket.emit('joinGameRoom', {
+      gameRoomName: room.gameRoomName,
     });
+    setIsCreated(0);
   }, [isCreated]);
 
   return (
     <Modal
-      // closeOnEsc={false}
+      closeOnEsc={false}
       closeOnOverlayClick={false}
       isOpen={isOpen}
       onClose={onClose}
       isCentered
     >
       <ModalOverlay />
-      <ModalContent bg="main" color="white">
+      <ModalContent bg="win" color="white" p={20} borderRadius={30}>
         <Center>
           <VStack>
-            <ModalHeader>INVITE</ModalHeader>
-            <ModalBody textAlign={'center'} fontSize="50">
-              INVITING USER
+            <ModalBody textAlign="center" fontSize="6xl">
+              INVITING USER...
             </ModalBody>
-            <ModalFooter>
-              {/* <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
-                  CANCEL
-                </CustomButton> */}
-            </ModalFooter>
           </VStack>
         </Center>
       </ModalContent>
@@ -138,73 +112,60 @@ function InviteModal() {
 
 function InvitedModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isInvited, InviteData, socket, setIsInvited } = chatStore();
+  const { isInvited, inviteData, socket: chatSocket, setIsInvited } = chatStore();
 
-  const [invitingDummyUser, setInvitingDummyUser] = useState<UserProps>({
-    id: 1,
-    name: 'yopark',
-    imgUrl: '',
-    status: UserStatus.INGAME,
-    rating: 1028,
-  });
+  const [invitingUser, setInvitingUser] = useState<UserProps>();
 
   useEffect(() => {
-    if (InviteData === undefined) return;
-    fetchUserById(InviteData.hostId).then((data) => {
-      setInvitingDummyUser(data);
-    });
-  }, [InviteData]);
+    if (inviteData === undefined) {
+      return;
+    }
+    fetchUserById(inviteData.hostId).then(setInvitingUser);
+  }, [inviteData]);
 
   useEffect(() => {
     if (isInvited === 1) {
-      console.log(InviteData);
+      console.log(inviteData);
       onOpen();
     } else return;
   }, [isInvited]);
 
   function handleMatchBtnClicked() {
-    if (socket === undefined) {
-      console.log('responseInvite : socket undefind');
+    if (chatSocket === undefined || !chatSocket.connected) {
+      console.log('socket is not ready');
       return;
     }
-    if (socket.connected === false) {
-      console.log('responseInvite : socket connected FALSE');
+    if (isInvited !== 1 || inviteData === undefined) {
+      console.log('isInvited is not 1 or inviteData is undefined');
       return;
     }
-    if (isInvited !== 1 || InviteData === undefined) return;
-    sleep(300).then(() => {
-      console.log('EMIT CHAT : responseInvite TRUE');
-      socket.emit('responseInvite', {
-        response: true,
-        randomInviteRoomName: InviteData.randomInviteRoomName,
-        hostId: InviteData.hostId,
-        targetId: InviteData.targetId,
-      });
+
+    chatSocket.emit('responseInvite', {
+      response: true,
+      randomInviteRoomName: inviteData.randomInviteRoomName,
+      hostId: inviteData.hostId,
+      targetId: inviteData.targetId,
     });
     onClose();
   }
 
   function handleMatchCancelBtnClicked() {
-    if (socket === undefined) {
-      console.log('responseInvite : socket undefind');
+    if (chatSocket === undefined || !chatSocket.connected) {
+      console.log('socket is not ready');
       return;
     }
-    if (socket.connected === false) {
-      console.log('responseInvite : socket connected FALSE');
+    if (isInvited !== 1 || inviteData === undefined) {
+      console.log('isInvited is not 1 or inviteData is undefined');
       return;
     }
-    if (isInvited !== 1 || InviteData === undefined) return;
-    console.log('EMIT CHAT : responseInvite FALSE');
-    sleep(300).then(() => {
-      socket.emit('responseInvite', {
-        response: false,
-        randomInviteRoomName: InviteData.randomInviteRoomName,
-        hostId: InviteData.hostId,
-        targetId: InviteData.targetId,
-      });
-      setIsInvited(0);
-      onClose();
+    chatSocket.emit('responseInvite', {
+      response: false,
+      randomInviteRoomName: inviteData.randomInviteRoomName,
+      hostId: inviteData.hostId,
+      targetId: inviteData.targetId,
     });
+    setIsInvited(0);
+    onClose();
   }
 
   return (
@@ -215,34 +176,32 @@ function InvitedModal() {
       onClose={onClose}
       isCentered
     >
-      <ModalOverlay backdropFilter="blur(10px) " />
+      <ModalOverlay backdropFilter="blur(10px)" />
       <ModalContent bg="win" color="white" borderRadius={30}>
-        <Center>
-          <VStack>
+        {invitingUser === undefined ? (
+          <Spinner />
+        ) : (
+          <VStack m="10">
             <ModalBody>
               <VStack>
-                <Flex w="100%" justifyContent="space-around" alignItems="center" bg="Win">
+                <HStack>
                   <Box mr={5}>
                     <CustomAvatar
-                      url={invitingDummyUser.imgUrl}
-                      size="xl"
-                      status={invitingDummyUser.status}
+                      url={invitingUser.imgUrl}
+                      size="lg"
+                      status={invitingUser.status}
                     />
                   </Box>
                   <VStack>
-                    <Text fontSize="4xl">{invitingDummyUser.name.toUpperCase()}</Text>
-                    <HStack>
-                      <Text>RATING</Text>
-                      <Text color={'opponent'}>{invitingDummyUser.rating}</Text>
-                    </HStack>
+                    <Text fontSize="3xl">{invitingUser.name.toUpperCase()}</Text>
+                    <Text>RATING {invitingUser.rating}</Text>
                   </VStack>
-                </Flex>
-                <Text fontSize="300%">INVITED YOU</Text>
+                </HStack>
+                <Text fontSize="6xl">INVITED YOU</Text>
               </VStack>
             </ModalBody>
             <ModalFooter>
-              <VStack mb={'7'}>
-                {/* TODO:onclick 핸들러로 매치 잡는 기능 */}
+              <VStack>
                 <CustomButton size="lg" onClick={handleMatchBtnClicked}>
                   MATCH
                 </CustomButton>
@@ -258,7 +217,7 @@ function InvitedModal() {
               </VStack>
             </ModalFooter>
           </VStack>
-        </Center>
+        )}
       </ModalContent>
     </Modal>
   );
@@ -283,7 +242,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <ChakraProvider theme={theme}>
       {getLayout(<Component {...pageProps} key={router.asPath} />)}
-      <InviteModal />
+      <InvitingModal />
       <InvitedModal />
     </ChakraProvider>
   );
