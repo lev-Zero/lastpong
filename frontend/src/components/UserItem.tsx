@@ -160,6 +160,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
       onOpen={() => {
         getDmRoomNo();
         setIsOpened(true);
+        if (inputRef !== null) inputRef.current.focus();
       }}
       onClose={() => {
         setMsg('');
