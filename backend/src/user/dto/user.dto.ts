@@ -24,3 +24,13 @@ export class UserUpdateNameDto {
   @IsNotEmpty()
   newUserName: string;
 }
+
+export class UserMatchIdDto {
+  @IsNumber()
+  @IsNotEmpty()
+  winnerId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  loserId: number;
+}

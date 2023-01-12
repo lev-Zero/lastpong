@@ -33,7 +33,12 @@ import { FriendService } from './service/friend.service';
 import { MatchService } from './service/match.service';
 import { Friend } from './entity/friend.entity';
 import { Block } from './entity/block.entity';
-import { UserMatchDto, UserNameDto, UserUpdateNameDto } from './dto/user.dto';
+import {
+  UserMatchDto,
+  UserMatchIdDto,
+  UserNameDto,
+  UserUpdateNameDto,
+} from './dto/user.dto';
 import { Avatar } from './entity/avatar.entity';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { Auth42Service } from 'src/auth/service/auth42.service';
@@ -310,9 +315,23 @@ export class UserController {
   }
 
   @Post('/match/add')
-  addMatchById(@Body() body: UserMatchDto): Promise<void> | HttpException {
+  @UseGuards(JwtAuthGuard)
+  async addMatch(@Body() body: UserMatchDto): Promise<Match | HttpException> {
     try {
-      return this.matchService.addMatchById(body);
+      return await this.matchService.addMatch(body);
+    } catch (e) {
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('/match/rating')
+  @UseGuards(JwtAuthGuard)
+  async updateRating(
+    @Body() body: UserMatchIdDto,
+  ): Promise<string | HttpException> {
+    try {
+      await this.matchService.updateRating(body.winnerId, body.loserId);
+      return JSON.stringify({ status: 'updated rating' });
     } catch (e) {
       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
