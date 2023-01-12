@@ -12,6 +12,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   const [isReadyToLoad, setIsReadyToLoad] = useState<boolean>(false);
+  const [calledPush, setCalledPush] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
   const { me, fetchMe } = userStore();
 
   function goToLogin() {
@@ -33,11 +34,10 @@ export default function LandingPage() {
     if (me.id === 0) {
       return;
     }
-    let mounted: boolean = false; // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
-    router.push(me.name === '' ? '/auth/basic/id' : '/home');
-    return () => {
-      mounted = false;
-    };
+    if (!calledPush) {
+      router.push(me.name === '' ? '/auth/basic/id' : '/home');
+    }
+    setCalledPush(true);
   }, [me]);
 
   return (
