@@ -1,7 +1,6 @@
 import CustomAvatar from '@/components/CustomAvatar';
 import { CustomButton } from '@/components/CustomButton';
 import MatchHistory from '@/components/MatchHistory';
-import WinLoseSum from '@/components/WinLoseSum';
 import { MatchHistoryProps } from '@/interfaces/MatchProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
@@ -117,7 +116,11 @@ export default function UserProfilePage() {
                 </VStack>
               </HStack>
               <Divider border="1px" borderColor="main" my={10} />
-              <WinLoseSum winCnt={totalWinCnt} loseCnt={totalLoseCnt} fontSize="3xl" />
+              <Flex fontSize="3xl">
+                <Text color="win">WIN {totalWinCnt} </Text>
+                <Text>&nbsp; : &nbsp;</Text>
+                <Text color="lose"> {totalLoseCnt} LOSE</Text>
+              </Flex>
               <VStack w="100%" my={10} maxH="15vh" overflowY="scroll">
                 {matchHistoryList.map((matchHistory, idx) => (
                   <MatchHistory
