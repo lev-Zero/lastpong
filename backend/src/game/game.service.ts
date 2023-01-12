@@ -9,14 +9,11 @@ import {
   PlayerType,
 } from './enum/game.enum';
 import { MatchService } from 'src/user/service/match.service';
-import { ConnectedSocket, WsException } from '@nestjs/websockets';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class GameService {
-  constructor(
-    private readonly userService: UserService,
-    private readonly matchService: MatchService,
-  ) {}
+  constructor(private readonly matchService: MatchService) {}
   /* --------------------------
 	|						멤버 변수   			|
 	---------------------------*/
@@ -65,12 +62,16 @@ export class GameService {
   }
 
   findSpectatorInGameRoom(userId: number, gameRoomName: string): number | null {
-    const gameRoom = this.gameRooms.get(gameRoomName);
-    if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
-    for (const spectatorId of gameRoom.spectators) {
-      if (spectatorId === userId) return spectatorId;
+    try {
+      const gameRoom = this.gameRooms.get(gameRoomName);
+      if (!gameRoom) throw new WsException('존재하지 않는 게임룸 입니다');
+      for (const spectatorId of gameRoom.spectators) {
+        if (spectatorId === userId) return spectatorId;
+      }
+      return null;
+    } catch (e) {
+      throw new WsException(e.message);
     }
-    return null;
   }
 
   findGameRoomOfUser(userId: number): string | null {
@@ -360,7 +361,7 @@ export class GameService {
     }
   }
 
-  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto) {
+  updateBallPositionAfterTouchBar(gameRoom: GameRoomDto): PositionDto {
     try {
       const nextBallPositionX =
         gameRoom.playing.ball.position.x + gameRoom.playing.ball.velocity.x;
@@ -615,11 +616,11 @@ export class GameService {
     }
   }
 
-  isPlayerInAnyGameRoom(MyId: number): GamePlayerDto | null {
+  isPlayerInAnyGameRoom(myId: number): GamePlayerDto | null {
     try {
       for (const gameRoom of this.gameRooms.values()) {
         for (const player of gameRoom.players) {
-          if (player.user.id === MyId) return player;
+          if (player.user.id === myId) return player;
         }
       }
       return null;
@@ -627,7 +628,7 @@ export class GameService {
       throw new WsException(e.message);
     }
   }
-  removeSocketInQueue(socket: Socket): null {
+  removeSocketInQueue(socket: Socket): void {
     try {
       if (this.queue.indexOf(socket) != -1) {
         this.queue.splice(this.queue.indexOf(socket), 1);

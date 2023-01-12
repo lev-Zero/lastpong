@@ -21,7 +21,11 @@ export class AuthService {
 	|								jwt								 |
 	----------------------------------*/
 
-  async generateJWT(userId: number, auth42Status, otpStatus): Promise<string> {
+  async generateJWT(
+    userId: number,
+    auth42Status: boolean,
+    otpStatus: boolean,
+  ): Promise<string> {
     try {
       const user = await this.userService.findUserById(userId);
 

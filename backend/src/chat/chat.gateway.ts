@@ -1,4 +1,3 @@
-import { Body, HttpStatus, UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -15,7 +14,6 @@ import { validate } from 'class-validator';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
-import { userStatus } from 'src/user/enum/status.enum';
 import { UserService } from 'src/user/service/user.service';
 import { ChatService } from './chat.service';
 import {
@@ -419,7 +417,10 @@ export class ChatGateway
       );
       const user = await this.userService.findUserById(socket.data.user.id);
 
-      await this.chatService.canUserEnterChatRoom(body, socket.data.user.id);
+      await this.chatService.canUserEnterChatRoom(
+        validBody,
+        socket.data.user.id,
+      );
 
       chatRoom = await this.chatService.findChatRoomById(chatRoom.id, [
         'joinedUser',
@@ -1158,6 +1159,8 @@ export class ChatGateway
         body,
         ResponseInviteDto,
       );
+      const data = this.chatParameterSanitizer(validBody.randomInviteRoomName);
+      validBody.randomInviteRoomName = data;
 
       socket.to(validBody.randomInviteRoomName).emit('responseInviteToHost', {
         message: '게임 초대 요청에 대한 응답',
@@ -1191,6 +1194,10 @@ export class ChatGateway
         body,
         InviteGameRoomInfoDto,
       );
+      let data = this.chatParameterSanitizer(validBody.randomInviteRoomName);
+      validBody.randomInviteRoomName = data;
+      data = this.chatParameterSanitizer(validBody.inviteGameRoomName);
+      validBody.inviteGameRoomName = data;
 
       socket.to(validBody.randomInviteRoomName).emit('inviteGameRoomInfo', {
         message: '게임룸 참여를 위한 정보',
@@ -1246,7 +1253,7 @@ export class ChatGateway
         }
         throw new WsException(JSON.stringify(errorArray));
       } else {
-        console.log('validation succeed');
+        // console.log('validation succeed');
       }
       return data;
     } catch (e) {

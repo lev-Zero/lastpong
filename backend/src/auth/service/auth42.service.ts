@@ -7,6 +7,7 @@ import { Payload } from '../interface/payload.interface';
 import { generateSecret, verify } from '2fa-util';
 import { AvatarService } from 'src/user/service/avatar.service';
 import { AuthService } from './auth.service';
+import { User42Dto } from '../dto/auth.dto';
 
 @Injectable()
 export class Auth42Service {
@@ -77,7 +78,7 @@ export class Auth42Service {
   // }
 
   //테스트
-  async login(data): Promise<{
+  async login(data: User42Dto): Promise<{
     token: string;
     profileUrl: string | null;
     otpStatus: boolean;

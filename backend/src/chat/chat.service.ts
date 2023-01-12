@@ -568,7 +568,10 @@ export class ChatService {
     }
   }
 
-  async directRemoveAdminUser(targetUserId: number, chatRoomId: number) {
+  async directRemoveAdminUser(
+    targetUserId: number,
+    chatRoomId: number,
+  ): Promise<void> {
     try {
       this.adminUserRepository
         .createQueryBuilder('adminuser')
@@ -679,7 +682,10 @@ export class ChatService {
     }
   }
 
-  async directRemoveMuteUser(targetUserId: number, chatRoomId: number) {
+  async directRemoveMuteUser(
+    targetUserId: number,
+    chatRoomId: number,
+  ): Promise<void> {
     try {
       const targetUser = await this.userService.findUserById(targetUserId);
       this.mutedUserRepository
@@ -799,7 +805,10 @@ export class ChatService {
     }
   }
 
-  async directRemoveBannedUser(targetUserId: number, chatRoomId: number) {
+  async directRemoveBannedUser(
+    targetUserId: number,
+    chatRoomId: number,
+  ): Promise<void> {
     try {
       const targetUser = await this.userService.findUserById(targetUserId);
       this.bannedUserRepository
