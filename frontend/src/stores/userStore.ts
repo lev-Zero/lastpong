@@ -8,30 +8,30 @@ import create from 'zustand';
 interface userStoreProps {
   me: UserProps;
   setMe: (user: UserProps) => void;
-  fetchMe: () => void;
+  fetchMe: () => Promise<void>;
 
   useOtp: boolean;
-  fetchUseOtp: () => void;
+  fetchUseOtp: () => Promise<void>;
   setUseOtp: (useOtp: boolean) => void;
-  toggleUseOtp: () => void;
+  toggleUseOtp: () => Promise<void>;
 
   friends: UserProps[];
   setFriends: (friends: UserProps[]) => void;
-  fetchFriends: () => void;
-  fetchFriendsStatus: () => void;
-  addFriend: (name: string) => void;
-  deleteFriend: (name: string) => void;
+  fetchFriends: () => Promise<void>;
+  fetchFriendsStatus: () => Promise<void>;
+  addFriend: (name: string) => Promise<void>;
+  deleteFriend: (name: string) => Promise<void>;
   blockedUsers: UserProps[];
   setBlockedUsers: (friends: UserProps[]) => void;
-  fetchBlockedUsers: () => void;
-  addBlock: (name: string) => void;
-  deleteBlock: (name: string) => void;
+  fetchBlockedUsers: () => Promise<void>;
+  addBlock: (name: string) => Promise<void>;
+  deleteBlock: (name: string) => Promise<void>;
 }
 
 export const userStore = create<userStoreProps>((set, get) => ({
   me: {
-    id: 1,
-    name: ' ', // FIXME: name=''은 첫 로그인인지(이름 정하는 페이지로 라우팅해야 하는지) 구분하는데 사용되므로 초기화는 다른 이름으로 해야함...
+    id: 0,
+    name: ' ', // 처음 회원가입할 때 default name이 '' 이라서 구분을 위해 공백
     imgUrl: '',
     status: UserStatus.OFFLINE,
     rating: 0,
@@ -41,16 +41,9 @@ export const userStore = create<userStoreProps>((set, get) => ({
   },
   fetchMe: async () => {
     try {
-      const json = await customFetch('GET', '/user/me');
-      const imgUrl = await avatarFetch('GET', '/user/avatar/me');
-      const user = {
-        id: json.id,
-        name: json.username,
-        imgUrl: imgUrl,
-        status: json.status,
-        rating: json.rating,
-      };
-      get().setMe(user);
+      const rawMe: RawUserProps = await customFetch('GET', '/user/me');
+      const me: UserProps = await convertRawUserToUser(rawMe);
+      get().setMe(me);
     } catch (e) {
       if (e instanceof Error) {
         throw Error(e.message);
