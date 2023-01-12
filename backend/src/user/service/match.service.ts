@@ -60,7 +60,7 @@ export class MatchService {
     }
   }
 
-  async addMatchById(matchResult: UserMatchDto): Promise<void> {
+  async addMatch(matchResult: UserMatchDto): Promise<Match> {
     try {
       const winner = await this.userService.findUserById(matchResult.winnerId);
       const loser = await this.userService.findUserById(matchResult.loserId);
@@ -71,13 +71,17 @@ export class MatchService {
         loserScore: matchResult.loserScore,
       });
       await this.matchRepository.save(match);
+      return match;
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async updateRank(winner: User, loser: User): Promise<void> {
+  async updateRating(winnerId: number, loserId: number): Promise<void> {
     try {
+      const winner = await this.userService.findUserById(winnerId);
+      const loser = await this.userService.findUserById(loserId);
+
       await this.userRepository.update(winner.id, {
         rating: winner.rating + 1,
       });
@@ -85,22 +89,6 @@ export class MatchService {
         await this.userRepository.update(loser.id, {
           rating: loser.rating - 1,
         });
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async addMatch(matchResult: UserMatchDto): Promise<void> {
-    try {
-      const winner = await this.userService.findUserById(matchResult.winnerId);
-      const loser = await this.userService.findUserById(matchResult.loserId);
-      const match = await this.matchRepository.create({
-        winner,
-        loser,
-        winnerScore: matchResult.winnerScore,
-        loserScore: matchResult.loserScore,
-      });
-      await this.matchRepository.save(match);
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

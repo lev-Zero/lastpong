@@ -368,12 +368,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (player)
           this.server.to(gameRoom.gameRoomName).emit('exitGameRoom', {
             message: `${player.user.username}가 게임룸에서 나갑니다.`,
+            userId: player.user.id,
           });
         if (spectator)
           this.server
             .to(gameRoom.gameRoomName)
             .emit('exitGameRoom', { message: `관찰자가 게임룸에서 나갑니다.` });
-        socket.emit('exitGameRoom', { message: `게임룸에서 나왔습니다.` });
+        socket.emit('exitGameRoom', {
+          message: `내가 게임룸에서 나왔습니다.`,
+        });
         // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
         await this.userService.updateStatus(user.id, userStatus.ONLINE);
       } else {

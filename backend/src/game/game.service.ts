@@ -517,7 +517,7 @@ export class GameService {
             if (player.user.id === winner.id) winnerScore = player.score;
             if (player.user.id === loser.id) loserScore = player.score;
           }
-          await this.matchService.updateRank(winner, loser);
+          await this.matchService.updateRating(winner.id, loser.id);
 
           const matchResult = {
             winnerId: winner.id,
