@@ -19,49 +19,12 @@ import {
   useDisclosure,
   VStack,
   Text,
+  HStack,
 } from '@chakra-ui/react';
 import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { UserProps } from '@/interfaces/UserProps';
-
-const styles = {
-  MainLayout: {
-    width: '100vw',
-    height: '92vh',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDir: 'row',
-  } as React.CSSProperties,
-
-  PlayerLayout: {
-    width: '300px',
-    height: '800px',
-  } as React.CSSProperties,
-
-  PlayerBoxLayout: {
-    width: '150px',
-    height: '200px',
-    marginTop: '200px',
-  } as React.CSSProperties,
-
-  GameLayout: {
-    width: '100%',
-    height: '100%',
-  } as React.CSSProperties,
-
-  TextUser: {
-    fontSize: '40px',
-    margin: '0',
-    color: 'black',
-  } as React.CSSProperties,
-
-  TextScore: {
-    fontSize: '160px',
-    margin: '0',
-    color: 'black',
-  } as React.CSSProperties,
-};
 
 const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
   ssr: false,
@@ -159,87 +122,66 @@ export default function GamePage() {
     }
   }, [winLose]);
 
-  function handleFinishBtnClicked() {
+  function goToHome() {
     router.push('/home');
   }
 
-  const draw = (p5: p5Types) => {
-    if (room.facts.gameOption.backgroundColor === 0) {
-      p5.background('white');
-      p5.fill('black');
-      p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
-      p5.fill('white');
-      p5.rect(2, 2, room.facts.display.width - 4, room.facts.display.height - 4);
-    } else {
-      p5.background('black');
-      p5.fill('white');
-      p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
-      p5.fill('black');
-      p5.rect(7, 7, room.facts.display.width - 14, room.facts.display.height - 14);
+  function draw(p5: p5Types) {
+    function drawBackground() {
+      if (room.facts.gameOption.backgroundColor === 0) {
+        p5.background('white');
+        p5.fill('black');
+        p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
+        p5.fill('white');
+        p5.rect(2, 2, room.facts.display.width - 4, room.facts.display.height - 4);
+        p5.fill('black');
+        p5.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
+        p5.fill('white');
+        p5.circle(room.facts.display.width / 2, room.facts.display.height / 2, 298);
+        p5.fill('black');
+        p5.strokeWeight(3);
+        p5.line(
+          room.facts.display.width / 2,
+          0,
+          room.facts.display.width / 2,
+          room.facts.display.height
+        );
+        p5.strokeWeight(2);
+      } else {
+        p5.background('black');
+        p5.fill('white');
+        p5.rect(0, 0, room.facts.display.width, room.facts.display.height);
+        p5.fill('black');
+        p5.rect(7, 7, room.facts.display.width - 14, room.facts.display.height - 14);
+        p5.fill('white');
+        p5.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
+        p5.fill('black');
+        p5.circle(room.facts.display.width / 2, room.facts.display.height / 2, 290);
+        p5.fill('white');
+        p5.strokeWeight(8);
+        p5.stroke(255, 255, 255);
+        p5.line(
+          room.facts.display.width / 2,
+          0,
+          room.facts.display.width / 2,
+          room.facts.display.height
+        );
+        p5.strokeWeight(2);
+      }
     }
-    function draw_score(p5obj: p5Types) {
+    function drawScore() {
       if (leftUser === undefined || rightUser === undefined) {
         return;
       }
-      // p5obj.fill('red');
-      // p5obj.textSize(50);
-      // p5obj.textFont('Knewave');
-      // p5obj.textAlign(p5obj.CENTER);
-      // p5obj.text('VS', room.facts.display.width / 2, 60);
-
-      if (room.facts.gameOption.backgroundColor === 0) {
-        p5obj.fill('black');
-        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
-        p5obj.fill('white');
-        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 298);
-        p5obj.fill('black');
-        p5obj.strokeWeight(3);
-        p5obj.line(
-          room.facts.display.width / 2,
-          0,
-          room.facts.display.width / 2,
-          room.facts.display.height
-        );
-        p5obj.strokeWeight(2);
-      } else {
-        p5obj.fill('white');
-        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 300);
-        p5obj.fill('black');
-        p5obj.circle(room.facts.display.width / 2, room.facts.display.height / 2, 290);
-        p5obj.fill('white');
-        p5obj.strokeWeight(8);
-        p5obj.stroke(255, 255, 255);
-        p5obj.line(
-          room.facts.display.width / 2,
-          0,
-          room.facts.display.width / 2,
-          room.facts.display.height
-        );
-        p5obj.strokeWeight(2);
-      }
-
-      p5obj.textSize(70);
-      p5obj.textAlign(p5obj.LEFT);
-
-      // p5obj.text(leftUser.name.toUpperCase(), 15, 60);
-      p5obj.textFont('Bungee');
-      p5obj.text(String(gameScore[0]).padStart(2, '0'), room.facts.display.width / 3 + 50, 90);
-
-      p5obj.textAlign(p5obj.LEFT);
-      p5obj.text(
-        String(gameScore[1]).padStart(2, '0'),
-        (2 * room.facts.display.width) / 3 - 100,
-        90
-      );
+      p5.textSize(70);
+      p5.textFont('Bungee');
+      p5.text(String(gameScore[0]).padStart(2, '0'), room.facts.display.width / 3 + 50, 90);
+      p5.text(String(gameScore[1]).padStart(2, '0'), (2 * room.facts.display.width) / 3 - 100, 90);
     }
 
-    function draw_p1_bar(p5obj: p5Types) {
-      if (room.facts.gameOption.backgroundColor === 0) {
-        p5obj.fill('black');
-      } else {
-        p5obj.fill('white');
-      }
-      p5obj.rect(
+    function drawLeftUserBar() {
+      p5.fill(room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white');
+      p5.rect(
         room.facts.touchBar.x,
         leftTouchBar - room.facts.touchBar.height / 2,
         room.facts.touchBar.width,
@@ -247,13 +189,9 @@ export default function GamePage() {
       );
     }
 
-    function draw_p2_bar(p5obj: p5Types) {
-      if (room.facts.gameOption.backgroundColor === 0) {
-        p5obj.fill('black');
-      } else {
-        p5obj.fill('white');
-      }
-      p5obj.rect(
+    function drawRightUserBar() {
+      p5.fill(room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white');
+      p5.rect(
         room.facts.display.width - room.facts.touchBar.width - room.facts.touchBar.x,
         rightTouchBar - room.facts.touchBar.height / 2,
         room.facts.touchBar.width,
@@ -261,13 +199,9 @@ export default function GamePage() {
       );
     }
 
-    function draw_ball(p5obj: p5Types) {
-      if (room.facts.gameOption.backgroundColor === 0) {
-        p5obj.fill('black');
-      } else {
-        p5obj.fill('white');
-      }
-      p5obj.circle(gameBall.x, gameBall.y, room.facts.ball.radius);
+    function drawBall() {
+      p5.fill(room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white');
+      p5.circle(gameBall.x, gameBall.y, room.facts.ball.radius);
     }
 
     if (gameSocket !== undefined) {
@@ -276,11 +210,12 @@ export default function GamePage() {
         gameRoomName: room.gameRoomName,
       });
     }
-    draw_p1_bar(p5);
-    draw_p2_bar(p5);
-    draw_score(p5);
-    draw_ball(p5);
-  };
+    drawBackground();
+    drawScore();
+    drawLeftUserBar();
+    drawRightUserBar();
+    drawBall();
+  }
 
   return (
     <>
@@ -289,37 +224,31 @@ export default function GamePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* if (room.facts.gameOption.backgroundColor === 0) {
-        p5obj.fill('black');
-      } else {
-        p5obj.fill('white');
-      } */}
-      <Flex
-        style={styles.MainLayout}
-        bgColor={room.facts.gameOption.backgroundColor === 0 ? 'white' : 'black'}
+      <HStack
+        width="100vw"
+        height="92vh"
+        bg={room.facts.gameOption.backgroundColor === 0 ? 'white' : 'black'}
       >
-        {/* <Box style={styles.GameLayout}> */}
         <VStack>
-          <Flex width={'full'} justifyContent="space-around" mb={8}>
+          <Flex width="full" justifyContent="space-around" mb={8}>
             <Text
-              fontFamily={'Bungee'}
-              fontSize={'6xl'}
+              fontFamily="Bungee"
+              fontSize="6xl"
               color={room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white'}
             >
-              {leftUser?.name.toUpperCase()}
+              {leftUser ? leftUser.name.toUpperCase() : ''}
             </Text>
             <Text
-              fontFamily={'Bungee'}
-              fontSize={'6xl'}
+              fontFamily="Bungee"
+              fontSize="6xl"
               color={room.facts.gameOption.backgroundColor === 0 ? 'black' : 'white'}
             >
-              {rightUser?.name.toUpperCase()}
+              {rightUser ? rightUser.name.toUpperCase() : ''}
             </Text>
           </Flex>
           <Sketch setup={setup} draw={draw} />
-          {/* </Box> */}
         </VStack>
-      </Flex>
+      </HStack>
 
       <Modal
         closeOnEsc={false}
@@ -335,10 +264,10 @@ export default function GamePage() {
               <ModalHeader></ModalHeader>
               <ModalBody>
                 <VStack>
-                  <Flex w="100%" justifyContent="space-around" alignItems="center" bg="transparent">
-                    <Text fontSize="400%">{winLose ? 'WIN' : 'LOSE'}</Text>
+                  <Flex w="full" justifyContent="space-around" alignItems="center" bg="transparent">
+                    <Text fontSize="6xl">{winLose ? 'WIN' : 'LOSE'}</Text>
                   </Flex>
-                  <Text fontSize="200%">
+                  <Text fontSize="4xl">
                     {gameScore[0]} : {gameScore[1]}
                   </Text>
                 </VStack>
@@ -347,7 +276,7 @@ export default function GamePage() {
                 <VStack mb={'7'}>
                   <CustomButton
                     size="lg"
-                    onClick={handleFinishBtnClicked}
+                    onClick={goToHome}
                     btnStyle={{
                       background: 'transparent',
                     }}
@@ -360,26 +289,6 @@ export default function GamePage() {
           </Center>
         </ModalContent>
       </Modal>
-      {/* TODO: 버튼이 아니라 경기 결과에 따라서 winLose 상태 변경 로직이 필요 */}
-      {/* <Button ml={'10%'} onClick={onOpen}>
-        GAME SET
-      </Button>
-      <Button
-        ml={'20%'}
-        onClick={() => {
-          setWinLose(true);
-        }}
-      >
-        WIN
-      </Button>
-      <Button
-        ml={'30%'}
-        onClick={() => {
-          setWinLose(false);
-        }}
-      >
-        LOSE
-      </Button> */}
     </>
   );
 }
