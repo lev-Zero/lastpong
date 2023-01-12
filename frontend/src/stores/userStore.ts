@@ -1,6 +1,5 @@
 import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
-import { avatarFetch } from '@/utils/avatarFetch';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
 import create from 'zustand';
@@ -19,14 +18,14 @@ interface userStoreProps {
   setFriends: (friends: UserProps[]) => void;
   fetchFriends: () => Promise<void> | never;
   fetchFriendsStatus: () => Promise<void> | never;
-  addFriend: (name: string) => Promise<void> | never;
-  deleteFriend: (name: string) => Promise<void> | never;
+  addFriend: (name: string) => Promise<void>;
+  deleteFriend: (name: string) => Promise<void>;
 
   blockedUsers: UserProps[];
   setBlockedUsers: (friends: UserProps[]) => void | never;
   fetchBlockedUsers: () => Promise<void> | never;
-  addBlock: (name: string) => Promise<void> | never;
-  deleteBlock: (name: string) => Promise<void> | never;
+  addBlock: (name: string) => Promise<void>;
+  deleteBlock: (name: string) => Promise<void>;
 
   allUsers: UserProps[];
   setAllUsers: (allUsers: UserProps[]) => void;
@@ -44,7 +43,6 @@ export const userStore = create<userStoreProps>((set, get) => ({
   setMe: (user: UserProps) => {
     set((state) => ({ ...state, me: user }));
   },
-  /* @throws Error */
   fetchMe: async () => {
     const rawMe: RawUserProps = await customFetch('GET', '/user/me');
     const me: UserProps = await convertRawUserToUser(rawMe);
@@ -60,20 +58,9 @@ export const userStore = create<userStoreProps>((set, get) => ({
     set((state) => ({ ...state, useOtp }));
   },
   toggleUseOtp: async () => {
-    let path: string = '';
-    if (get().useOtp) {
-      path = '/auth/otp/off';
-    } else {
-      path = '/auth/otp/on';
-    }
-    try {
-      await customFetch('PATCH', path);
-      get().fetchUseOtp();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw Error(e.message);
-      }
-    }
+    customFetch('PATCH', `/auth/otp/${get().useOtp ? 'off' : 'on'}`)
+      .then(() => get().fetchUseOtp())
+      .catch(console.log);
   },
   friends: [],
   setFriends: (friends: UserProps[]) => {
@@ -98,67 +85,37 @@ export const userStore = create<userStoreProps>((set, get) => ({
     get().setFriends(friendsCpy);
   },
   addFriend: async (name: string) => {
-    try {
-      const json = await customFetch('POST', 'user/friend/name', { username: name });
-      get().fetchFriends();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw Error(e.message);
-      }
-    }
+    customFetch('POST', 'user/friend/name', { username: name })
+      .then(() => get().fetchFriends())
+      .catch(console.log);
   },
   deleteFriend: async (name: string) => {
-    try {
-      const text = await customFetch('DELETE', 'user/friend/name', { username: name });
-      console.log(text);
-      get().fetchFriends();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw Error(e.message);
-      }
-    }
+    customFetch('DELETE', 'user/friend/name', { username: name })
+      .then(() => get().fetchFriends())
+      .catch(console.log);
   },
   blockedUsers: [],
   setBlockedUsers: (blockedUsers: UserProps[]) => {
     set((state) => ({ ...state, blockedUsers }));
   },
   fetchBlockedUsers: async () => {
-    try {
-      const rawBlockedUsers = await customFetch('GET', '/user/block');
-      const blockedUsers: UserProps[] = await Promise.all(
-        rawBlockedUsers.map(async ({ blockedUser: rawBlockedUser }: any) =>
-          convertRawUserToUser(rawBlockedUser)
-        )
-      );
-      get().setBlockedUsers(blockedUsers);
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log(e.message);
-        return;
-      }
-    }
+    const rawBlockedUsers = await customFetch('GET', '/user/block');
+    const blockedUsers: UserProps[] = await Promise.all(
+      rawBlockedUsers.map(async ({ blockedUser: rawBlockedUser }: any) =>
+        convertRawUserToUser(rawBlockedUser)
+      )
+    );
+    get().setBlockedUsers(blockedUsers);
   },
   addBlock: async (name: string) => {
-    try {
-      const json = await customFetch('POST', 'user/block/name', { username: name });
-      console.log(json);
-      get().fetchBlockedUsers();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw Error(e.message);
-      }
-    }
+    customFetch('POST', 'user/block/name', { username: name })
+      .then(() => get().fetchBlockedUsers())
+      .catch(console.log);
   },
   deleteBlock: async (name: string) => {
-    try {
-      const json = await customFetch('DELETE', 'user/block/name', { username: name });
-      console.log(json);
-      get().fetchBlockedUsers();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw Error(e.message);
-      }
-    }
+    customFetch('DELETE', 'user/block/name', { username: name })
+      .then(() => get().fetchBlockedUsers())
+      .catch(console.log);
   },
   allUsers: [],
   setAllUsers: (allUsers: UserProps[]) => {
