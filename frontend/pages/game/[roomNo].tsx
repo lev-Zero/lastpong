@@ -46,7 +46,7 @@ export default function GamePage() {
     setIsReady,
     disconnectSocket,
   } = gameStore();
-  const [winLose, setWinLose] = useState<boolean>();
+  const [isWin, setIsWin] = useState<boolean>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
   const [leftUser, setLeftUser] = useState<UserProps>();
@@ -95,32 +95,30 @@ export default function GamePage() {
       });
       return;
     }
-    if (gameMeProps !== undefined) {
-      if (gameMeProps.id === leftUser.id) {
-        if (gameScore[0] > gameScore[1]) setWinLose(true);
-        else setWinLose(false);
-      } else {
-        if (gameScore[1] > gameScore[0]) setWinLose(true);
-        else setWinLose(false);
-      }
+    if (gameMeProps === undefined) {
+      console.log('gameMeProps is undefined');
+      return;
     }
+    setIsWin(
+      gameMeProps.id === leftUser.id ? gameScore[0] > gameScore[1] : gameScore[0] < gameScore[1]
+    );
   }, [isFinished, leftUser]);
 
   useEffect(() => {
-    if (isFinished === 0) return;
-    else {
-      if (gameSocket !== undefined) {
-        gameSocket.emit('exitGameRoom', {
-          gameRoomName: room.gameRoomName,
-        });
-      }
-      onOpen();
-      setIsSetting(0);
-      setIsFinished(0);
-      setIsReady(0);
-      disconnectSocket();
+    if (isFinished === 0) {
+      return;
     }
-  }, [winLose]);
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+    onOpen();
+    setIsSetting(0);
+    setIsFinished(0);
+    setIsReady(0);
+    disconnectSocket();
+  }, [isWin]);
 
   function goToHome() {
     router.push('/home');
@@ -258,14 +256,14 @@ export default function GamePage() {
         isCentered
       >
         <ModalOverlay backdropFilter="blur(10px)" />
-        <ModalContent bg={winLose ? 'win' : 'lose'} color="white" borderRadius={30}>
+        <ModalContent bg={isWin ? 'win' : 'lose'} color="white" borderRadius={30}>
           <Center>
             <VStack>
               <ModalHeader></ModalHeader>
               <ModalBody>
                 <VStack>
                   <Flex w="full" justifyContent="space-around" alignItems="center" bg="transparent">
-                    <Text fontSize="6xl">{winLose ? 'WIN' : 'LOSE'}</Text>
+                    <Text fontSize="6xl">{isWin ? 'WIN' : 'LOSE'}</Text>
                   </Flex>
                   <Text fontSize="4xl">
                     {gameScore[0]} : {gameScore[1]}
