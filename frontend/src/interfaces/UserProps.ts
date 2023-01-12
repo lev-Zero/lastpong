@@ -8,6 +8,6 @@ export interface UserProps {
   id: number;
   name: string;
   imgUrl: string;
-  status?: UserStatus;
+  status: UserStatus;
   rating: number;
 }
