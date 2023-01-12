@@ -10,51 +10,36 @@ import { userStore } from '@/stores/userStore';
 
 export default function LandingPage() {
   const router = useRouter();
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [isLogin, setIsLogin] = useState<boolean>(false);
-  const [isFirstLogin, setIsFirstLogin] = useState<boolean>(false);
 
-  const goToLogin = () => {
-    router.push(`${SERVER_URL}/auth`);
-  };
-
+  const [isReadyToLoad, setIsReadyToLoad] = useState<boolean>(false);
   const { me, fetchMe } = userStore();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        await fetchMe();
-        if (me.name === ' ') {
-          return;
-        }
-        if (me.name === '') {
-          setIsFirstLogin(true);
-        }
-        setIsLogin(true);
-        setIsLoaded(true);
-      } catch (e) {
-        console.log(e);
-        setIsLogin(false);
-        setIsLoaded(true);
-      }
-    }
-    fetchData();
-  }, [me]);
-
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-    if (isFirstLogin) {
-      router.push('/auth/basic/id');
-    } else if (isLogin) {
-      router.push('/home');
-    }
-  }, [isLogin, isFirstLogin, isLoaded]);
+  function goToLogin() {
+    router.push(`${SERVER_URL}/auth`);
+  }
 
   function goToFakeLogin() {
     router.push('/fakeLogin');
   }
+
+  useEffect(() => {
+    async function f() {
+      fetchMe().catch(() => setIsReadyToLoad(true));
+    }
+    f();
+  }, []);
+
+  useEffect(() => {
+    if (me.id === 0) {
+      return;
+    }
+    let mounted: boolean = false; // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
+    router.push(me.name === '' ? '/auth/basic/id' : '/home');
+    return () => {
+      mounted = false;
+    };
+  }, [me]);
+
   return (
     <>
       <Head>
@@ -64,7 +49,7 @@ export default function LandingPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {!isLoaded || isLogin ? (
+      {!isReadyToLoad ? (
         <Text fontSize="6xl">LOADING...</Text>
       ) : (
         <>
