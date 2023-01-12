@@ -26,16 +26,16 @@ import {
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { ReactElement, ReactEventHandler, ReactNode, useEffect, useRef, useState } from 'react';
-import { allUserStore } from '@/stores/allUserStore';
 import Link from 'next/link';
 import RawUserItem from '@/components/RawUserItem';
 import { chatStore } from '@/stores/chatStore';
 import { useRouter } from 'next/router';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { UserStatus } from '@/interfaces/UserProps';
+import { userStore } from '@/stores/userStore';
 
 export default function ChatPage() {
-  const { allUsers, getAllUsers } = allUserStore();
+  const { allUsers, fetchAllUsers } = userStore();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: privIsOpen, onOpen: privOnOpen, onClose: privOnClose } = useDisclosure();
@@ -64,11 +64,15 @@ export default function ChatPage() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    getAllUsers();
     if (socket === undefined) {
       makeSocket();
     }
     refreshChatRoomList();
+  }, []);
+
+  useEffect(() => {
+    // TODO: 채팅 참여자가 실시간으로 변경되지는 않음
+    fetchAllUsers().catch(console.log);
   }, []);
 
   useEffect(() => {
@@ -225,11 +229,8 @@ export default function ChatPage() {
         </VStack>
         <VStack w="25%" h="90%" m={10} p={7} backgroundColor="white" borderRadius={'25px'}>
           <VStack w="100%" overflowY="scroll">
-            {/* TODO: BE에서 UserStatus 제대로 넘어오면, ONLINE인 사람만 표시하는 것으로 로직 변경 */}
             {allUsers
-              .filter(
-                (user) => user.status === UserStatus.ONLINE || user.status === UserStatus.INGAME
-              )
+              .filter((user) => user.status === UserStatus.ONLINE)
               .map((user, index) => (
                 <Link key={index} href={`/user/${user.name}`}>
                   <Flex width={'200px'}>
