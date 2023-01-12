@@ -24,6 +24,17 @@ export function ChatAdminOptionMenu({
 }: ChatAdminOptionMenuProps) {
   const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
   const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
+  const { socket: chatSocket, setIsInvited } = chatStore();
+
+  function inviteToGame() {
+    if (chatSocket === undefined || !chatSocket.connected) {
+      console.log('socket is not ready');
+      return;
+    }
+    console.log('INVITE TO GAME 버튼이 정상적으로 눌렸습니다.');
+    chatSocket.emit('createInviteRoom', { userId: user.id });
+    setIsInvited(2);
+  }
 
   if (me.name === user.name) return null;
   return (
@@ -75,7 +86,7 @@ export function ChatAdminOptionMenu({
       </MenuItem>
       <MenuItem>
         {user.status === UserStatus.ONLINE ? (
-          <Text>INVITE TO GAME</Text>
+          <Text onClick={inviteToGame}>INVITE TO GAME</Text>
         ) : (
           <Text color="gray.200">INVITE TO GAME</Text>
         )}

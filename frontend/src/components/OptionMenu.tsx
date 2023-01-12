@@ -11,7 +11,17 @@ export interface OptionMenuProps {
 
 export function OptionMenu({ user, isFriend }: OptionMenuProps) {
   const { me, addFriend, deleteFriend } = userStore();
-  const { socket, setIsInvited } = chatStore();
+  const { socket: chatSocket, setIsInvited } = chatStore();
+
+  function inviteToGame() {
+    if (chatSocket === undefined || !chatSocket.connected) {
+      console.log('socket is not ready');
+      return;
+    }
+    console.log('INVITE TO GAME 버튼이 정상적으로 눌렸습니다.');
+    chatSocket.emit('createInviteRoom', { userId: user.id });
+    setIsInvited(2);
+  }
 
   return (
     <MenuList>
@@ -22,26 +32,7 @@ export function OptionMenu({ user, isFriend }: OptionMenuProps) {
         {user.status === UserStatus.OFFLINE ||
         user.status === UserStatus.ONLINE ||
         user.status === UserStatus.INGAME ? (
-          <Text
-            onClick={() => {
-              console.log('CHECK Invite');
-              if (socket === undefined) {
-                console.log('createInviteRoom : socket undefind');
-                return;
-              }
-              if (socket.connected === false) {
-                console.log('createInviteRoom : socket connected FALSE');
-                return;
-              }
-              console.log('EMIT CHAT : createInviteRoom');
-              socket.emit('createInviteRoom', {
-                userId: user.id,
-              });
-              setIsInvited(2);
-            }}
-          >
-            INVITE TO GAME
-          </Text>
+          <Text onClick={inviteToGame}>INVITE TO GAME</Text>
         ) : (
           <Text color="gray.200">INVITE TO GAME</Text>
         )}
