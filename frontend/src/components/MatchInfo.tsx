@@ -20,7 +20,7 @@ export default function MatchInfo({ me, opp }: MatchInfoProps) {
           <VStack>
             <Text fontSize="lg">{opp.name.toUpperCase()}</Text>
             <Text fontSize="sm" color="opponent">
-              RATING ${opp.rating}
+              RATING {opp.rating}
             </Text>
           </VStack>
           <CustomAvatar url={opp.imgUrl} size="md" />

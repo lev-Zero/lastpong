@@ -4,12 +4,12 @@
 }
 
 @font-face {
-  font-family: 'nanum';
+  font-family: 'Nanum';
   src: url('fonts/NanumSquareRoundEB.ttf');
 }
 
 @font-face {
-  font-family: 'bungee';
+  font-family: 'Bungee';
   src: url('fonts/Bungee-Regular.ttf');
 }
 
@@ -24,7 +24,7 @@ div#__next > div {
 }
 
 * {
-  font-family: 'Knewave', 'nanum';
+  font-family: 'Knewave', 'Nanum';
   box-sizing: border-box;
 }
 
