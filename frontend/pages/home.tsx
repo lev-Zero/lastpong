@@ -25,7 +25,7 @@ import { useRouter } from 'next/router';
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { gameSocket, room, isSetting, setIsSetting, makeSocket, disconnectSocket } = gameStore();
+  const { gameSocket, room, isSetting, setIsSetting, disconnectSocket } = gameStore();
   const router = useRouter();
 
   function sleep(ms: number) {
@@ -73,15 +73,6 @@ export default function HomePage() {
     router.push('/game/options');
     console.log('Ready to play game');
   }, [isSetting]);
-
-  useEffect(() => {
-    sleep(300).then(() => {
-      if (gameSocket === undefined || gameSocket.connected === false) {
-        console.log('Socket Making!');
-        makeSocket();
-      }
-    });
-  }, [gameSocket]);
 
   return (
     <>

@@ -64,11 +64,14 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
         await get().setInviteData(data);
         console.log('INVITE DATA');
         console.log(get().InviteData);
-        if (userStore.getState().me.id === data.hostId) {
-          await get().setIsInvited(2);
-        } else {
-          await get().setIsInvited(1);
-        }
+
+        sleep(300).then(() => {
+          if (userStore.getState().me.id === data.hostId) {
+            get().setIsInvited(2);
+          } else {
+            get().setIsInvited(1);
+          }
+        });
       });
       newSocket.on('responseInvite', (data) => {
         console.log('ON CHAT : responseInvite');
@@ -79,11 +82,15 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
         console.log('ON CHAT : responseInviteToHost');
         if (data.response === false) {
           console.log('FALSE RESPONSE');
-          get().setIsInvited(0);
+          sleep(300).then(() => {
+            get().setIsInvited(0);
+          });
         } else {
           if (userStore.getState().me.id === data.hostId) {
-            get().setIsInvited(3);
-            await get().setInviteData(data);
+            sleep(300).then(() => {
+              get().setIsInvited(3);
+              get().setInviteData(data);
+            });
           }
         }
       });

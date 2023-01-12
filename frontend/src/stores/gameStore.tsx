@@ -36,6 +36,10 @@ interface GameStoreProps {
   setRoom: (gameRoomList: GameRoomProps) => void;
 }
 
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 export const gameStore = create<GameStoreProps>((set, get) => ({
   gameSocket: undefined,
   setSocket: (gameSocket: Socket | undefined) => {
@@ -137,8 +141,8 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
     const newSocket = io(`${WS_SERVER_URL}/game`, {
       reconnection: true,
       reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 10000,
+      reconnectionDelay: 100,
+      reconnectionDelayMax: 500,
       extraHeaders: {
         authorization: getJwtToken(),
       },
@@ -148,16 +152,17 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`Ramdom Game Maching`);
         await get().setRoom(temp_room);
-        await get().setIsSetting(1);
+        sleep(300).then(() => {
+          get().setIsSetting(1);
+        });
       });
 
       newSocket.on('readyGame', async function (data) {
-        const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`READY GAME!`);
-        await get().setRoom(temp_room);
-        await console.log(`ROOM : `);
-        await console.log(get().room);
-        await get().setIsReady(1);
+        await get().setRoom(data.gameRoom);
+        sleep(300).then(() => {
+          get().setIsReady(1);
+        });
       });
 
       newSocket.on('joinGameRoom', ({ gameRoom }) => {
@@ -198,20 +203,19 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       newSocket.on('createGameRoom', async (data) => {
         console.log('CREATE GAME ROOM');
         await get().setRoom(data.gameRoom);
-        await get().setIsCreated(1);
+        sleep(300).then(() => {
+          get().setIsCreated(1);
+        });
       });
 
       newSocket.on('joinGameRoom', async (data) => {
         console.log('JOIN GAME ROOM');
         await get().setRoom(data.gameRoom);
         chatStore.getState().setIsInvited(0);
-        get().setIsSetting(1);
+        sleep(300).then(() => {
+          get().setIsSetting(1);
+        });
       });
-
-      // newSocket.onAny((data) => {
-      //   console.log('ANY DATA : ');
-      //   console.log(data);
-      // });
     });
     newSocket.on('disconnection', () => {
       console.log('socket is disconnected!!!!');
@@ -221,6 +225,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
   },
 
   disconnectSocket: () => {
+    console.log('SOCKET ME : DISCONNECTING');
     const tempSocket = get().gameSocket;
     if (tempSocket !== undefined) tempSocket.disconnect();
     get().setSocket(undefined);

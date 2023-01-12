@@ -131,6 +131,7 @@ export default function GameOptionsPage() {
   useEffect(() => {
     if (isReady === 0) return;
     else {
+      console.log('IS Ready TRUE');
       if (room.gameRoomName !== '') router.push('/game/' + room.gameRoomName);
     }
   }, [isReady]);
