@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import ChatPage from 'pages/chat';
-import { Flex, Box, Text, Image, Spacer, Circle, HStack, Button } from '@chakra-ui/react';
+import { Flex, Box, Text, Image, Spacer, Circle, HStack } from '@chakra-ui/react';
 import CustomAvatar from './CustomAvatar';
 import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
@@ -13,18 +12,8 @@ export default function Header() {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      fetchMe();
-    } catch (e) {
-      console.log(e);
-    }
-  }, []);
-  useEffect(() => {
-    try {
-      fetchUseOtp();
-    } catch (e) {
-      console.log(e);
-    }
+    fetchMe().catch(console.log);
+    fetchUseOtp().catch(console.log);
   }, []);
 
   async function logout() {
