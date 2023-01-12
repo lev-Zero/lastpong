@@ -2,42 +2,49 @@ import React from 'react';
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { ReactElement } from 'react';
-import { Center, Text } from '@chakra-ui/react';
+import { Flex, HStack, Image, PinInput, PinInputField, Spinner, VStack } from '@chakra-ui/react';
 import BasicLayout from '@/layouts/BasicLayout';
-import OtpWindow from '@/components/OtpWindow';
-import { SERVER_URL } from '@/utils/variables';
 import { useRouter } from 'next/router';
+import { customFetch } from '@/utils/customFetch';
+import { removeCookie, setCookie } from 'typescript-cookie';
 
 export default function OtpPage() {
-  let otpStatus: boolean;
-  let authStr: string;
-  let profileUrl: string;
-
-  const [qrCodeSrc, setQrCodeSrc] = useState<string>('');
+  const [qrCodeSrc, setQrCodeSrc] = useState<string>();
+  const [isWrongColor, setIsWrongColor] = useState<boolean>(false);
+  const [isRerender, setIsRerender] = useState<boolean>(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const cookies = Object.fromEntries(
-      document.cookie.split(';').map((cookie) => cookie.trim().split('='))
-    );
-    authStr = 'Bearer ' + cookies['accessToken'];
-    otpStatus = cookies['otpStatus'];
-    profileUrl = cookies['profileUrl'];
-
-    fetch(SERVER_URL + '/auth/login/otp/check', {
-      method: 'GET',
-      headers: {
-        authorization: authStr,
-      },
-    })
-      .then((response) => response.json())
+  async function verifyOtpCode(code: string) {
+    customFetch('POST', '/auth/login/otp', { code })
       .then((json) => {
-        if ('status' in json) {
-          router.push('/');
-        } else {
-          setQrCodeSrc(json.qrcode);
+        if (json.status === 400) {
+          console.log(json.response);
+          setIsWrongColor(true);
+          setTimeout(() => setIsWrongColor(false), 500);
+          setIsRerender(true);
+          return;
         }
-      });
+        removeCookie('accessToken');
+        setCookie('accessToken', json.token);
+        router.push('/');
+      })
+      .catch(console.log);
+  }
+
+  // FIXME: code 초기화, autofocus를 동시에 해결하기 위해 리렌더를 해버렸다.
+  useEffect(() => {
+    setIsRerender(false);
+  }, [isRerender]);
+
+  useEffect(() => {
+    customFetch('GET', '/auth/login/otp/check').then((json) => {
+      // otp off인 유저
+      if ('status' in json) {
+        router.push('/');
+        return;
+      }
+      setQrCodeSrc(json.qrcode);
+    });
   }, []);
 
   return (
@@ -48,7 +55,33 @@ export default function OtpPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {qrCodeSrc === '' ? <Text>LOADING...</Text> : <OtpWindow src={qrCodeSrc} />}
+      {qrCodeSrc === undefined ? (
+        <Spinner />
+      ) : (
+        <Flex
+          border="2px"
+          p="20"
+          borderRadius="20%"
+          borderColor={!isWrongColor ? 'black' : 'red'}
+          bg={!isWrongColor ? 'transparent' : 'red'}
+        >
+          <VStack>
+            <Image border="2px" width="300px" height="300px" borderColor="black" src={qrCodeSrc} />
+            <HStack p={10}>
+              {isRerender ? null : (
+                <PinInput otp onComplete={verifyOtpCode} size="lg">
+                  <PinInputField bg="white" color="black" autoFocus />
+                  <PinInputField bg="white" color="black" />
+                  <PinInputField bg="white" color="black" />
+                  <PinInputField bg="white" color="black" />
+                  <PinInputField bg="white" color="black" />
+                  <PinInputField bg="white" color="black" />
+                </PinInput>
+              )}
+            </HStack>
+          </VStack>
+        </Flex>
+      )}
     </>
   );
 }
