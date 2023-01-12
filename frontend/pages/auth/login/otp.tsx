@@ -9,7 +9,7 @@ import { customFetch } from '@/utils/customFetch';
 import { removeCookie, setCookie } from 'typescript-cookie';
 
 export default function OtpPage() {
-  const [qrCodeSrc, setQrCodeSrc] = useState<string>();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>();
   const [isWrongColor, setIsWrongColor] = useState<boolean>(false);
   const [isRerender, setIsRerender] = useState<boolean>(false);
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function OtpPage() {
         router.push('/');
         return;
       }
-      setQrCodeSrc(json.qrcode);
+      setQrCodeUrl(json.qrcode);
     });
   }, []);
 
@@ -55,7 +55,7 @@ export default function OtpPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {qrCodeSrc === undefined ? (
+      {qrCodeUrl === undefined ? (
         <Spinner />
       ) : (
         <Flex
@@ -66,7 +66,7 @@ export default function OtpPage() {
           bg={!isWrongColor ? 'transparent' : 'red'}
         >
           <VStack>
-            <Image border="2px" width="300px" height="300px" borderColor="black" src={qrCodeSrc} />
+            <Image border="2px" width="300px" height="300px" borderColor="black" src={qrCodeUrl} />
             <HStack p={10}>
               {isRerender ? null : (
                 <PinInput otp onComplete={verifyOtpCode} size="lg">
