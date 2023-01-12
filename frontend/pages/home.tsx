@@ -30,7 +30,7 @@ export default function HomePage() {
 
   async function handleMatchBtnClicked() {
     if (gameSocket === undefined || gameSocket.connected === false) {
-      console.log('socket is not connected');
+      console.log('gameSocket is not connected');
       return;
     }
     onOpen();
@@ -40,8 +40,9 @@ export default function HomePage() {
   }
 
   function handleMatchCancelBtnClicked() {
-    if (gameSocket === undefined) {
-      console.log('gameSocket is undefined');
+    if (gameSocket === undefined || gameSocket.connected === false) {
+      console.log('gameSocket is not connected');
+      onClose();
       return;
     }
     if (room.gameRoomName === '') {
