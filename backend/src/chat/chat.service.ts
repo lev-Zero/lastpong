@@ -23,7 +23,7 @@ import { ChatLog } from './entity/chatLog.entity';
 import { ChatDmLog } from './entity/chatDmLog.entity';
 import { WsException } from '@nestjs/websockets';
 
-const temporary = 60 * 1000;
+const temp_time = 60 * 1000;
 
 @Injectable()
 export class ChatService {
@@ -622,7 +622,7 @@ export class ChatService {
         .catch(() => null);
 
       if (!isMutedUser) {
-        const time = new Date(Date.now() + temporary);
+        const time = new Date(Date.now() + temp_time);
         const muted = this.mutedUserRepository.create({
           user: targetUser,
           endTime: time,
@@ -742,7 +742,7 @@ export class ChatService {
         .catch(() => null);
 
       if (!isBannedUser) {
-        const time = new Date(Date.now() + temporary);
+        const time = new Date(Date.now() + temp_time);
         const banned = this.bannedUserRepository.create({
           user: targetUser,
           endTime: time,
