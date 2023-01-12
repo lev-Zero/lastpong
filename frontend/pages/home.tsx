@@ -1,12 +1,8 @@
 import MainLayout from '@/layouts/MainLayout';
 import Head from 'next/head';
-import Link from 'next/link';
-
 import { ReactElement, useEffect, useState } from 'react';
 import {
-  Button,
   Center,
-  Flex,
   Image,
   Modal,
   ModalBody,
@@ -14,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
@@ -27,40 +22,39 @@ export default function HomePage() {
   const [timeSpent, setTimeSpent] = useState<number>(1);
   const { gameSocket, room, isSetting, setIsSetting, disconnectSocket } = gameStore();
   const router = useRouter();
+  const [intervalId, setIntervalId] = useState<NodeJS.Timer>();
 
   function sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
   }
 
-  useEffect(() => {
-    const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
-
   async function handleMatchBtnClicked() {
-    setTimeSpent(1);
     if (gameSocket === undefined || gameSocket.connected === false) {
-      console.log('socket is not Working');
-      alert('socket is not Working');
-    } else {
-      onOpen();
-      sleep(2000).then(() => {
-        console.log(gameSocket);
-        console.log('EMIT : Random Game Match');
-        gameSocket.emit('randomGameMatch');
-      });
+      console.log('socket is not connected');
+      return;
     }
+    onOpen();
+    setIntervalId(setInterval(() => setTimeSpent((cur) => cur + 1), 1000));
+
+    sleep(2000).then(() => gameSocket.emit('randomGameMatch'));
   }
 
   function handleMatchCancelBtnClicked() {
+    if (gameSocket === undefined) {
+      console.log('gameSocket is undefined');
+      return;
+    }
     if (room.gameRoomName === '') {
-      if (gameSocket !== undefined) {
-        gameSocket.emit('removeSocketInQueue');
-        gameSocket.removeAllListeners();
-        disconnectSocket();
-        setIsSetting(0);
-        console.log('socket is disconnected');
-      }
+      gameSocket.emit('removeSocketInQueue');
+      gameSocket.removeAllListeners();
+      disconnectSocket();
+      setIsSetting(0);
+      console.log('socket is disconnected');
+    }
+    if (intervalId !== undefined) {
+      clearInterval(intervalId);
+      setIntervalId(undefined);
+      setTimeSpent(1);
     }
     onClose();
   }
@@ -69,9 +63,8 @@ export default function HomePage() {
     if (gameSocket === undefined || isSetting === 0) {
       return;
     }
-    console.log(`FIND Room : ${room.gameRoomName}`);
+    console.log(`${room.gameRoomName} 방으로 게임 매칭되었습니다.`);
     router.push('/game/options');
-    console.log('Ready to play game');
   }, [isSetting]);
 
   return (
@@ -82,21 +75,22 @@ export default function HomePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex height={'100%'} flexDir={'column'} alignItems="center" justifyContent={'center'}>
+      <VStack h="95%" mt="30px" mr="30px">
         <Image
-          src="/HowToPlay.png"
-          height="90%"
+          src="/how-to-play.png"
+          height="full"
           alt="How To Play LastPong"
-          pointerEvents={'none'}
+          pointerEvents="none"
+          borderRadius="20px"
         />
         <CustomButton
           size="2xl"
           onClick={handleMatchBtnClicked}
-          btnStyle={{ position: 'absolute', bottom: '13%', right: '52%' }}
+          btnStyle={{ position: 'absolute', bottom: '10%', right: '52%' }}
         >
           MATCH
         </CustomButton>
-      </Flex>
+      </VStack>
       <Modal
         closeOnEsc={false}
         closeOnOverlayClick={false}
