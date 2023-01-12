@@ -29,9 +29,7 @@ export function OptionMenu({ user, isFriend }: OptionMenuProps) {
         VIEW PROFILE
       </MenuItem>
       <MenuItem>
-        {user.status === UserStatus.OFFLINE ||
-        user.status === UserStatus.ONLINE ||
-        user.status === UserStatus.INGAME ? (
+        {user.status === UserStatus.ONLINE ? (
           <Text onClick={inviteToGame}>INVITE TO GAME</Text>
         ) : (
           <Text color="gray.200">INVITE TO GAME</Text>
