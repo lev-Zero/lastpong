@@ -33,42 +33,27 @@ import { GameUserProps } from '@/interfaces/GameUserProps';
 
 export default function GameOptionsPage() {
   const router = useRouter();
-  const [valueOpt1, setValueOpt1] = React.useState(false);
-  const [valueOpt2, setValueOpt2] = React.useState(false);
-  const [valueInt1, setValueInt1] = React.useState(0);
-  const [valueInt2, setValueInt2] = React.useState(0);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isFastMode, setIsFastMode] = useState<boolean>(false);
+  const [isMyTurn, setMyTurn] = useState(false);
+  const [timeSpent, setTimeSpent] = useState<number>(1);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timer>();
 
-  const [isMyTurn, setMyTurn] = React.useState(false);
   const { me } = userStore();
-
   const [leftUser, setLeftUser] = useState<UserProps>();
   const [rightUser, setRightUser] = useState<UserProps>();
   const [meUser, setMeUser] = useState<GameUserProps>(); // FIXME: 이것도 UserProps로 바꾸고 싶었으나, 의존적으로 활용하는 곳이 너무 많아 아직 리팩토링하지 못했다. 사실 GameUserProps로 저장할 게 아니라 UserProps로 저장해야 한다.
-
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [timeSpent, setTimeSpent] = useState<number>(1);
   const { socket: gameSocket, room, isReady, gameMeProps, setGameMeProps } = gameStore();
+  const [calledPush, setCalledPush] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
 
-  useEffect(() => {
-    const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
+  function toggleDarkMode() {
+    setIsDarkMode((pre) => !pre);
+  }
 
-  useEffect(() => {
-    if (valueOpt1 === false) {
-      setValueInt1(0);
-    } else {
-      setValueInt1(1);
-    }
-  }, [valueOpt1]);
-
-  useEffect(() => {
-    if (valueOpt2 === false) {
-      setValueInt2(0);
-    } else {
-      setValueInt2(1);
-    }
-  }, [valueOpt2]);
+  function toggleFastMode() {
+    setIsFastMode((pre) => !pre);
+  }
 
   useEffect(() => {
     async function fetchTwoUsers() {
@@ -129,31 +114,33 @@ export default function GameOptionsPage() {
   }, [gameMeProps, leftUser, rightUser]);
 
   useEffect(() => {
-    if (isReady === 0) return;
-    else {
-      console.log('IS Ready TRUE');
-      if (room.gameRoomName !== '') router.push('/game/' + room.gameRoomName);
+    if (isReady === 0) {
+      return;
     }
+    if (room.gameRoomName === '') {
+      return;
+    }
+    if (!calledPush) {
+      router.push(`/game/${room.gameRoomName}`);
+    }
+    setCalledPush(true);
   }, [isReady]);
 
-  async function handleMatchBtnClicked() {
-    setTimeSpent(1);
-    if (gameSocket === undefined) {
-      console.log('socket is undefined');
-      alert('Sockect is not working Critical ERROR!!');
-      router.push('/');
-    } else {
-      gameSocket.emit('readyGame', {
-        gameRoomName: room.gameRoomName,
-        backgroundColor: valueInt1,
-        mode: valueInt2,
-      });
-      onOpen();
+  function handleReadyBtnClicked() {
+    if (gameSocket === undefined || gameSocket.connected === false) {
+      console.log('gameSocket is not connected');
+      return;
     }
+    onOpen();
+    setIntervalId(setInterval(() => setTimeSpent((cur) => cur + 1), 1000));
+
+    gameSocket.emit('readyGame', {
+      gameRoomName: room.gameRoomName,
+      backgroundColor: Number(isDarkMode),
+      mode: Number(isFastMode),
+    });
   }
 
-  // TODO : Form 요청 보내는 로직 추가
-  // TODO : READY 했을 때 구역 disabled 되도록 변경
   return (
     <>
       {leftUser === undefined || rightUser === undefined ? (
@@ -185,43 +172,33 @@ export default function GameOptionsPage() {
                 <FormLabel htmlFor="dark-mode" mb="0">
                   <Text fontSize="xl">DARK MODE?</Text>
                 </FormLabel>
-                <Switch
-                  size="lg"
-                  id="dark-mode"
-                  onChange={(e) => setValueOpt1(!valueOpt1)}
-                  disabled={!isMyTurn}
-                />
+                <Switch size="lg" onChange={toggleDarkMode} disabled={!isMyTurn} />
               </FormControl>
               <FormControl display="flex" alignItems="center">
                 <FormLabel htmlFor="fast-mode" mb="0">
                   <Text fontSize="xl">FAST MODE?</Text>
                 </FormLabel>
-                <Switch
-                  size="lg"
-                  id="dark-mode"
-                  onChange={(e) => setValueOpt2(!valueOpt2)}
-                  disabled={!isMyTurn}
-                />
+                <Switch size="lg" onChange={toggleFastMode} disabled={!isMyTurn} />
               </FormControl>
             </Box>
             <Box py={10}>
-              <CustomButton size="lg" onClick={handleMatchBtnClicked}>
+              <CustomButton size="lg" onClick={handleReadyBtnClicked}>
                 READY
               </CustomButton>
             </Box>
           </Flex>
           <Modal isOpen={isOpen} onClose={onClose} isCentered>
             <ModalOverlay />
-            <ModalContent bg="main" color="white">
+            <ModalContent bg="main" color="white" p={20} borderRadius={30}>
               <Center>
                 <VStack>
                   <ModalHeader>READY FOR THE GAME...</ModalHeader>
                   <ModalBody fontSize="6xl">{timeSpent}</ModalBody>
-                  <ModalFooter>
-                    {/* <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
+                  {/* <ModalFooter>
+                    <CustomButton size="md" onClick={handleMatchCancelBtnClicked}>
                   CANCEL
-                </CustomButton> */}
-                  </ModalFooter>
+                </CustomButton>
+                  </ModalFooter> */}
                 </VStack>
               </Center>
             </ModalContent>
