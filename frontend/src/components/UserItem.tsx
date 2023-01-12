@@ -20,10 +20,9 @@ import CustomAvatar from './CustomAvatar';
 import { OptionMenu } from './OptionMenu';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 import RawUserItem from './RawUserItem';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
-import { MsgProps } from '@/interfaces/MsgProps';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const { dmMsgList, dmIdxMap, updateDmIdxMap } = chatStore();
@@ -55,11 +54,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         if (!isOpened) {
           setMsgCount((prev) => prev + 1);
         }
-
-        console.log('Here2');
-
         updateDmIdxMap(user.name, idx);
-        console.log('Here3');
       }
     });
   }, [dmMsgList]);
@@ -160,7 +155,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
       onOpen={() => {
         getDmRoomNo();
         setIsOpened(true);
-        if (inputRef !== null) inputRef.current.focus();
+        if (inputRef !== null) inputRef.current?.focus();
       }}
       onClose={() => {
         setMsg('');
