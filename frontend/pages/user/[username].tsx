@@ -30,6 +30,7 @@ export default function UserProfilePage() {
     winCnt: 0,
     loseCnt: 0,
   });
+  const { me } = userStore();
   useEffect(() => {
     if (user === undefined) {
       return;
@@ -168,7 +169,7 @@ export default function UserProfilePage() {
             </VStack>
           </Flex>
           <HStack>
-            {!isFriend ? (
+            {user.name === me.name ? null : !isFriend ? (
               <CustomButton
                 size="xl"
                 onClick={() => {
