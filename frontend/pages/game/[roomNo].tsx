@@ -249,7 +249,7 @@ export default function GamePage() {
     return () => {
       router.events.off('routeChangeStart', handleRouteChangeStart);
     };
-  }, [isOppLeft]);
+  }, [isGameEnd, isOppLeft]);
 
   useEffect(() => {
     if (gameSocket === undefined || !gameSocket.connected) {
@@ -269,7 +269,7 @@ export default function GamePage() {
   }, [gameSocket?.connected]);
 
   useEffect(() => {
-    if (!isOppLeft) {
+    if (!isOppLeft || isGameEnd) {
       return;
     }
     alert('상대가 나갔습니다. 게임을 종료합니다.');
@@ -279,7 +279,7 @@ export default function GamePage() {
     }
     gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
     router.push('/home');
-  }, [isOppLeft, gameSocket?.connected]);
+  }, [isOppLeft, isGameEnd, gameSocket?.connected]);
 
   return (
     <>
