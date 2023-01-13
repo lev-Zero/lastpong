@@ -138,7 +138,7 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<User> | HttpException {
     try {
-      const user = this.userService.findUserById(id, ['friendOfferUser']);
+      const user = this.userService.findUserById(id);
       return user;
     } catch (e) {
       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
