@@ -253,7 +253,13 @@ export default function GameOptionsPage() {
               </CustomButton>
             </Box>
           </Flex>
-          <Modal isOpen={isOpen} onClose={onClose} isCentered>
+          <Modal
+            closeOnEsc={false}
+            closeOnOverlayClick={false}
+            isOpen={isOpen}
+            onClose={onClose}
+            isCentered
+          >
             <ModalOverlay />
             <ModalContent bg="main" color="white" p={20} borderRadius={30}>
               <Center>
