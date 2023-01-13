@@ -225,16 +225,17 @@ function InvitedModal() {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
-  const { socket: gameSocket, makeSocket } = gameStore();
+  // const { socket: gameSocket, makeSocket } = gameStore();
 
-  useEffect(() => {
-    sleep(300).then(() => {
-      if (gameSocket === undefined || gameSocket.connected === false) {
-        console.log('Socket Making!');
-        makeSocket();
-      }
-    });
-  }, [gameSocket]);
+  // FIXME: App은 로그인 안 했을 때의 페이지도 포함인데, 여기 넣는게 맞나?
+  // useEffect(() => {
+  //   sleep(300).then(() => {
+  //     if (gameSocket === undefined || gameSocket.connected === false) {
+  //       console.log('Socket Making!');
+  //       makeSocket();
+  //     }
+  //   });
+  // }, [gameSocket]);
 
   // TODO: beforeunload일 때 처리 어떻게 하지..?
   const router = useRouter();
