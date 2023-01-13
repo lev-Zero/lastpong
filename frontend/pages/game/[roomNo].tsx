@@ -49,6 +49,7 @@ export default function GamePage() {
   const [rightUser, setRightUser] = useState<UserProps>();
   // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
   const [isGameEnd, setIsGameEnd] = useState<boolean>(false);
+  const [isOppLeft, setIsOppLeft] = useState<boolean>(false);
 
   // // 연결 유실 시 / 으로 라우팅
   // useEffect(() => {
@@ -226,6 +227,59 @@ export default function GamePage() {
     drawRightUserBar();
     drawBall();
   }
+
+  useEffect(() => {
+    function handleRouteChangeStart() {
+      if (isGameEnd || isOppLeft) {
+        return;
+      }
+      const warningText = '여기에서 나가게 되면 당신은 패배하게 됩니다';
+      if (window.confirm(warningText)) {
+        if (gameSocket === undefined) {
+          return;
+        }
+        gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+        return;
+      }
+      router.events.emit('routeChangeError');
+      throw 'routeChange aborted';
+    }
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, [isOppLeft]);
+
+  useEffect(() => {
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.on('exitGameRoom', (res) => {
+      console.log('exitGameRoom', res.message);
+      if ('userId' in res) {
+        setIsOppLeft(true);
+      }
+    });
+
+    return () => {
+      gameSocket.off('exitGameRoom');
+    };
+  }, [gameSocket?.connected]);
+
+  useEffect(() => {
+    if (!isOppLeft) {
+      return;
+    }
+    alert('상대가 나갔습니다. 게임을 종료합니다.');
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+    router.push('/home');
+  }, [isOppLeft, gameSocket?.connected]);
 
   return (
     <>
