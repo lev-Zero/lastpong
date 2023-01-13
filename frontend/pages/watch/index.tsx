@@ -29,12 +29,12 @@ export default function WatchPage() {
       alert(error);
       return;
     });
-    gameSocket.once('joinGameRoom', (res) => {
-      console.log(res);
-      setRoom(res.gameRoom);
-      setIsInvited(0);
-      router.push(`/watch/${name}`);
-    });
+    // gameSocket.once('joinGameRoom', (res) => {
+    //   console.log(res);
+    //   setRoom(res.gameRoom);
+    //   setIsInvited(0);
+    //   router.push(`/watch/${name}`);
+    // });
   }
 
   function refreshGameRoomList() {

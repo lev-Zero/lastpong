@@ -32,11 +32,29 @@ import { UserProps } from '@/interfaces/UserProps';
 import { fetchUserById } from '@/utils/fetchUserById';
 import CustomAvatar from './CustomAvatar';
 import { CustomButton } from './CustomButton';
+import { useRouter } from 'next/router';
 
 function InvitingModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { socket: chatSocket, isInvited, inviteData } = chatStore();
-  const { socket: gameSocket, room, isCreated, setIsCreated } = gameStore();
+  const {
+    socket: gameSocket,
+    room,
+    isCreated,
+    setIsCreated,
+    isSetting,
+    setIsSetting,
+  } = gameStore();
+  const router = useRouter();
+
+  // isSetting -> /game/options 페이지로 1회 라우팅
+  useEffect(() => {
+    if (isSetting) {
+      router.push('/game/options');
+      console.log('/game/options로 이동...');
+      setIsSetting(false);
+    }
+  }, [isSetting]);
 
   useEffect(() => {
     if (isInvited === 0) onClose();
@@ -106,8 +124,19 @@ function InvitingModal() {
 function InvitedModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isInvited, inviteData, socket: chatSocket, setIsInvited } = chatStore();
+  const { isSetting, setIsSetting } = gameStore();
+  const router = useRouter();
 
   const [invitingUser, setInvitingUser] = useState<UserProps>();
+
+  // isSetting -> /game/options 페이지로 1회 라우팅
+  useEffect(() => {
+    if (isSetting) {
+      router.push('/game/options');
+      console.log('/game/options로 이동...');
+      setIsSetting(false);
+    }
+  }, [isSetting]);
 
   useEffect(() => {
     if (inviteData === undefined) {

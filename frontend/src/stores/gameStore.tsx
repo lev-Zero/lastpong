@@ -6,6 +6,8 @@ import { WS_SERVER_URL } from '@/utils/variables';
 import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 import { chatStore } from './chatStore';
+import { sleep } from '@/utils/sleep';
+import { useRouter } from 'next/router';
 interface GameStoreProps {
   socket?: Socket;
   setSocket: (socket: Socket | undefined) => void;
@@ -25,6 +27,8 @@ interface GameStoreProps {
   setGameScore: (GameScore: number[]) => void;
   room: GameRoomProps;
   setRoom: (gameRoomList: GameRoomProps) => void;
+  isSetting: boolean;
+  setIsSetting: (isSetting: boolean) => void;
 }
 
 export const gameStore = create<GameStoreProps>((set, get) => ({
@@ -120,6 +124,13 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       },
     });
     newSocket.on('connection', console.log);
+    newSocket.on('joinGameRoom', (res) => {
+      get().setRoom(res.gameRoom);
+      chatStore.getState().setIsInvited(0);
+      sleep(500).then(() => {
+        get().setIsSetting(true);
+      });
+    });
     newSocket.on('wait', console.log);
     newSocket.on('ball', (data) => {
       get().setGameBall(data.ballPosition);
@@ -147,5 +158,9 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
     newSocket.on('disconnection', console.log);
 
     get().setSocket(newSocket);
+  },
+  isSetting: false,
+  setIsSetting: (isSetting: boolean) => {
+    set((state) => ({ ...state, isSetting }));
   },
 }));
