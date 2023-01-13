@@ -60,7 +60,7 @@ export class AuthController {
         res.cookie('profileUrl', data.profileUrl);
         res.cookie('otpStatus', data.otpStatus);
         res.cookie('accessToken42', data.accessToken42);
-        this.userService.updateStatus(req.user.userId, userStatus.ONLINE);
+        await this.userService.updateStatus(req.user.userId, userStatus.ONLINE);
 
         res.status(301).redirect(`${process.env.FRONTEND_URL}/auth/login/otp`);
       } else {
@@ -214,7 +214,7 @@ export class AuthController {
         const newToken = await this.auth42Service.loginOTP(payload, codeData);
 
         res.cookie('accessToken', newToken);
-        this.userService.updateStatus(payload.id, userStatus.ONLINE);
+        await this.userService.updateStatus(payload.id, userStatus.ONLINE);
         return JSON.stringify({ token: newToken });
         // res.send({ token: newToken });
       } else {
