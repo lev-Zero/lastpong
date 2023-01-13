@@ -5,6 +5,7 @@ import MainLayout from '@/layouts/MainLayout';
 import { chatStore } from '@/stores/chatStore';
 import { gameStore } from '@/stores/gameStore';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
+import { fetchUserById } from '@/utils/fetchUserById';
 import { Box, Link, SimpleGrid } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -52,8 +53,8 @@ export default function WatchPage() {
           }
           const rawP1: RawUserProps = room.players[0].user;
           const rawP2: RawUserProps = room.players[1].user;
-          const p1: UserProps = await convertRawUserToUser(rawP1);
-          const p2: UserProps = await convertRawUserToUser(rawP2);
+          const p1: UserProps = await fetchUserById(rawP1.id);
+          const p2: UserProps = await fetchUserById(rawP2.id);
           return { me: p1, opp: p2, roomName: room.gameRoomName };
         })
       );
