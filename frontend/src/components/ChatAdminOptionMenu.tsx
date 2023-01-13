@@ -41,15 +41,17 @@ export function ChatAdminOptionMenu({
     <MenuList>
       {myRole !== ChatUserStatus.OWNER && role !== ChatUserStatus.COMMON ? null : (
         <>
-          <MenuItem>
-            {role === ChatUserStatus.COMMON ? (
-              <Text onClick={() => giveAdmin(roomNo, user.id)}>GIVE ADMIN</Text>
-            ) : (
-              <Text color="red" onClick={() => removeAdmin(roomNo, user.id)}>
-                REMOVE ADMIN
-              </Text>
-            )}
-          </MenuItem>
+          {myRole === ChatUserStatus.OWNER ? (
+            <MenuItem>
+              {role === ChatUserStatus.COMMON ? (
+                <Text onClick={() => giveAdmin(roomNo, user.id)}>GIVE ADMIN</Text>
+              ) : (
+                <Text color="red" onClick={() => removeAdmin(roomNo, user.id)}>
+                  REMOVE ADMIN
+                </Text>
+              )}
+            </MenuItem>
+          ) : null}
 
           <MenuItem>
             {!isMuted ? (
