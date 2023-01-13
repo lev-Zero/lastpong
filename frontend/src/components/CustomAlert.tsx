@@ -27,7 +27,7 @@ interface AlertProps {
 status  는 error success warning info  중 하나
 
 */
-export default function customAlert({ status, title, msg }: AlertProps) {
+export default function CustomAlert({ status, title, msg }: AlertProps) {
   const { isOpen, onClose, onOpen } = useDisclosure({ defaultIsOpen: true });
 
   return (
