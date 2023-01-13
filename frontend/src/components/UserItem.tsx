@@ -14,6 +14,7 @@ import {
   Spacer,
   Input,
   Image,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { ContextMenu } from 'chakra-ui-contextmenu';
 import CustomAvatar from './CustomAvatar';
@@ -25,13 +26,15 @@ import { useEffect, useRef, useState } from 'react';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
 import { customFetch } from '@/utils/customFetch';
+import Swal from 'sweetalert2';
+import { UserStatus } from '@/interfaces/UserProps';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const { dmMsgList, dmIdxMap, updateDmIdxMap } = chatStore();
   const [msg, setMsg] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [dmRoomNo, setDmRoomNo] = useState<number>();
-
+  const [isMyFriend, setIsMyFriend] = useState<boolean>(false);
   const { me, friends } = userStore();
   const { socket } = chatStore();
   const [msgCount, setMsgCount] = useState<number>(0);
@@ -150,99 +153,162 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
     return arr;
   }
 
-  /*
-  async function checkDmOk(): boolean {
+  async function checkDmOk(): Promise<boolean> {
     //userStore friends: userProps[] -> 상대 아이디 있나 확인해서  id 로 저장
     const tmp = friends.find((friend) => friend.id === user.id);
-    console.log('!!tmp', tmp);
+    // console.log('!!tmp', tmp);
     if (!tmp) return false;
-    const json = await customFetch('GET', `/user/id/${tmp.id}`);
-    console.log('!!res', json);
-    const res = json.friend;
-    if (!res) return false;
+    const json = await customFetch('GET', `user/friend/id/${tmp.id}`);
+    // console.log('!!json', json);
+    const res = json.find((friend: any) => {
+      // console.log('friend id ', friend.friend.id);
+      // console.log('me id ', me.id);
+      // console.log('result ', friend.id === me.id);
+
+      return friend.friend.id === me.id;
+    });
+    // console.log('final res', res);
+    if (res === null || res === undefined) return false;
 
     //localhost:3000/user/id/5    -> freinds response 받을 수있음
 
     return true;
   }
-  if (checkDmOk() === false)
-    return (
-      <CustomAlert
-        status={'error'}
-        title={'서로 친구가 아닙니다'}
-        msg={'서로 친구 사이여야 DM을 할 수있습니다.'}
-      />
-    );
-    */
+
+  function getCheckDmPromiseBoolean() {
+    checkDmOk().then((res) => {
+      // console.log('getCheckDmPromiseBoolean', res);
+      if (res === true) {
+        setIsMyFriend(true);
+      } else {
+        setIsMyFriend(false);
+      }
+    });
+  }
+
+  function noFriendAlert(isMyFriend: boolean, userStatus: UserStatus) {
+    if (!isMyFriend) {
+      Swal.fire({
+        title: '찐친이 아닙니다',
+        text: '서로 친구여야 DM을 보낼 수 있습니다.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: '확인',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            '친구 추가 하는법',
+            '친구 검색후 프로필에서 ADD FRIEND' + `\n` + '직접 가서 알려주세요!!',
+            //FIXME: 줄바꿈 왜안될까
+            'info'
+          );
+        }
+      });
+    } else if (userStatus === UserStatus.INGAME) {
+      Swal.fire({
+        title: '친구가 게임중입니다.',
+        text: '게임중 일때는 DM을 보낼 수 없습니다.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: '확인',
+      });
+    } else {
+      Swal.fire({
+        title: '친구가 오프라인 입니다.',
+        text: '온라인 유저에게만 DM을 보낼 수 있습니다.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: '확인',
+      });
+    }
+  }
+
+  useEffect(() => {
+    getCheckDmPromiseBoolean();
+  }, [friends]);
+
   return (
-    //FIXME: placement가 하단에 고정될 수는 없을까?
-    <Popover
-      placement="left"
-      onOpen={() => {
-        getDmRoomNo();
-        setIsOpened(true);
-        if (inputRef !== null) inputRef.current?.focus();
-      }}
-      onClose={() => {
-        setMsg('');
-        setIsOpened(false);
-      }}
-    >
-      <PopoverTrigger>
-        <Box>
-          <RawUserItem user={user} msgNum={msgCount} />
-        </Box>
-      </PopoverTrigger>
-      <Portal>
-        <PopoverContent
-          borderRadius="20"
-          width={'40vw'}
-          style={{ position: 'relative', right: '5%' }}
-        >
-          <PopoverCloseButton w={'8%'} h={'8%'} mt={'2%'}>
-            <Image src="/close.svg" />
-          </PopoverCloseButton>
-          <PopoverHeader borderTopRadius="20" p="3" bg="main" color="white">
-            <HStack spacing="5">
-              <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
-              <Text fontSize="xl">{user.name.toUpperCase()}</Text>
-            </HStack>
-          </PopoverHeader>
-          <PopoverBody>
-            <VStack
-              p={5}
-              w="full"
-              height={'40vh'}
-              mt={10}
-              bg="white"
-              overflow="scroll"
-              ref={messageBoxRef}
+    <>
+      <Popover
+        placement="left"
+        onOpen={() => {
+          getDmRoomNo();
+          setIsOpened(true);
+          if (inputRef !== null) inputRef.current?.focus();
+        }}
+        onClose={() => {
+          setMsg('');
+          setIsOpened(false);
+        }}
+      >
+        <Box onClick={getCheckDmPromiseBoolean}>
+          {isMyFriend && user.status === UserStatus.ONLINE ? (
+            <PopoverTrigger>
+              <Box>
+                <RawUserItem user={user} msgNum={msgCount} />
+              </Box>
+            </PopoverTrigger>
+          ) : (
+            <Box
+              onClick={() => {
+                noFriendAlert(isMyFriend, user.status);
+              }}
             >
-              <>{makeDmList()}</>
-            </VStack>
-            <Spacer />
-            <HStack w="full" p={5}>
-              <Input
-                pl="20px"
-                mr="20px"
-                h="60px"
-                borderRadius="20px"
-                bg="gray.100"
-                fontSize="xl"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setMsg(e.target.value);
-                }}
-                onKeyDown={handleEnterKeyDown}
-                value={msg}
-                autoFocus
-                ref={inputRef}
-              />
-              <Image w="50px" src="/send-button.svg" onClick={handleSendButtonClicked} />
-            </HStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Portal>
-    </Popover>
+              <RawUserItem user={user} msgNum={msgCount} />
+            </Box>
+          )}
+        </Box>
+        <Portal>
+          <PopoverContent
+            borderRadius="20"
+            width={'40vw'}
+            style={{ position: 'relative', right: '5%' }}
+          >
+            <PopoverCloseButton w={'8%'} h={'8%'} mt={'2%'}>
+              <Image src="/close.svg" />
+            </PopoverCloseButton>
+            <PopoverHeader borderTopRadius="20" p="3" bg="main" color="white">
+              <HStack spacing="5">
+                <CustomAvatar url={user.imgUrl} size="md" status={user.status} />
+                <Text fontSize="xl">{user.name.toUpperCase()}</Text>
+              </HStack>
+            </PopoverHeader>
+            <PopoverBody>
+              <VStack
+                p={5}
+                w="full"
+                height={'40vh'}
+                mt={10}
+                bg="white"
+                overflow="scroll"
+                ref={messageBoxRef}
+              >
+                <>{makeDmList()}</>
+              </VStack>
+              <Spacer />
+              <HStack w="full" p={5}>
+                <Input
+                  pl="20px"
+                  mr="20px"
+                  h="60px"
+                  borderRadius="20px"
+                  bg="gray.100"
+                  fontSize="xl"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setMsg(e.target.value);
+                  }}
+                  onKeyDown={handleEnterKeyDown}
+                  value={msg}
+                  autoFocus
+                  ref={inputRef}
+                />
+                <Image w="50px" src="/send-button.svg" onClick={handleSendButtonClicked} />
+              </HStack>
+            </PopoverBody>
+          </PopoverContent>
+        </Portal>
+      </Popover>
+    </>
   );
 }
 
