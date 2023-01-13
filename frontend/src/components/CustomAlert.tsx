@@ -19,16 +19,19 @@ import {
 } from '@chakra-ui/react';
 
 interface AlertProps {
-  status: string;
+  status: String;
   title: string;
   msg: string;
+  onOpen?: () => void;
+  onClose?: () => void;
+  isOpen?: boolean;
 }
 /*
 status  는 error success warning info  중 하나
 
 */
-export default function CustomAlert({ status, title, msg }: AlertProps) {
-  const { isOpen, onClose, onOpen } = useDisclosure({ defaultIsOpen: true });
+export default function CustomAlert({ status, title, msg, onOpen, onClose, isOpen }: AlertProps) {
+  // const { isOpen, onClose, onOpen } = useDisclosure({ defaultIsOpen: true });
 
   return (
     <Alert status={status}>
