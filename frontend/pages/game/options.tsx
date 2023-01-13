@@ -31,6 +31,7 @@ import { useRouter } from 'next/router';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 import { sleep } from '@/utils/sleep';
+import { fetchUserById } from '@/utils/fetchUserById';
 
 export default function GameOptionsPage() {
   const router = useRouter();
@@ -80,8 +81,8 @@ export default function GameOptionsPage() {
       }
       const rawLeftUser: RawUserProps = room.players[0].user;
       const rawRightUser: RawUserProps = room.players[1].user;
-      const leftUser: UserProps = await convertRawUserToUser(rawLeftUser);
-      const rightUser: UserProps = await convertRawUserToUser(rawRightUser);
+      const leftUser: UserProps = await fetchUserById(rawLeftUser.id);
+      const rightUser: UserProps = await fetchUserById(rawRightUser.id);
       setLeftUser(leftUser);
       setRightUser(rightUser);
       if (me.id === leftUser.id) {
@@ -104,7 +105,7 @@ export default function GameOptionsPage() {
       }
     }
     fetchTwoUsers();
-  }, [room?.players]);
+  }, [room]);
 
   useEffect(() => {
     if (meUser === undefined) {
