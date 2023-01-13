@@ -193,7 +193,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         text: '서로 친구여야 DM을 보낼 수 있습니다.',
         icon: 'error',
         confirmButtonColor: '#3085d6',
-        confirmButtonText: '확인',
+        confirmButtonText: '슬프다',
       }).then((result) => {
         if (result.isConfirmed) {
           Swal.fire(
