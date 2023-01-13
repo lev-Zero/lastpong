@@ -8,6 +8,7 @@ interface userStoreProps {
   me: UserProps;
   setMe: (user: UserProps) => void;
   fetchMe: () => Promise<void> | never; // never -> can throws Error
+  resetMe: () => void;
 
   useOtp: boolean;
   fetchUseOtp: () => Promise<void> | never;
@@ -47,6 +48,15 @@ export const userStore = create<userStoreProps>((set, get) => ({
     const rawMe: RawUserProps = await customFetch('GET', '/user/me');
     const me: UserProps = await convertRawUserToUser(rawMe);
     get().setMe(me);
+  },
+  resetMe: () => {
+    get().setMe({
+      id: 0,
+      name: ' ', // 처음 회원가입할 때 default name이 '' 이라서 구분을 위해 공백
+      imgUrl: '',
+      status: UserStatus.OFFLINE,
+      rating: 0,
+    });
   },
   useOtp: false,
   fetchUseOtp: async () => {

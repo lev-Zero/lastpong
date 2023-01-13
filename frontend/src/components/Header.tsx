@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { customFetch } from '@/utils/customFetch';
 
 export default function Header() {
-  const { me, fetchMe, useOtp, fetchUseOtp, toggleUseOtp } = userStore();
+  const { me, fetchMe, useOtp, fetchUseOtp, toggleUseOtp, resetMe } = userStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -17,10 +17,14 @@ export default function Header() {
   }, []);
 
   async function logout() {
-    const json = await customFetch('GET', '/auth/logout');
-    console.log(json);
-    removeCookie('accessToken');
-    router.push('/');
+    customFetch('GET', '/auth/logout')
+      .then((res) => {
+        console.log(res);
+        removeCookie('accessToken');
+        resetMe();
+      })
+      .catch(console.log)
+      .finally(() => router.push('/'));
   }
 
   return (
