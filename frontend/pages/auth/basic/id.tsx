@@ -5,13 +5,13 @@ import { customFetch } from '@/utils/customFetch';
 import { Box, Input, Text, VStack } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { ReactElement, useState } from 'react';
-
+import { ReactElement, useRef, useState } from 'react';
+import Swal from 'sweetalert2';
 export default function BasicIdPage() {
   const [inputName, setInputName] = useState<string>('');
   const router = useRouter();
   const { fetchMe } = userStore();
-
+  const inputRef = useRef<HTMLInputElement>(null);
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setInputName(e.currentTarget.value.toLowerCase());
   }
@@ -22,6 +22,25 @@ export default function BasicIdPage() {
     }
   }
 
+  function idInputFailAlert(title: string) {
+    Swal.fire({
+      title: title,
+      // text: '다시 되돌릴 수 없습니다. 신중하세요.',
+      icon: 'warning',
+      // showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      // cancelButtonColor: '#d33',
+      confirmButtonText: '다시 해볼게',
+      // cancelButtonText: '안 할래',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
+        // onOpen();
+        setInputName('');
+        if (inputRef.current !== null) inputRef.current.focus();
+      }
+    });
+  }
   async function submitInputName() {
     if (inputName.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
       alert('한글/영어/숫자만 이용할 수 있습니다');
@@ -54,6 +73,7 @@ export default function BasicIdPage() {
             textTransform="uppercase"
             onChange={handleChange}
             onKeyDown={handleEnterKeyDown}
+            ref={inputRef}
             autoFocus
           />
         </Box>

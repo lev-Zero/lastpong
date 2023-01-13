@@ -17,12 +17,14 @@ import {
 } from '@chakra-ui/react';
 import { ContextMenu } from 'chakra-ui-contextmenu';
 import CustomAvatar from './CustomAvatar';
+import CustomAlert from './CustomAlert';
 import { OptionMenu } from './OptionMenu';
 import RawUserItemProps from '@/interfaces/RawUserItemProps';
 import RawUserItem from './RawUserItem';
 import { useEffect, useRef, useState } from 'react';
 import { userStore } from '@/stores/userStore';
 import { chatStore } from '@/stores/chatStore';
+import { customFetch } from '@/utils/customFetch';
 
 function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const { dmMsgList, dmIdxMap, updateDmIdxMap } = chatStore();
@@ -30,7 +32,7 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dmRoomNo, setDmRoomNo] = useState<number>();
 
-  const { me } = userStore();
+  const { me, friends } = userStore();
   const { socket } = chatStore();
   const [msgCount, setMsgCount] = useState<number>(0);
   const [isOpened, setIsOpened] = useState<boolean>(false);
@@ -148,6 +150,30 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
     return arr;
   }
 
+  /*
+  async function checkDmOk(): boolean {
+    //userStore friends: userProps[] -> 상대 아이디 있나 확인해서  id 로 저장
+    const tmp = friends.find((friend) => friend.id === user.id);
+    console.log('!!tmp', tmp);
+    if (!tmp) return false;
+    const json = await customFetch('GET', `/user/id/${tmp.id}`);
+    console.log('!!res', json);
+    const res = json.friend;
+    if (!res) return false;
+
+    //localhost:3000/user/id/5    -> freinds response 받을 수있음
+
+    return true;
+  }
+  if (checkDmOk() === false)
+    return (
+      <CustomAlert
+        status={'error'}
+        title={'서로 친구가 아닙니다'}
+        msg={'서로 친구 사이여야 DM을 할 수있습니다.'}
+      />
+    );
+    */
   return (
     //FIXME: placement가 하단에 고정될 수는 없을까?
     <Popover
