@@ -2,6 +2,7 @@ import MatchInfo from '@/components/MatchInfo';
 import { MatchInfoProps } from '@/interfaces/MatchInfoProps';
 import { UserProps, UserStatus } from '@/interfaces/UserProps';
 import MainLayout from '@/layouts/MainLayout';
+import { chatStore } from '@/stores/chatStore';
 import { gameStore } from '@/stores/gameStore';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { Box, Link, SimpleGrid } from '@chakra-ui/react';
@@ -11,7 +12,8 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function WatchPage() {
   const [matchInfoList, setMatchInfoList] = useState<MatchInfoProps[]>([]);
-  const { socket: gameSocket, makeSocket } = gameStore();
+  const { socket: gameSocket, makeSocket, setRoom } = gameStore();
+  const { setIsInvited } = chatStore();
   const router = useRouter();
 
   function watchGameRoom(name: string | undefined) {
@@ -29,6 +31,8 @@ export default function WatchPage() {
     });
     gameSocket.once('joinGameRoom', (res) => {
       console.log(res);
+      setRoom(res.gameRoom);
+      setIsInvited(0);
       router.push(`/watch/${name}`);
     });
   }
