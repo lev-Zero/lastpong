@@ -48,7 +48,7 @@ export default function WatchPage() {
         gameRoom.map(async (room: any) => {
           if (room.players.length !== 2) {
             console.log('players are not 2 people');
-            return;
+            return null;
           }
           const rawP1: RawUserProps = room.players[0].user;
           const rawP2: RawUserProps = room.players[1].user;
