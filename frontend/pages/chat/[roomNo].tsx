@@ -42,6 +42,7 @@ import { ChatUserItemProps, ChatUserStatus } from '@/interfaces/ChatUserItemProp
 import ChatUserItem from '@/components/ChatUserItem';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { CustomButton } from '@/components/CustomButton';
+import Swal from 'sweetalert2';
 
 export default function ChatRoomPage() {
   const router = useRouter();
@@ -309,20 +310,63 @@ export default function ChatRoomPage() {
     return leftTime;
   }
 
+  function muteAlert(title: string) {
+    Swal.fire({
+      title: title,
+      // text: '다시 되돌릴 수 없습니다. 신중하세요.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '참아 본다',
+      cancelButtonText: '못 참아',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+      } else {
+        Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+      }
+    });
+  }
+  function muteAlertEnter(title: string) {
+    Swal.fire({
+      title: 'tmp',
+    }).then(() => {
+      Swal.fire({
+        title: title,
+        // text: '다시 되돌릴 수 없습니다. 신중하세요.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '참아 본다',
+        cancelButtonText: '못 참아',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+        } else {
+          Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+        }
+      });
+    });
+  }
   function handleSendButtonClicked() {
     if (socket === undefined) {
       console.log('socket is undefined');
       return;
     }
-    setMsg('');
+
     if (inputRef.current !== null) inputRef.current.focus();
     const leftTime = checkIfMuted();
     if (leftTime > 0) {
       const second = Math.floor(leftTime / 1000);
-      alert(`${second} 초 후에 채팅 가능`);
+      muteAlert(`${second} 초 후에 채팅 가능`);
+      setMsg('');
+
       return;
     }
     socket.emit('message', { chatRoomId: roomNo, message: msg });
+    setMsg('');
   }
 
   function handleEnterKeyDown(e: React.KeyboardEvent<HTMLElement>) {
@@ -335,15 +379,16 @@ export default function ChatRoomPage() {
     }
     if (e.key === 'Enter') {
       console.log(msg);
-      setMsg('');
       const leftTime = checkIfMuted();
       if (leftTime > 0) {
         const second = Math.floor(leftTime / 1000);
-        alert(`${second} 초 후에 채팅 가능`);
+        muteAlertEnter(`${second} 초 후에 채팅 가능`);
+        setMsg('');
         return;
       }
-
+      //FIXME: enter 로 채팅 치면 2번 앤터가 되어서 alert 바로 넘어가는듯?
       socket.emit('message', { chatRoomId: roomNo, message: msg });
+      setMsg('');
     }
   }
 
@@ -359,13 +404,29 @@ export default function ChatRoomPage() {
     setValuePassword('');
   };
 
+  function roomUpdatefailAlert(title: string) {
+    onSettingModalClose();
+    Swal.fire({
+      title: title,
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '다시 할래',
+      cancelButtonText: '안 할래',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        onSettingModalOpen();
+      }
+    });
+  }
   const updateChatRoomPassword = () => {
     if (roomProtected && valuePassword === '') {
-      alert('비밀번호를 입력해주십시오.');
+      roomUpdatefailAlert('비밀번호를 입력해주십시오.');
       return;
     }
     if (roomProtected && valuePassword.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
-      alert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
+      roomUpdatefailAlert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
       return;
     }
     if (socket === undefined) {

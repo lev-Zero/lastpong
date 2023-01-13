@@ -33,6 +33,7 @@ import { useRouter } from 'next/router';
 import { ChatRoomStatus } from '@/interfaces/ChatRoomProps';
 import { UserStatus } from '@/interfaces/UserProps';
 import { userStore } from '@/stores/userStore';
+import Swal from 'sweetalert2';
 
 export default function ChatPage() {
   const { allUsers, fetchAllUsers } = userStore();
@@ -83,13 +84,51 @@ export default function ChatPage() {
     return () => clearInterval(id);
   }, []);
 
+  function roomCreatefailAlert(title: string) {
+    onClose();
+    Swal.fire({
+      title: title,
+      // text: '다시 되돌릴 수 없습니다. 신중하세요.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '다시 할래',
+      cancelButtonText: '안 할래',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
+        onOpen();
+      }
+    });
+  }
+
+  function roomJoinfailAlert(title: string) {
+    privOnClose();
+    Swal.fire({
+      title: title,
+      // text: '다시 되돌릴 수 없습니다. 신중하세요.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '다시 할래',
+      cancelButtonText: '안 할래',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
+        privOnOpen();
+      }
+    });
+  }
   const createChatRoom = () => {
     if (valueTitle === '') {
-      alert('방 제목을 입력해주십시오.');
+      // alert('방 제목을 입력해주십시오.');
+      roomCreatefailAlert('방 제목을 입력해 주십시오.');
       return;
     }
     if (roomProtected && valuePassword === '') {
-      alert('비밀번호를 입력해주십시오.');
+      roomCreatefailAlert('비밀번호를 입력해주십시오.');
       return;
     }
     if (socket === undefined) {
@@ -97,11 +136,11 @@ export default function ChatPage() {
       return;
     }
     if (valueTitle.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
-      alert('제목에는 한글/영어/숫자만 이용할 수 있습니다');
+      roomCreatefailAlert('제목에는 한글/영어/숫자만 이용할 수 있습니다');
       return;
     }
     if (roomProtected && valuePassword.search(/[^A-Za-z0-9ㄱ-ㅎ가-힣]/) > -1) {
-      alert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
+      roomCreatefailAlert('비밀번호에는 한글/영어/숫자만 이용할 수 있습니다');
       return;
     }
 
@@ -131,7 +170,7 @@ export default function ChatPage() {
 
   const joinPrivChatRoom = (id: number) => {
     if (valuePasswordPriv === '') {
-      alert('비밀번호를 입력해주십시오.');
+      roomJoinfailAlert('비밀번호를 입력해주십시오.');
       return;
     }
     if (socket === undefined) {
@@ -145,7 +184,7 @@ export default function ChatPage() {
         privOnClose();
         router.push(`/chat/${id}`);
       } else {
-        alert('비밀번호가 틀렸습니다!'); // TODO: UI 개선 (OTP 틀렸을 때처럼)
+        roomJoinfailAlert('비밀번호가 틀렸습니다!'); // TODO: UI 개선 (OTP 틀렸을 때처럼)
         setValuePasswordPriv('');
       }
     });
