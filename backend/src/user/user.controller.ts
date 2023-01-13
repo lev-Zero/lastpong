@@ -377,6 +377,18 @@ export class UserController {
     }
   }
 
+  @Get('/friend/id/:id')
+  @UseGuards(JwtAuthGuard)
+  findFriends(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Friend[]> | HttpException {
+    try {
+      return this.friendService.findFriend(id);
+    } catch (e) {
+      return new HttpException(e.message, HttpStatus.BAD_REQUEST);
+    }
+  }
   @Delete('/friend/name')
   @UseGuards(JwtAuthGuard)
   removeFriendByName(
