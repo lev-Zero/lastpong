@@ -117,13 +117,11 @@ export default function GameOptionsPage() {
     if (gameMeProps === undefined || leftUser === undefined || rightUser === undefined) {
       return;
     }
-    if (gameMeProps.username === leftUser.name) {
-      if (gameMeProps.rating <= rightUser.rating) setMyTurn(true);
-      else setMyTurn(false);
-    } else if (gameMeProps.username === rightUser.name) {
-      if (gameMeProps.rating <= leftUser.rating) setMyTurn(true);
-      else setMyTurn(false);
-    }
+    setMyTurn(
+      gameMeProps.username === leftUser.name
+        ? gameMeProps.rating <= rightUser.rating
+        : gameMeProps.rating <= leftUser.rating
+    );
   }, [gameMeProps, leftUser, rightUser]);
 
   function handleReadyBtnClicked() {
