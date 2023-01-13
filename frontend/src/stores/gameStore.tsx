@@ -7,7 +7,7 @@ import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
 import { chatStore } from './chatStore';
 import { sleep } from '@/utils/sleep';
-import { useRouter } from 'next/router';
+
 interface GameStoreProps {
   socket?: Socket;
   setSocket: (socket: Socket | undefined) => void;
@@ -127,6 +127,10 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
     newSocket.on('joinGameRoom', (res) => {
       get().setRoom(res.gameRoom);
       chatStore.getState().setIsInvited(0);
+      // 관찰자가 들어왔다는 메시지는 isSetting으로 가도록 하면 안됨
+      if (res.message.includes('관찰자')) {
+        return;
+      }
       sleep(500).then(() => {
         get().setIsSetting(true);
       });

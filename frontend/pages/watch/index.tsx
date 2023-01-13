@@ -28,14 +28,10 @@ export default function WatchPage() {
     }
     gameSocket.emit('joinGameRoom', { gameRoomName: name }, ({ error }: any) => {
       alert(error);
-      return;
     });
-    // gameSocket.once('joinGameRoom', (res) => {
-    //   console.log(res);
-    //   setRoom(res.gameRoom);
-    //   setIsInvited(0);
-    //   router.push(`/watch/${name}`);
-    // });
+    gameSocket.once('joinGameRoom', (res) => {
+      router.push(`/watch/${name}`);
+    });
   }
 
   function refreshGameRoomList() {
@@ -46,17 +42,15 @@ export default function WatchPage() {
     gameSocket.emit('findGameRooms');
     gameSocket.once('findGameRooms', async ({ gameRoom }: any) => {
       const newMatchInfoList: MatchInfoProps[] = await Promise.all(
-        gameRoom.map(async (room: any) => {
-          if (room.players.length !== 2) {
-            console.log('players are not 2 people');
-            return null;
-          }
-          const rawP1: RawUserProps = room.players[0].user;
-          const rawP2: RawUserProps = room.players[1].user;
-          const p1: UserProps = await fetchUserById(rawP1.id);
-          const p2: UserProps = await fetchUserById(rawP2.id);
-          return { me: p1, opp: p2, roomName: room.gameRoomName };
-        })
+        gameRoom
+          .filter((room: any) => room.players.length === 2)
+          .map(async (room: any) => {
+            const rawP1: RawUserProps = room.players[0].user;
+            const rawP2: RawUserProps = room.players[1].user;
+            const p1: UserProps = await fetchUserById(rawP1.id);
+            const p2: UserProps = await fetchUserById(rawP2.id);
+            return { me: p1, opp: p2, roomName: room.gameRoomName };
+          })
       );
       setMatchInfoList(newMatchInfoList);
     });
