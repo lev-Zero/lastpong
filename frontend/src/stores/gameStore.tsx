@@ -6,7 +6,7 @@ import { getJwtToken } from '@/utils/getJwtToken';
 import { WS_SERVER_URL } from '@/utils/variables';
 import { GameBall } from '@/interfaces/GameRoomProps';
 import { GameUserProps } from '@/interfaces/GameUserProps';
-import Router from 'next/router';
+import useRouter from 'next/router';
 import { chatStore } from './chatStore';
 interface GameStoreProps {
   gameSocket?: Socket;
@@ -152,7 +152,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         const temp_room: GameRoomProps = await data.gameRoom;
         await console.log(`Ramdom Game Maching`);
         await get().setRoom(temp_room);
-        sleep(300).then(() => {
+        sleep(500).then(() => {
           get().setIsSetting(1);
         });
       });
@@ -160,7 +160,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       newSocket.on('readyGame', async function (data) {
         await console.log(`READY GAME!`);
         await get().setRoom(data.gameRoom);
-        sleep(300).then(() => {
+        sleep(500).then(() => {
           get().setIsReady(1);
         });
       });
@@ -203,7 +203,7 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
       newSocket.on('createGameRoom', async (data) => {
         console.log('CREATE GAME ROOM');
         await get().setRoom(data.gameRoom);
-        sleep(300).then(() => {
+        sleep(500).then(() => {
           get().setIsCreated(1);
         });
       });
@@ -212,9 +212,26 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         console.log('JOIN GAME ROOM');
         await get().setRoom(data.gameRoom);
         chatStore.getState().setIsInvited(0);
-        sleep(300).then(() => {
+        sleep(500).then(() => {
           get().setIsSetting(1);
         });
+      });
+
+      newSocket.on('exitGameRoom', (data) => {
+        console.log(data);
+        if (get().isFinished === 1) return;
+        if (data.message === '게임룸에서 나왔습니다.') {
+          console.log('게임룸에서 나왔습니다.');
+          get().setIsSetting(0);
+          get().setIsFinished(0);
+          get().setIsReady(0);
+          get().disconnectSocket();
+        } else {
+          get().setIsSetting(1);
+          sleep(500).then(() => {
+            get().setIsFinished(2);
+          });
+        }
       });
     });
     newSocket.on('disconnection', () => {

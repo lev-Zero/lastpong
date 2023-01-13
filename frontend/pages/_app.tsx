@@ -53,7 +53,7 @@ function InviteModal() {
       onOpen();
       if (isInvited === 3 && gameSocket !== undefined) {
         console.log('EMIT CHAT : createGameRoom');
-        sleep(400).then(() => {
+        sleep(300).then(() => {
           gameSocket.emit('createGameRoom');
           onClose();
         });
@@ -261,7 +261,20 @@ function InvitedModal() {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
-  const { gameSocket, makeSocket } = gameStore();
+  const router = useRouter();
+
+  const {
+    gameSocket,
+    makeSocket,
+    disconnectSocket,
+    isSetting,
+    isFinished,
+    room,
+    setIsSetting,
+    setIsFinished,
+    setIsReady,
+  } = gameStore();
+
   useEffect(() => {
     sleep(300).then(() => {
       if (gameSocket === undefined || gameSocket.connected === false) {
@@ -271,28 +284,32 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     });
   }, [gameSocket]);
 
-  // TODO: beforeunload일 때 처리 어떻게 하지..?
-  const router = useRouter();
-  // useEffect(() => {
-  //   function preventUnload(e: BeforeUnloadEvent) {
-  //     e.preventDefault();
-  //     e.returnValue = '';
-  //   }
-  //   async function logout() {
-  //     const json = await customFetch('GET', '/auth/logout');
-  //     console.log(json);
-  //     removeCookie('accessToken');
-  //     router.push('/');
-  //   }
-  //   window.addEventListener('beforeunload', preventUnload);
+  useEffect(() => {
+    if (gameSocket === undefined || isSetting === 0) {
+      return;
+    }
+    console.log(`FIND Room : ${room.gameRoomName}`);
+    router.push('/game/options');
+    console.log('Ready to play game');
+  }, [isSetting]);
 
-  //   return () => {
-  //     window.removeEventListener('beforeunload', preventUnload);
-  //     if (getCookie('accessToken') !== undefined) {
-  //       logout();
-  //     }
-  //   };
-  // }, []);
+  useEffect(() => {
+    if (gameSocket === undefined || isFinished !== 2) {
+      return;
+    }
+    router.push('/home');
+    sleep(500)
+      .then(() => {
+        setIsSetting(0);
+        setIsFinished(0);
+        setIsReady(0);
+        disconnectSocket();
+        console.log('Return Home');
+      })
+      .then(() => {
+        alert('상대방이 게임에서 나갔습니다.');
+      });
+  }, [isFinished]);
 
   return (
     <ChakraProvider theme={theme}>

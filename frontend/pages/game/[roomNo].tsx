@@ -114,6 +114,39 @@ export default function GamePage() {
     fetchTwoUsers();
   }, [room]);
 
+  useEffect(() => {
+    const warningText = '게임에서 나가게 되면 당신은 패배하게 될것입니다!';
+    const handleWindowClose = (e: BeforeUnloadEvent) => {
+      if (isFinished) return;
+      if (gameSocket === undefined) return;
+      console.log('EMIT GAME : exitGameRoom CLOSE');
+      gameSocket.emit('exitGameRoom', {
+        gameRoomName: room.gameRoomName,
+      });
+      e.preventDefault();
+      return (e.returnValue = warningText);
+    };
+    const handleBrowseAway = () => {
+      if (isFinished) return;
+      if (gameSocket === undefined) return;
+      if (window.confirm(warningText)) {
+        console.log('EMIT GAME : exitGameRoom Defferent PAGE');
+        gameSocket.emit('exitGameRoom', {
+          gameRoomName: room.gameRoomName,
+        });
+        return;
+      }
+      router.events.emit('routeChangeError');
+      throw 'routeChange aborted.';
+    };
+    window.addEventListener('beforeunload', handleWindowClose);
+    router.events.on('routeChangeStart', handleBrowseAway);
+    return () => {
+      window.removeEventListener('beforeunload', handleWindowClose);
+      router.events.off('routeChangeStart', handleBrowseAway);
+    };
+  }, [isFinished]);
+
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     // use parent to render the canvas in this ref
     // (without that p5 will render the canvas outside of your component)
@@ -145,6 +178,7 @@ export default function GamePage() {
         if (GameScore[1] > GameScore[0]) setWinLose(true);
         else setWinLose(false);
       }
+      if (GameScore[0] !== 10 && GameScore[1] !== 10) setWinLose(true);
     }
   }, [isFinished, leftUser]);
 

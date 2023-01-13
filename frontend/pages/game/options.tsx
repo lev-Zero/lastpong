@@ -47,12 +47,46 @@ export default function GameOptionsPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { gameSocket, room, isReady, GameMeProps, setGameMeProps } = gameStore();
+  const { gameSocket, room, isReady, isFinished, GameMeProps, setGameMeProps } = gameStore();
 
   useEffect(() => {
     const id = setInterval(() => setTimeSpent((cur) => cur + 1), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const warningText = 'OPTION 게임에서 나가게 되면 당신은 패배하게 될것입니다!';
+    console.log(`${isReady} ${isFinished}`);
+    const handleWindowClose = (e: BeforeUnloadEvent) => {
+      if (isReady || isFinished === 2) return;
+
+      if (gameSocket === undefined) return;
+      gameSocket.emit('exitGameRoom', {
+        gameRoomName: room.gameRoomName,
+      });
+      e.preventDefault();
+      return (e.returnValue = warningText);
+    };
+    const handleBrowseAway = () => {
+      if (isReady || isFinished === 2) return;
+      if (gameSocket === undefined) return;
+      if (window.confirm(warningText)) {
+        gameSocket.emit('exitGameRoom', {
+          gameRoomName: room.gameRoomName,
+        });
+        return;
+      }
+      router.events.emit('routeChangeError');
+      throw 'routeChange aborted.';
+    };
+
+    window.addEventListener('beforeunload', handleWindowClose);
+    router.events.on('routeChangeStart', handleBrowseAway);
+    return () => {
+      window.removeEventListener('beforeunload', handleWindowClose);
+      router.events.off('routeChangeStart', handleBrowseAway);
+    };
+  }, [isReady, isFinished]);
 
   useEffect(() => {
     if (valueOpt1 === false) {

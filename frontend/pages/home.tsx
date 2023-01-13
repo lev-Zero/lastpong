@@ -65,15 +65,6 @@ export default function HomePage() {
     onClose();
   }
 
-  useEffect(() => {
-    if (gameSocket === undefined || isSetting === 0) {
-      return;
-    }
-    console.log(`FIND Room : ${room.gameRoomName}`);
-    router.push('/game/options');
-    console.log('Ready to play game');
-  }, [isSetting]);
-
   return (
     <>
       <Head>

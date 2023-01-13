@@ -100,7 +100,7 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
       }
       newSocket.on('inviteGameRoomInfo', (data) => {
         console.log('ON CHAT : inviteGameRoomInfo');
-        sleep(500).then(() => {
+        sleep(300).then(() => {
           if (
             gameStore.getState().gameSocket !== undefined &&
             gameStore.getState().gameSocket?.connected === true
