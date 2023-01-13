@@ -118,7 +118,6 @@ export default function ChatRoomPage() {
     }
     socket.on('message', (res) => {
       // Block한 유저가 단체 채팅방에서 보낸 메시지는 표시하지 않음
-      console.log('blockedUsers!', blockedUsers); // FIXME: blockedUsers가 바뀌었는데 왜 여기선 반영 안되는지...?
       if (blockedUsers.some(({ name }) => name === res.user.username)) {
         return;
       }
@@ -174,7 +173,7 @@ export default function ChatRoomPage() {
       socket.off('message');
       socket.off('chatRoomById');
     };
-  }, [roomNo]);
+  }, [roomNo, blockedUsers]);
 
   useEffect(() => {
     function convertToChatUserList(chatRoom: ChatRoomProps) {

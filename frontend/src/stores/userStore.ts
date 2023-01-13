@@ -120,11 +120,13 @@ export const userStore = create<userStoreProps>((set, get) => ({
   addBlock: async (name: string) => {
     customFetch('POST', 'user/block/name', { username: name })
       .then(() => get().fetchBlockedUsers())
+      .then(() => console.log(`${name}을 블락 유저에 추가했습니다`))
       .catch(console.log);
   },
   deleteBlock: async (name: string) => {
     customFetch('DELETE', 'user/block/name', { username: name })
       .then(() => get().fetchBlockedUsers())
+      .then(() => console.log(`${name}을 블락 유저에서 제거했습니다`))
       .catch(console.log);
   },
   allUsers: [],
