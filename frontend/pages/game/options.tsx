@@ -47,6 +47,8 @@ export default function GameOptionsPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { socket: gameSocket, room, setRoom, gameMeProps, setGameMeProps } = gameStore();
   // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [isOppLeft, setIsOppLeft] = useState<boolean>(false);
 
   function toggleDarkMode() {
     setIsDarkMode((pre) => !pre);
@@ -141,9 +143,69 @@ export default function GameOptionsPage() {
     );
     gameSocket.once('readyGame', (res) => {
       setRoom(res.gameRoom);
-      router.push(`/game/${room.gameRoomName}`);
+      setIsReady(true);
     });
   }
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+    router.push(`/game/${room.gameRoomName}`);
+  }, [isReady]);
+
+  useEffect(() => {
+    function handleRouteChangeStart() {
+      if (isReady || isOppLeft) {
+        return;
+      }
+      const warningText = 'OPTION 게임에서 나가게 되면 당신은 패배하게 될것입니다!';
+      if (window.confirm(warningText)) {
+        if (gameSocket === undefined) {
+          return;
+        }
+        gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+        return;
+      }
+      router.events.emit('routeChangeError');
+      throw 'routeChange aborted';
+    }
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, [isReady, isOppLeft]);
+
+  useEffect(() => {
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.on('exitGameRoom', (res) => {
+      console.log('exitGameRoom', res.message);
+      if ('userId' in res) {
+        setIsOppLeft(true);
+      }
+    });
+
+    return () => {
+      gameSocket.off('exitGameRoom');
+    };
+  }, [gameSocket?.connected]);
+
+  useEffect(() => {
+    if (!isOppLeft) {
+      return;
+    }
+    alert('상대가 나갔습니다. 게임을 종료합니다.');
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+    router.push('/home');
+  }, [isOppLeft, gameSocket?.connected]);
 
   return (
     <>
