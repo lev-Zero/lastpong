@@ -16,17 +16,20 @@ import {
 import { CustomButton } from '@/components/CustomButton';
 import { gameStore } from '@/stores/gameStore';
 import { useRouter } from 'next/router';
+import { sleep } from '@/utils/sleep';
 
 export default function HomePage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [timeSpent, setTimeSpent] = useState<number>(1);
-  const { socket: gameSocket, room, isSetting, setIsSetting, disconnectSocket } = gameStore();
+  const { socket: gameSocket, makeSocket, setRoom } = gameStore();
   const router = useRouter();
   const [intervalId, setIntervalId] = useState<NodeJS.Timer>();
 
-  function sleep(ms: number) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
+  useEffect(() => {
+    if (gameSocket === undefined) {
+      makeSocket();
+    }
+  }, []);
 
   async function handleMatchBtnClicked() {
     if (gameSocket === undefined || gameSocket.connected === false) {
@@ -37,6 +40,11 @@ export default function HomePage() {
     setIntervalId(setInterval(() => setTimeSpent((cur) => cur + 1), 1000));
 
     sleep(2000).then(() => gameSocket.emit('randomGameMatch'));
+    gameSocket.once('randomGameMatch', (res) => {
+      setRoom(res.gameRoom);
+      console.log('게임 매칭되었습니다.');
+      router.push('/game/options');
+    });
   }
 
   function handleMatchCancelBtnClicked() {
@@ -45,13 +53,7 @@ export default function HomePage() {
       onClose();
       return;
     }
-    if (room.gameRoomName === '') {
-      gameSocket.emit('removeSocketInQueue');
-      gameSocket.removeAllListeners();
-      disconnectSocket();
-      setIsSetting(0);
-      console.log('socket is disconnected');
-    }
+    gameSocket.emit('removeSocketInQueue', console.log);
     if (intervalId !== undefined) {
       clearInterval(intervalId);
       setIntervalId(undefined);
@@ -59,14 +61,6 @@ export default function HomePage() {
     }
     onClose();
   }
-
-  useEffect(() => {
-    if (gameSocket === undefined || isSetting === 0) {
-      return;
-    }
-    console.log(`${room.gameRoomName} 방으로 게임 매칭되었습니다.`);
-    router.push('/game/options');
-  }, [isSetting]);
 
   return (
     <>
