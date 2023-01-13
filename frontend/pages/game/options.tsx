@@ -30,6 +30,7 @@ import { userStore } from '@/stores/userStore';
 import { useRouter } from 'next/router';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { GameUserProps } from '@/interfaces/GameUserProps';
+import { sleep } from '@/utils/sleep';
 
 export default function GameOptionsPage() {
   const router = useRouter();
@@ -44,8 +45,8 @@ export default function GameOptionsPage() {
   const [rightUser, setRightUser] = useState<UserProps>();
   const [meUser, setMeUser] = useState<GameUserProps>(); // FIXME: 이것도 UserProps로 바꾸고 싶었으나, 의존적으로 활용하는 곳이 너무 많아 아직 리팩토링하지 못했다. 사실 GameUserProps로 저장할 게 아니라 UserProps로 저장해야 한다.
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { socket: gameSocket, room, isReady, gameMeProps, setGameMeProps } = gameStore();
-  const [calledPush, setCalledPush] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
+  const { socket: gameSocket, room, setRoom, gameMeProps, setGameMeProps } = gameStore();
+  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
 
   function toggleDarkMode() {
     setIsDarkMode((pre) => !pre);
@@ -54,6 +55,16 @@ export default function GameOptionsPage() {
   function toggleFastMode() {
     setIsFastMode((pre) => !pre);
   }
+
+  // // 연결 유실 시 / 으로 라우팅
+  // useEffect(() => {
+  //   if (gameSocket === undefined) {
+  //     if (!calledPushRoot) {
+  //       router.push('/');
+  //     }
+  //     setCalledPushRoot(true);
+  //   }
+  // }, [gameSocket]);
 
   useEffect(() => {
     async function fetchTwoUsers() {
@@ -113,19 +124,6 @@ export default function GameOptionsPage() {
     }
   }, [gameMeProps, leftUser, rightUser]);
 
-  useEffect(() => {
-    if (isReady === 0) {
-      return;
-    }
-    if (room.gameRoomName === '') {
-      return;
-    }
-    if (!calledPush) {
-      router.push(`/game/${room.gameRoomName}`);
-    }
-    setCalledPush(true);
-  }, [isReady]);
-
   function handleReadyBtnClicked() {
     if (gameSocket === undefined || gameSocket.connected === false) {
       console.log('gameSocket is not connected');
@@ -134,10 +132,16 @@ export default function GameOptionsPage() {
     onOpen();
     setIntervalId(setInterval(() => setTimeSpent((cur) => cur + 1), 1000));
 
-    gameSocket.emit('readyGame', {
-      gameRoomName: room.gameRoomName,
-      backgroundColor: Number(isDarkMode),
-      mode: Number(isFastMode),
+    sleep(2000).then(() =>
+      gameSocket.emit('readyGame', {
+        gameRoomName: room.gameRoomName,
+        backgroundColor: Number(isDarkMode),
+        mode: Number(isFastMode),
+      })
+    );
+    gameSocket.once('readyGame', (res) => {
+      setRoom(res.gameRoom);
+      router.push(`/game/${room.gameRoomName}`);
     });
   }
 

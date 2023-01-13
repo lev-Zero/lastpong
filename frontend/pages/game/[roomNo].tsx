@@ -25,6 +25,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { useRouter } from 'next/router';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { UserProps } from '@/interfaces/UserProps';
+import { sleep } from '@/utils/sleep';
 
 const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
   ssr: false,
@@ -38,19 +39,26 @@ export default function GamePage() {
     gameScore,
     leftTouchBar,
     rightTouchBar,
-    isFinished,
     gameMeProps,
     setGameScore,
-    setIsSetting,
-    setIsFinished,
-    setIsReady,
-    disconnectSocket,
   } = gameStore();
   const [isWin, setIsWin] = useState<boolean>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
   const [leftUser, setLeftUser] = useState<UserProps>();
   const [rightUser, setRightUser] = useState<UserProps>();
+  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
+  const [isGameEnd, setIsGameEnd] = useState<boolean>(false);
+
+  // // 연결 유실 시 / 으로 라우팅
+  // useEffect(() => {
+  //   if (gameSocket === undefined) {
+  //     if (!calledPushRoot) {
+  //       router.push('/');
+  //     }
+  //     setCalledPushRoot(true);
+  //   }
+  // }, []);
 
   useEffect(() => {
     async function fetchTwoUsers() {
@@ -72,6 +80,35 @@ export default function GamePage() {
     fetchTwoUsers();
   }, [room]);
 
+  useEffect(() => {
+    if (
+      gameSocket === undefined ||
+      !gameSocket.connected ||
+      gameMeProps === undefined ||
+      leftUser === undefined
+    ) {
+      console.log('game is not ready');
+      return;
+    }
+    setGameScore([0, 0]);
+    gameSocket.emit('startGame', {
+      gameRoomName: room.gameRoomName,
+    });
+    gameSocket.on('gameOver', () => setIsGameEnd(true));
+    return () => {
+      gameSocket.off('gameOver');
+    };
+  }, [gameSocket?.connected, leftUser]);
+
+  useEffect(() => {
+    if (gameMeProps === undefined || leftUser === undefined) {
+      return;
+    }
+    setIsWin(
+      gameMeProps.id === leftUser.id ? gameScore[0] > gameScore[1] : gameScore[0] < gameScore[1]
+    );
+  }, [isGameEnd]);
+
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     // use parent to render the canvas in this ref
     // (without that p5 will render the canvas outside of your component)
@@ -79,48 +116,23 @@ export default function GamePage() {
   };
 
   useEffect(() => {
-    if (gameSocket === undefined) {
-      console.log('socket is undefined');
-      return;
-    }
-    if (leftUser === undefined) {
-      console.log('left user is undefined');
-      return;
-    }
-    if (isFinished === 0) {
-      console.log('SOCKET EMIT START GAME!');
-      setGameScore([0, 0]);
-      gameSocket.emit('startGame', {
-        gameRoomName: room.gameRoomName,
-      });
-      return;
-    }
-    if (gameMeProps === undefined) {
-      console.log('gameMeProps is undefined');
-      return;
-    }
-    setIsWin(
-      gameMeProps.id === leftUser.id ? gameScore[0] > gameScore[1] : gameScore[0] < gameScore[1]
-    );
-  }, [isFinished, leftUser]);
-
-  useEffect(() => {
-    if (isFinished === 0) {
+    if (isWin === undefined) {
       return;
     }
     if (gameSocket === undefined || !gameSocket.connected) {
       console.log('gameSocket is not ready');
       return;
     }
-    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
     onOpen();
-    setIsSetting(0);
-    setIsFinished(0);
-    setIsReady(0);
-    disconnectSocket();
-  }, [isWin]);
+  }, [gameSocket, isWin]);
 
   function goToHome() {
+    if (gameSocket === undefined || !gameSocket.connected) {
+      console.log('gameSocket is not ready');
+      return;
+    }
+    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+    onClose();
     router.push('/home');
   }
 
