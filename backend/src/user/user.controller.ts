@@ -74,35 +74,35 @@ export class UserController {
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
-    this.userService.updateStatus(user.userId, userStatus.ONLINE);
+    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U2');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
-    this.userService.updateStatus(user.userId, userStatus.ONLINE);
+    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U3');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
-    this.userService.updateStatus(user.userId, userStatus.ONLINE);
+    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U4');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
-    this.userService.updateStatus(user.userId, userStatus.ONLINE);
+    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
     user = await this.userService.testCreateFakeUser('fake_U5');
     await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
       originalname: 'fakePhoto',
       buffer: null,
     } as Express.Multer.File);
     await this.auth42Service.createAuth42(user.id);
-    this.userService.updateStatus(user.userId, userStatus.ONLINE);
+    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
   }
 
   //http://localhost:3000/user/test/delete/fakeuser
