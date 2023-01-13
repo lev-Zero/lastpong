@@ -151,9 +151,9 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
     newSocket.on('score', (data) => {
       get().setGameScore(data.score);
     });
-    newSocket.on('createGameRoom', (res) => {
-      get().setRoom(res.gameRoom);
-      get().setIsCreated(1);
+    newSocket.on('createGameRoom', async (res) => {
+      await get().setRoom(res.gameRoom);
+      sleep(500).then(() => get().setIsCreated(1));
     });
     newSocket.on('disconnection', console.log);
 

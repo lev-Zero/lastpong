@@ -161,6 +161,7 @@ export default function GameOptionsPage() {
       const warningText = 'OPTION 게임에서 나가게 되면 당신은 패배하게 될것입니다!';
       if (window.confirm(warningText)) {
         if (gameSocket === undefined) {
+          console.log('gameSocket is undefined');
           return;
         }
         gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
