@@ -82,12 +82,7 @@ export default function WatchGamePage() {
   }, [room]);
 
   useEffect(() => {
-    if (
-      gameSocket === undefined ||
-      !gameSocket.connected ||
-      gameMeProps === undefined ||
-      leftUser === undefined
-    ) {
+    if (gameSocket === undefined || !gameSocket.connected || leftUser === undefined) {
       console.log('game is not ready');
       return;
     }

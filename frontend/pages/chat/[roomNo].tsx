@@ -349,7 +349,7 @@ export default function ChatRoomPage() {
         
       `,
           title: '무조건 참아야 합니다',
-          text: '방장에 복족하세요',
+          text: '방장에 복종하세요',
           icon: 'warning',
         });
       }
