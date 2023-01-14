@@ -202,12 +202,24 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
         confirmButtonText: '슬프다',
       }).then((result) => {
         if (result.isConfirmed) {
-          Swal.fire(
-            '친구 추가 하는법',
-            '친구 검색후 프로필에서 ADD FRIEND' + `\n` + '직접 가서 알려주세요!!',
-            //FIXME: 줄바꿈 왜안될까
-            'info'
-          );
+          // Swal.fire(
+          //   '친구 추가 하는법',
+          //   '친구 검색후 프로필에서 ADD FRIEND' + `\n` + '직접 가서 알려주세요!!',
+          //   //FIXME: 줄바꿈 왜안될까
+          //   'info'
+          // );
+
+          Swal.fire({
+            backdrop: `    rgba(0,0,123)
+            url("/nyan-cat-4k.gif")
+            left top
+            repeat
+            
+          `,
+            title: '친구 추가 하는법',
+            text: '친구 검색후 프로필에서 ADD FRIEND' + `\n` + '직접 가서 알려주세요!!',
+            icon: 'info',
+          });
         }
       });
     } else if (userStatus === UserStatus.INGAME) {

@@ -127,7 +127,6 @@ export default function ChatPage() {
       cancelButtonText: '안 할래',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
         privOnOpen();
       }
     });
@@ -353,13 +352,7 @@ export default function ChatPage() {
                 </ModalBody>
                 <ModalFooter>
                   <VStack mb={'7'}>
-                    <CustomButton
-                      size="lg"
-                      onClick={(event: Event) => {
-                        event.preventDefault();
-                        createChatRoom();
-                      }}
-                    >
+                    <CustomButton size="lg" onClick={createChatRoom}>
                       CREATE
                     </CustomButton>
                   </VStack>

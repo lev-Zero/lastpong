@@ -327,9 +327,31 @@ export default function ChatRoomPage() {
       cancelButtonText: '못 참아',
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+        // Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+        Swal.fire({
+          backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
+          title: '다음부터 조심하세요',
+          text: '강퇴 당할 수 있습니다',
+          icon: 'success',
+        });
       } else {
-        Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+        // Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+        Swal.fire({
+          backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
+          title: '무조건 참아야 합니다',
+          text: '방장에 복족하세요',
+          icon: 'warning',
+        });
       }
     });
   }
@@ -360,9 +382,31 @@ export default function ChatRoomPage() {
         cancelButtonText: '못 참아',
       }).then((result) => {
         if (result.isConfirmed) {
-          Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+          // Swal.fire('다음부터 조심하세요', '강퇴 당할 수 있습니다', 'success');
+          Swal.fire({
+            backdrop: `    rgba(0,0,123)
+          url("/nyan-cat-4k.gif")
+          left top
+          repeat
+          
+        `,
+            title: '다음부터 조심하세요',
+            text: '강퇴 당할 수 있습니다',
+            icon: 'success',
+          });
         } else {
-          Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+          // Swal.fire('무조건 참아야 합니다', '방장에 복종하세요', 'warning');
+          Swal.fire({
+            backdrop: `    rgba(0,0,123)
+          url("/nyan-cat-4k.gif")
+          left top
+          repeat
+          
+        `,
+            title: '무조건 참아야 합니다',
+            text: '방장에 복족하세요',
+            icon: 'warning',
+          });
         }
       });
     });

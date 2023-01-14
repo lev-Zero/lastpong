@@ -40,7 +40,6 @@ export default function BasicIdPage() {
       // cancelButtonText: '안 할래',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
         // onOpen();
         setInputName('');
         if (inputRef.current !== null) inputRef.current.focus();
