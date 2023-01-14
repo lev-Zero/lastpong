@@ -49,17 +49,6 @@ export class AvatarService {
     }
   }
 
-  /*
-		file: {
-			fieldname: 'file',
-			originalname: 'asdf.png',
-			encoding: '7bit',
-			mimetype: 'image/png',
-			buffer: <Buffer 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52 00 00 03 63 00 00 01 ad 08 06 00 00 00 9b 4c ac e4 00 00 00 09 70 48 59 73 00 00 0b 13 00 00 0b 13 01 ... 619325 more bytes>,
-			size: 619375
-		}
-	*/
-
   async updateOrCreateAvatar(
     userId: number,
     profileUrl?: string,
@@ -82,7 +71,6 @@ export class AvatarService {
         .catch(() => null);
 
       if (!avatar) {
-        // if (!profileUrl) profileUrl = 'empty';
         avatar = await this.avatarRepository.create({
           filename,
           photoData,
@@ -101,3 +89,14 @@ export class AvatarService {
     }
   }
 }
+
+/*
+	file: {
+		fieldname: 'file',
+		originalname: 'asdf.png',
+		encoding: '7bit',
+		mimetype: 'image/png',
+		buffer: <Buffer 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52 00 00 03 63 00 00 01 ad 08 06 00 00 00 9b 4c ac e4 00 00 00 09 70 48 59 73 00 00 0b 13 00 00 0b 13 01 ... 619325 more bytes>,
+		size: 619375
+	}
+*/

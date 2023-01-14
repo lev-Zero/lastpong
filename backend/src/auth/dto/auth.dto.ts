@@ -1,16 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
 
-// export class user42Dto {
-//   @IsNumber()
-// 	userId: number;
-
-//   @IsString()
-//   username: string;
-
-//   @IsString()
-//   profileUrl: string;
-// }
-
 export class User42Dto {
   @IsNumber()
   userId?: number;

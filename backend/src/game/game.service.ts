@@ -384,8 +384,6 @@ export class GameService {
           nextBallPosition.x + ballRadius > widthOnDisplay
         )
       ) {
-        //player1
-        // 640 >= y >= 440
         if (gameRoom.players.length === 2) {
           if (
             nextBallPosition.y >=
@@ -403,8 +401,6 @@ export class GameService {
             }
           }
 
-          //player 2
-          // 640 >= y >= 440
           if (
             nextBallPosition.y >=
               gameRoom.players[1].touchBar - touchBarHeight / 2 &&

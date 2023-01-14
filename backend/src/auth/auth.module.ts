@@ -13,9 +13,8 @@ import { Auth42Service } from './service/auth42.service';
   imports: [
     TypeOrmModule.forFeature([Auth42]),
     JwtModule.register({
-      // secret: "SECRET_KEY",
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '7d' },
     }),
     forwardRef(() => UserModule),
   ],

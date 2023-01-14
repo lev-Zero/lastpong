@@ -133,7 +133,7 @@ export class BlockService {
       const foundBlock = await this.userService.findUserByName(blockedName);
       const blockedUser = foundBlock.id;
       await this.blockRepository
-        .createQueryBuilder('blockedUser') //alias = select Block as blockedUser
+        .createQueryBuilder('blockedUser')
         .delete()
         .from(Block)
         .where('blockOfferUser = :blockOfferUser', {

@@ -27,8 +27,6 @@ import { ChatDmLog } from './chat/entity/chatDmLog.entity';
     GameModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: 'nestjs.env',
-      // envFilePath: `${__dirname}/../../../docker/backend.env`,
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

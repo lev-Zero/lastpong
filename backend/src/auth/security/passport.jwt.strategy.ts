@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           'OTP가 유효하지 않습니다.',
           HttpStatus.BAD_REQUEST,
         );
-      return { userId: payload.id, username: payload.username }; //-> req.user
+      return { userId: payload.id, username: payload.username };
     } catch (e) {
       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
     }

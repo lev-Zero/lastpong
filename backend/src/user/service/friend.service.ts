@@ -104,7 +104,7 @@ export class FriendService {
         .catch(() => null);
       const friend = foundFriend.id;
       await this.friendRepository
-        .createQueryBuilder('friend') //alias = select Friend as friend
+        .createQueryBuilder('friend')
         .delete()
         .from(Friend)
         .where('friendOfferUserId = :friendOfferUserId', {
@@ -123,7 +123,7 @@ export class FriendService {
   ): Promise<void> {
     try {
       await this.friendRepository
-        .createQueryBuilder('friend') //alias = select Friend as friend
+        .createQueryBuilder('friend')
         .delete()
         .from(Friend)
         .where('friendOfferUserId = :friendOfferUserId', {
