@@ -24,6 +24,12 @@ export default function BasicIdPage() {
 
   function idInputFailAlert(title: string) {
     Swal.fire({
+      backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
       title: title,
       // text: '다시 되돌릴 수 없습니다. 신중하세요.',
       icon: 'warning',
@@ -34,7 +40,6 @@ export default function BasicIdPage() {
       // cancelButtonText: '안 할래',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Swal.fire('승인이 완료되었습니다.', '화끈하시네요~!', 'success');
         // onOpen();
         setInputName('');
         if (inputRef.current !== null) inputRef.current.focus();

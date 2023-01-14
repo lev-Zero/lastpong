@@ -5,6 +5,7 @@ import { userStore } from '@/stores/userStore';
 import { MenuDivider, MenuItem, MenuList, Text } from '@chakra-ui/react';
 import Link from 'next/link';
 import { ChatOptionMenuProps } from './ChatOptionMenu';
+import React, { useEffect, useState } from 'react';
 
 export interface ChatAdminOptionMenuProps extends ChatOptionMenuProps {
   role: ChatUserStatus;
@@ -25,6 +26,7 @@ export function ChatAdminOptionMenu({
   const { me, addFriend, deleteFriend, addBlock, deleteBlock } = userStore();
   const { giveAdmin, removeAdmin, addBan, muteUser, removeMute } = chatStore();
   const { socket: chatSocket, setIsInvited } = chatStore();
+  const [timerId, setTimerId] = useState<NodeJS.Timeout>();
 
   function inviteToGame() {
     if (chatSocket === undefined || !chatSocket.connected) {
@@ -35,6 +37,24 @@ export function ChatAdminOptionMenu({
     chatSocket.emit('createInviteRoom', { userId: user.id });
     setIsInvited(2);
   }
+
+  function muteUserAndRemove() {
+    muteUser(roomNo, user.id);
+    const id = setTimeout(() => {
+      removeMute(roomNo, user.id);
+      // console.log('refreshed');
+    }, 62 * 1000);
+    setTimerId(id);
+  }
+
+  //작동안하는듯 보이는 클리어함수
+  // useEffect(() => {
+  //   return () => {
+  //     console.log(timerId);
+  //     clearTimeout(timerId);
+  //     console.log('add mute timer Cleared');
+  //   };
+  // }, []);
 
   if (me.name === user.name) return null;
   return (
@@ -57,7 +77,7 @@ export function ChatAdminOptionMenu({
             {!isMuted ? (
               <Text
                 onClick={() => {
-                  muteUser(roomNo, user.id);
+                  muteUserAndRemove();
                 }}
               >
                 MUTE 1 MIN
