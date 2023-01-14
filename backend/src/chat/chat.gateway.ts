@@ -1232,7 +1232,8 @@ export class ChatGateway
   private chatMessageSanitizer(data: string): string {
     try {
       const data1 = Sanitizer.stripLow(data, true);
-      return data1;
+      const data2 = Sanitizer.escape(data1);
+      return data2;
     } catch (e) {
       throw new WsException(e.message);
     }
