@@ -53,7 +53,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
-      // await this.userService.updateStatus(user.id, userStatus.INGAME);
+      await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       socket.data.user = user;
       socket_username[user.username] = socket;

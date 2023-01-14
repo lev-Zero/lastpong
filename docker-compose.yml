@@ -10,8 +10,10 @@ services:
       - 5432:5432
     networks:
       - transcendence
+    command: postgres -c 'hba_file=/var/lib/postgresql/pg_hba.conf'
     volumes:
       - data:/var/lib/postgresql/data
+      - ./docker/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
     restart: unless-stopped
 
   pgadmin:
