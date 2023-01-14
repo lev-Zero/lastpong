@@ -47,7 +47,6 @@ export default function GameOptionsPage() {
   const [meUser, setMeUser] = useState<GameUserProps>(); // FIXME: 이것도 UserProps로 바꾸고 싶었으나, 의존적으로 활용하는 곳이 너무 많아 아직 리팩토링하지 못했다. 사실 GameUserProps로 저장할 게 아니라 UserProps로 저장해야 한다.
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { socket: gameSocket, room, setRoom, gameMeProps, setGameMeProps } = gameStore();
-  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isOppLeft, setIsOppLeft] = useState<boolean>(false);
 
@@ -59,12 +58,14 @@ export default function GameOptionsPage() {
     setIsFastMode((pre) => !pre);
   }
 
+  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false); // React.StrictMode 두번 렌더링으로 인한 router.push 중복 발생 문제 해결방법
   // // 연결 유실 시 / 으로 라우팅
   // useEffect(() => {
   //   if (gameSocket === undefined) {
   //     if (!calledPushRoot) {
   //       router.push('/');
   //     }
+  //     alert('연결이 유실되었습니다.');
   //     setCalledPushRoot(true);
   //   }
   // }, [gameSocket]);

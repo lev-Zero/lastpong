@@ -47,19 +47,20 @@ export default function WatchGamePage() {
   const router = useRouter();
   const [leftUser, setLeftUser] = useState<UserProps>();
   const [rightUser, setRightUser] = useState<UserProps>();
-  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
   const [isGameEnd, setIsGameEnd] = useState<boolean>(false);
   const [isPlayerLeft, setIsPlayerLeft] = useState<boolean>(false);
 
+  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
   // // 연결 유실 시 / 으로 라우팅
   // useEffect(() => {
   //   if (gameSocket === undefined) {
   //     if (!calledPushRoot) {
   //       router.push('/');
   //     }
+  //     alert('연결이 유실되었습니다.');
   //     setCalledPushRoot(true);
   //   }
-  // }, []);
+  // }, [gameSocket]);
 
   useEffect(() => {
     async function fetchTwoUsers() {

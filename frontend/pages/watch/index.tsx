@@ -57,7 +57,7 @@ export default function WatchPage() {
   }
 
   useEffect(() => {
-    if (gameSocket === undefined) {
+    if (gameSocket === undefined || !gameSocket.connected) {
       makeSocket();
     }
     refreshGameRoomList();
@@ -65,11 +65,15 @@ export default function WatchPage() {
 
   useEffect(() => {
     const id = setInterval(() => {
+      if (gameSocket === undefined || !gameSocket.connected) {
+        console.log('gameSocket is not ready');
+        return;
+      }
       console.log('refreshed');
       refreshGameRoomList();
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [gameSocket]);
 
   return (
     <>
