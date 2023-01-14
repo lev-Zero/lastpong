@@ -142,7 +142,9 @@ export default function GameOptionsPage() {
     );
     gameSocket.once('readyGame', (res) => {
       setRoom(res.gameRoom);
-      setIsReady(true);
+      sleep(300).then(() => {
+        setIsReady(true);
+      });
     });
   }
 

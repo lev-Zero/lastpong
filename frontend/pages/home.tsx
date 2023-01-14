@@ -43,7 +43,9 @@ export default function HomePage() {
     gameSocket.once('randomGameMatch', (res) => {
       setRoom(res.gameRoom);
       console.log('게임 매칭되었습니다.');
-      router.push('/game/options');
+      sleep(300).then(() => {
+        router.push('/game/options');
+      });
     });
   }
 
