@@ -14,6 +14,7 @@ import { validate } from 'class-validator';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/entity/user.entity';
+import { userStatus } from 'src/user/enum/status.enum';
 import { UserService } from 'src/user/service/user.service';
 import { ChatService } from './chat.service';
 import {
@@ -74,7 +75,7 @@ export class ChatGateway
       }
 
       // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
-      // await this.userService.updateStatus(user.id, userStatus.INGAME);
+      await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       await this.chatService.deleteChatRoomIfOwner(user.id);
       const initChatRooms = await this.chatService
