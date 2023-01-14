@@ -59,11 +59,9 @@ export class AuthService {
   // |								socket						|
   // ----------------------------------*/
 
-  // postman socket요청시 Header에 authorization:'token' 담아서 보내면됌. {{token}}
   async findUserByRequestToken(socket: Socket): Promise<User> {
     try {
       const authorization = socket.handshake.headers.authorization;
-      // console.log({authorization})
 
       const token = authorization && authorization.split(' ')[0];
 

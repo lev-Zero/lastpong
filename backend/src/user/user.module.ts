@@ -20,7 +20,7 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([User, Avatar, Match, Block, Friend]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '7d' },
     }),
     forwardRef(() => AuthModule),
   ],

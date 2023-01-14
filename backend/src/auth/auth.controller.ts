@@ -92,50 +92,6 @@ export class AuthController {
 	|								OTP								 |
 	----------------------------------*/
 
-  // //원본
-  // @Get('/login/otp/check')
-  // async loginOTPCheck(@Req() req: Request): Promise<string> {
-  //   try {
-  //     let token;
-  //     if (req.headers.authorization)
-  //       token = req.headers.authorization.split(' ')[1];
-  //     else
-  //       throw new HttpException(
-  //         '토큰을 찾을 수 없습니다.',
-  //         HttpStatus.BAD_REQUEST,
-  //       );
-
-  //     const payload = await this.authService.verifyJWT(token);
-
-  //     if (payload.auth42Status) {
-  //       const auth42 = await this.auth42Service
-  //         .findAuth42ById(payload.id)
-  //         .catch(() => null);
-  //       if (!auth42)
-  //         throw new HttpException(
-  //           'AUTH42를 찾을 수 없습니다',
-  //           HttpStatus.BAD_REQUEST,
-  //         );
-
-  //       // if (!auth42.otp) {
-  //       const qrcodeImg = await this.auth42Service.create42QRCode(payload.id);
-
-  //       return qrcodeImg;
-  //       // } else {
-  //       // 	return 'Write OTP Code'
-  //       // }
-  //     } else {
-  //       throw new HttpException(
-  //         'AUTH42가 유효하지 않습니다.',
-  //         HttpStatus.BAD_REQUEST,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-  //   }
-  // }
-
-  //테스트
   @Get('/login/otp/check')
   async loginOTPCheck(@Req() req: Request): Promise<string | HttpException> {
     try {
@@ -163,13 +119,9 @@ export class AuthController {
         if (auth42.otpOn === false) {
           return JSON.stringify({ status: 'otpOff' });
         } else {
-          // if (!auth42.otp) {
           const qrcodeImg = await this.auth42Service.create42QRCode(payload.id);
 
           return qrcodeImg;
-          // } else {
-          // 	return 'Write OTP Code'
-          // }
         }
       } else {
         throw new HttpException(
@@ -216,7 +168,6 @@ export class AuthController {
         res.cookie('accessToken', newToken);
         await this.userService.updateStatus(payload.id, userStatus.ONLINE);
         return JSON.stringify({ token: newToken });
-        // res.send({ token: newToken });
       } else {
         throw new HttpException(
           'AUTH42가 유효하지 않습니다.',

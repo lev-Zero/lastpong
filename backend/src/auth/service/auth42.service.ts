@@ -23,61 +23,6 @@ export class Auth42Service {
 	|				42 AUTH LOGIN 						 |
 	----------------------------------*/
 
-  /*
-	Auth42AuthGuard -> Auth42Strategy -> FtauthGuard -> authController.redirect -> authService.login
-	*/
-  //원본
-  // async login(data): Promise<any> {
-  //   try {
-  //     const findUser = await this.userService
-  //       .findUserByName(data.username)
-  //       .catch(() => null);
-
-  //     if (!findUser) {
-  //       const user = await this.userService.createUser(data);
-
-  //       await this.createAuth42(user.id);
-
-  //       if (data.profileUrl) {
-  //         await this.avatarService.updateOrCreateAvatar(
-  //           user.id,
-  //           data.profileUrl,
-  //           {
-  //             originalname: `profilePhoto${user.id}`,
-  //             buffer: null,
-  //           } as Express.Multer.File,
-  //         );
-  //       }
-  //     }
-
-  //     const user = await this.userService.findUserByName(data.username, [
-  //       'auth42',
-  //     ]);
-
-  //     const auth42Status = true;
-  //     let otpStatus = false;
-
-  //     if (findUser && user.auth42.otpOn === false) {
-  //       otpStatus = true;
-  //     }
-
-  //     const result = {
-  //       token: await this.authService.generateJWT(
-  //         user.id,
-  //         auth42Status,
-  //         otpStatus,
-  //       ),
-  //       profileUrl: data.profileUrl,
-  //       otpStatus,
-  //       accessToken42: data.accessToken42,
-  //     };
-  //     return result;
-  //   } catch (e) {
-  //     throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-  //   }
-  // }
-
-  //테스트
   async login(data: User42Dto): Promise<{
     token: string;
     profileUrl: string | null;
@@ -185,12 +130,6 @@ export class Auth42Service {
   async create42QRCode(userId: number): Promise<string> {
     try {
       const auth42 = await this.findAuth42ById(userId, ['user']);
-
-      // if (auth42.otp)
-      //   throw new HttpException(
-      //     '이미 유저는 OTP 인증을 마쳤습니다.',
-      //     HttpStatus.BAD_REQUEST,
-      //   );
 
       const output = await generateSecret(auth42.user.username, 'jeonghwl');
 

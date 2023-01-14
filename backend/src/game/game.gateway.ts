@@ -52,7 +52,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new WsException('소켓 연결 유저 없습니다.');
       }
 
-      // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
       await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       socket.data.user = user;
@@ -72,8 +71,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const gameRoomName = this.gameService.findGameRoomOfUser(user.id);
       if (gameRoomName) await this.exitGameRoom(socket, { gameRoomName });
-
-      // await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       this.gameService.removeSocketInQueue(socket);
       socket.emit('disconnection', { message: `${user.username} 연결해제` });
@@ -175,7 +172,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new WsException('PlayerType이 정의되지 않은 유저 입니다.');
       }
 
-      // await this.userService.updateStatus(user.id, userStatus.GAMEROOM);
       await this.userService.updateStatus(user.id, userStatus.INGAME);
     } catch (e) {
       return new WsException(e.message);
@@ -218,11 +214,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .to(validBody.gameRoomName)
           .emit('wait', { message: `다른 유저를 기다리는 중입니다.` });
       } else {
-        // this.server.to(gameRoom.gameRoomName).emit('readyGame', {
-        //   message: `양 쪽 유저 게임 준비 완료`,
-        //   gameRoomOptions: gameRoom.facts,
-        //   players: gameRoom.players.map((player) => player.user),
-        // });
         this.server.to(gameRoom.gameRoomName).emit('readyGame', {
           message: `양 쪽 유저 게임 준비 완료`,
           gameRoom: gameRoom,
@@ -292,9 +283,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
               .emit('score', { message: 'score', score });
 
           await this.gameService.isGameOver(gameRoom, this.server, socket);
-          // new Promise(() =>
-          //   this.gameService.isGameOver(gameRoom, this.server, socket),
-          // );
 
           ballPosition = await this.gameService.updateBallPositionAfterTouchBar(
             gameRoom,
@@ -377,7 +365,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         socket.emit('exitGameRoom', {
           message: `내가 게임룸에서 나왔습니다.`,
         });
-        // await this.userService.updateStatus(user.id, userStatus.GAMECHANNEL);
         await this.userService.updateStatus(user.id, userStatus.ONLINE);
       } else {
         throw new WsException('해당룸에 당신은 존재하지 않습니다.');
@@ -488,7 +475,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         throw new WsException(JSON.stringify(errorArray));
       } else {
-        // console.log('validation succeed');
       }
       return data;
     } catch (e) {

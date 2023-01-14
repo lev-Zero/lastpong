@@ -74,7 +74,6 @@ export class UserService {
           'users.status',
           'users.username42',
         ])
-        // .leftJoinAndSelect('users.avatar', 'avatar')
         .getMany();
 
       return users;

@@ -40,7 +40,6 @@ import {
 
 const socket_username = {};
 
-// ws://localhost:3000/chat
 @WebSocketGateway({ namespace: 'chat', cors: true })
 export class ChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
@@ -74,7 +73,6 @@ export class ChatGateway
         throw new WsException('소켓 연결 유저 없습니다.');
       }
 
-      // await this.userService.updateStatus(user.id, userStatus.CHATCHANNEL);
       await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       await this.chatService.deleteChatRoomIfOwner(user.id);
@@ -130,7 +128,6 @@ export class ChatGateway
     try {
       const user = socket.data.user;
       if (!user) throw new WsException('소켓 연결 유저 없습니다.');
-      // else await this.userService.updateStatus(user.id, userStatus.ONLINE);
 
       const disconnectUser = await this.userService.findUserById(user.id);
 
@@ -145,11 +142,6 @@ export class ChatGateway
             chatRoomId: chatRoom.id,
           };
           await this.leaveChatRoom(socket, leaveUser);
-          // await this.chatService.leaveChatRoom(
-          //   disconnectUser.id,
-          //   chatRoom.id,
-          //   disconnectUser.id,
-          // );
         }
       }
 
@@ -164,11 +156,6 @@ export class ChatGateway
             chatRoomId: chatRoomDm.id,
           };
           await this.leaveChatRoomDm(socket, leaveUser);
-          // await this.chatService.leaveChatRoomDm(
-          //   disconnectUser.id,
-          //   chatRoomDm.id,
-          //   disconnectUser.id,
-          // );
         }
       }
 
@@ -239,8 +226,6 @@ export class ChatGateway
   ): Promise<WsException | void> {
     try {
       const validBody = await this.chatParameterValidation(body, UpdatePwdDto);
-      // let data = this.chatParameterSanitizer(validBody.oldPwd);
-      // validBody.oldPwd = data;
       const data = this.chatParameterSanitizer(validBody.newPwd);
       validBody.newPwd = data;
 
@@ -427,9 +412,6 @@ export class ChatGateway
         'joinedUser',
       ]);
 
-      // await this.userService.updateStatus(user.id, userStatus.CHATROOM);
-      // await this.userService.updateStatus(user.id, userStatus.INGAME);
-
       socket.join(chatRoom.name);
 
       this.server
@@ -447,7 +429,6 @@ export class ChatGateway
     }
   }
 
-  //offerUser가 body.targetId를 남으로 하면 강퇴, 지가 지꺼쓰면 퇴장
   @SubscribeMessage('leave')
   async leaveChatRoom(
     @ConnectedSocket() socket: Socket,
@@ -471,11 +452,6 @@ export class ChatGateway
       if (chatRoom.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoom.name).fetchSockets();
         for (const so of sockets) {
-          // await this.userService.updateStatus(
-          //   targetUser.id,
-          //   userStatus.CHATCHANNEL,
-          // );
-          // await this.userService.updateStatus(so.data.id, userStatus.INGAME);
           so.emit('leave', {
             message: `owner가 ${chatRoom.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoom,
@@ -512,8 +488,6 @@ export class ChatGateway
         });
 
         const targetUserSocket = socket_username[targetUser.username];
-        // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-        // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoom.name);
       }
     } catch (e) {
@@ -525,7 +499,6 @@ export class ChatGateway
 	|					sendMessage 			|
 	---------------------------*/
 
-  //클라이언트에서 block유저 관계 확인해서 해당 유저면 그 유저 화면에서는 특정유저의 메지시 안보여줌.
   @SubscribeMessage('message')
   async sendMessage(
     @ConnectedSocket() socket: Socket,
@@ -701,7 +674,6 @@ export class ChatGateway
     }
   }
 
-  //시간상관없이 조건 풀어주는로직
   @SubscribeMessage('removeMute')
   async removeMutedUser(
     @ConnectedSocket() socket: Socket,
@@ -777,9 +749,6 @@ export class ChatGateway
       });
       targetUserSocket.leave(chatRoom.name);
 
-      // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-      // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
-
       chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
         'joinedUser',
         'bannedUser',
@@ -798,50 +767,6 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-
-  //조건없이 강제로 지워줌
-  // @SubscribeMessage('removeBan')
-  // async removeBannedUser(
-  //   socket: Socket,
-  //   body: ChatRoomIdUserIdDto,
-  // ): Promise<WsException | void> {
-  //   try {
-  //     const validBody = await this.chatParameterValidation(
-  //       body,
-  //       ChatRoomIdUserIdDto,
-  //     );
-
-  //     let chatRoom = await this.chatService.findChatRoomById(
-  //       validBody.chatRoomId,
-  //       ['joinedUser', 'bannedUser'],
-  //     );
-  //     const targetUser = await this.userService.findUserById(validBody.userId);
-  //     const me = socket.data.user;
-
-  //     await this.chatService.removeBannedUser(
-  //       targetUser.id,
-  //       chatRoom.id,
-  //       me.id,
-  //     );
-
-  //     chatRoom = await this.chatService.findChatRoomById(validBody.chatRoomId, [
-  //       'joinedUser',
-  //       'bannedUser',
-  //     ]);
-
-  //     this.server.to(chatRoom.name).emit('ban', {
-  //       message: `ban user가 삭제 되었습니다`,
-  //       bannedUser: { id: targetUser.id, username: targetUser.username },
-  //       chatRoom: {
-  //         id: chatRoom.id,
-  //         name: chatRoom.name,
-  //         banned: chatRoom.bannedUser,
-  //       },
-  //     });
-  //   } catch (e) {
-  //     return new WsException(e.message);
-  //   }
-  // }
 
   /* --------------------------
 	|				createChatRoomDm			|
@@ -974,7 +899,6 @@ export class ChatGateway
 	|				leaveChatRoomDm				|
 	---------------------------*/
 
-  //owner가 body.id를 남으로 하면 강퇴, 지가 지꺼쓰면퇴정
   @SubscribeMessage('leaveDm')
   async leaveChatRoomDm(
     @ConnectedSocket() socket: Socket,
@@ -998,11 +922,6 @@ export class ChatGateway
       if (chatRoomDm.owner.id === offerUser.id) {
         const sockets = await this.server.in(chatRoomDm.name).fetchSockets();
         for (const so of sockets) {
-          // await this.userService.updateStatus(
-          //   targetUser.id,
-          //   userStatus.CHATCHANNEL,
-          // );
-          // await this.userService.updateStatus(so.data.id, userStatus.INGAME);
           so.emit('leaveDm', {
             message: `owner가 ${chatRoomDm.name} 채팅방 나가서 방이 삭제 됐습니다.`,
             chatRoomDm,
@@ -1039,8 +958,6 @@ export class ChatGateway
         });
 
         const targetUserSocket = socket_username[targetUser.username];
-        // await this.userService.updateStatus(targetUser.id, userStatus.CHATCHANNEL);
-        // await this.userService.updateStatus(targetUser.id, userStatus.INGAME);
         targetUserSocket.leave(chatRoomDm.name);
       }
     } catch (e) {
@@ -1182,9 +1099,6 @@ export class ChatGateway
       return new WsException(e.message);
     }
   }
-  //response === true 이면
-  //게임 신청유저 -> "emit.createGameRoom" -> "emit.joinGameRoom" -> "emit.inviteGameRoomInfo"
-  //초대 받은유저 -> 'on.inviteGameRoomInfo' -> emit.joinGameRoom
   @SubscribeMessage('inviteGameRoomInfo')
   async inviteGameRoomInfo(
     @ConnectedSocket() socket: Socket,
@@ -1255,7 +1169,6 @@ export class ChatGateway
         }
         throw new WsException(JSON.stringify(errorArray));
       } else {
-        // console.log('validation succeed');
       }
       return data;
     } catch (e) {

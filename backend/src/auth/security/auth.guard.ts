@@ -18,15 +18,3 @@ export class Auth42AuthGuard extends AuthGuard('42') {
     }
   }
 }
-
-// @Injectable()
-// export class AuthenticatedGuard implements CanActivate {
-//   async canActivate(context: ExecutionContext): Promise<any> {
-//     try {
-//       const req = context.switchToHttp().getRequest();
-//       return req.isAuthenticated();
-//     } catch (e) {
-//       return new HttpException(e.message, HttpStatus.BAD_REQUEST);
-//     }
-//   }
-// }
