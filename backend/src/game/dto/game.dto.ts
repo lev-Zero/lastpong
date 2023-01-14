@@ -124,10 +124,6 @@ class touchBarDto {
 class ScoreDto {
   @IsNumber()
   @IsNotEmpty()
-  y: number;
-
-  @IsNumber()
-  @IsNotEmpty()
   max: number;
 }
 
