@@ -311,6 +311,12 @@ export default function ChatRoomPage() {
 
   function muteAlert(title: string) {
     Swal.fire({
+      backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
       title: title,
       // text: '다시 되돌릴 수 없습니다. 신중하세요.',
       icon: 'error',
@@ -329,9 +335,21 @@ export default function ChatRoomPage() {
   }
   function muteAlertEnter(title: string) {
     Swal.fire({
+      backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
       title: 'tmp',
     }).then(() => {
       Swal.fire({
+        backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
         title: title,
         // text: '다시 되돌릴 수 없습니다. 신중하세요.',
         icon: 'error',
@@ -406,6 +424,12 @@ export default function ChatRoomPage() {
   function roomUpdatefailAlert(title: string) {
     onSettingModalClose();
     Swal.fire({
+      backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
       title: title,
       icon: 'error',
       showCancelButton: true,

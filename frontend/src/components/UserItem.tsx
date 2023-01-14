@@ -189,6 +189,12 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
   function noFriendAlert(isMyFriend: boolean, userStatus: UserStatus) {
     if (!isMyFriend) {
       Swal.fire({
+        backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
         title: '찐친이 아닙니다',
         text: '서로 친구여야 DM을 보낼 수 있습니다.',
         icon: 'error',
@@ -206,6 +212,12 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
       });
     } else if (userStatus === UserStatus.INGAME) {
       Swal.fire({
+        backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
         title: '친구가 게임중입니다.',
         text: '게임중 일때는 DM을 보낼 수 없습니다.',
         icon: 'error',
@@ -214,6 +226,12 @@ function PopoverHoc({ user, msgNum }: RawUserItemProps) {
       });
     } else {
       Swal.fire({
+        backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
         title: '친구가 오프라인 입니다.',
         text: '온라인 유저에게만 DM을 보낼 수 있습니다.',
         icon: 'error',
