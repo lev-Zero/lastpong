@@ -6,6 +6,7 @@ import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
 import dynamic from 'next/dynamic';
 import p5Types from 'p5';
+import Sketch from 'react-p5';
 
 import {
   Center,
@@ -27,9 +28,9 @@ import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser
 import { UserProps } from '@/interfaces/UserProps';
 import { sleep } from '@/utils/sleep';
 
-const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
-  ssr: false,
-});
+// const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
+//   ssr: false,
+// });
 
 export default function GamePage() {
   const {
@@ -47,19 +48,20 @@ export default function GamePage() {
   const router = useRouter();
   const [leftUser, setLeftUser] = useState<UserProps>();
   const [rightUser, setRightUser] = useState<UserProps>();
-  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
   const [isGameEnd, setIsGameEnd] = useState<boolean>(false);
   const [isOppLeft, setIsOppLeft] = useState<boolean>(false);
 
+  // const [calledPushRoot, setCalledPushRoot] = useState<boolean>(false);
   // // 연결 유실 시 / 으로 라우팅
   // useEffect(() => {
   //   if (gameSocket === undefined) {
   //     if (!calledPushRoot) {
   //       router.push('/');
   //     }
+  //     alert('연결이 유실되었습니다.');
   //     setCalledPushRoot(true);
   //   }
-  // }, []);
+  // }, [gameSocket]);
 
   useEffect(() => {
     async function fetchTwoUsers() {
