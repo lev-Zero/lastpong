@@ -285,7 +285,7 @@ export default function WatchGamePage() {
         height="92vh"
         bg={room.facts.gameOption.backgroundColor === 0 ? 'white' : 'black'}
       >
-        <VStack>
+        <VStack position={'absolute'} right={'13%'}>
           <Flex width="full" justifyContent="space-around" mb={8}>
             <Text
               fontFamily="Bungee"
