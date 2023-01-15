@@ -30,6 +30,7 @@ export default function WatchPage() {
       alert(error);
     });
     gameSocket.once('joinGameRoom', (res) => {
+      setRoom(res.gameRoom);
       router.push(`/watch/${name}`);
     });
   }

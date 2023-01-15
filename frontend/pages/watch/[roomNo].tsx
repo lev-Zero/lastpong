@@ -4,7 +4,7 @@ import LayoutWithoutSidebar from '@/layouts/LayoutWithoutSidebar';
 import Head from 'next/head';
 import { ReactElement } from 'react';
 import { gameStore } from '@/stores/gameStore';
-import dynamic from 'next/dynamic';
+// import dynamic from 'next/dynamic';
 import p5Types from 'p5';
 
 import {
@@ -26,10 +26,11 @@ import { useRouter } from 'next/router';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { UserProps } from '@/interfaces/UserProps';
 import { sleep } from '@/utils/sleep';
+import Sketch from 'react-p5';
 
-const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
-  ssr: false,
-});
+// const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
+//   ssr: false,
+// });
 
 export default function WatchGamePage() {
   const {
