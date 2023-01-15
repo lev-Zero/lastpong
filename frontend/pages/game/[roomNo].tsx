@@ -295,7 +295,7 @@ export default function GamePage() {
         height="92vh"
         bg={room.facts.gameOption.backgroundColor === 0 ? 'white' : 'black'}
       >
-        <VStack>
+        <VStack position={'absolute'} right={'13%'}>
           <Flex width="full" justifyContent="space-around" mb={8}>
             <Text
               fontFamily="Bungee"
@@ -312,6 +312,7 @@ export default function GamePage() {
               {rightUser ? rightUser.name.toUpperCase() : ''}
             </Text>
           </Flex>
+
           <Sketch setup={setup} draw={draw} />
         </VStack>
       </HStack>
