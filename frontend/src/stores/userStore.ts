@@ -2,6 +2,7 @@ import { UserProps } from '@/interfaces/UserProps';
 import { UserStatus } from '@/interfaces/UserProps';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { customFetch } from '@/utils/customFetch';
+import Swal from 'sweetalert2';
 import create from 'zustand';
 
 interface userStoreProps {
@@ -118,6 +119,20 @@ export const userStore = create<userStoreProps>((set, get) => ({
     get().setBlockedUsers(blockedUsers);
   },
   addBlock: async (name: string) => {
+    if (get().friends.find((friend: UserProps) => friend.name === name)) {
+      Swal.fire({
+        backdrop: `    rgba(0,0,123)
+        url("/nyan-cat-4k.gif")
+        left top
+        repeat
+        
+      `,
+        title: '친구는 블락할 수 없습니다.',
+        text: '친구랑 사이좋게 지내세요!!',
+        icon: 'error',
+      });
+      return;
+    }
     customFetch('POST', 'user/block/name', { username: name })
       .then(() => get().fetchBlockedUsers())
       .then(() => console.log(`${name}을 블락 유저에 추가했습니다`))
