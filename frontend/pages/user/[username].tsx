@@ -135,7 +135,11 @@ export default function UserProfilePage() {
               </VStack>
             </Flex>
             <HStack>
-              {user.name === me.name ? null : !isFriend ? (
+              {user.name === me.name ? (
+                <CustomButton size="xl" onClick={() => router.push('/auth/basic/id')}>
+                  CHANGE USERNAME
+                </CustomButton>
+              ) : !isFriend ? (
                 <CustomButton
                   size="xl"
                   onClick={() => {
