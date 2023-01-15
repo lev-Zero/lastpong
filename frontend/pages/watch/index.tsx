@@ -6,6 +6,7 @@ import { chatStore } from '@/stores/chatStore';
 import { gameStore } from '@/stores/gameStore';
 import { convertRawUserToUser, RawUserProps } from '@/utils/convertRawUserToUser';
 import { fetchUserById } from '@/utils/fetchUserById';
+import { sleep } from '@/utils/sleep';
 import { Box, Link, SimpleGrid } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -31,7 +32,7 @@ export default function WatchPage() {
     });
     gameSocket.once('joinGameRoom', (res) => {
       setRoom(res.gameRoom);
-      router.push(`/watch/${name}`);
+      sleep(300).then(() => router.push(`/watch/${name}`));
     });
   }
 
