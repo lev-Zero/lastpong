@@ -73,26 +73,28 @@ export function ChatAdminOptionMenu({
             </MenuItem>
           ) : null}
 
-          <MenuItem>
-            {!isMuted ? (
-              <Text
-                onClick={() => {
-                  muteUserAndRemove();
-                }}
-              >
-                MUTE 1 MIN
-              </Text>
-            ) : (
-              <Text
-                color="black"
-                onClick={() => {
-                  removeMute(roomNo, user.id);
-                }}
-              >
-                UNMUTE
-              </Text>
-            )}
-          </MenuItem>
+          {role === ChatUserStatus.ADMIN || role === ChatUserStatus.OWNER ? null : (
+            <MenuItem>
+              {!isMuted ? (
+                <Text
+                  onClick={() => {
+                    muteUserAndRemove();
+                  }}
+                >
+                  MUTE 1 MIN
+                </Text>
+              ) : (
+                <Text
+                  color="black"
+                  onClick={() => {
+                    removeMute(roomNo, user.id);
+                  }}
+                >
+                  UNMUTE
+                </Text>
+              )}
+            </MenuItem>
+          )}
 
           <MenuItem>
             <Text color="red" onClick={() => addBan(roomNo, user.id)}>
