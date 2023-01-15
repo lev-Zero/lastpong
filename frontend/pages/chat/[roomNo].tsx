@@ -74,27 +74,6 @@ export default function ChatRoomPage() {
     }
   };
 
-  // useLayoutEffect(() => {
-  //   console.log('chatRoom Mounted!');
-  //   return () => {
-  //     if (socket === undefined) {
-  //       console.log('socket is undefined');
-  //       return;
-  //     }
-  //     console.log('roomNo', roomNo);
-  //     console.log('socket', socket);
-  //     socket.emit('leave', { targetUserId: me.id, chatRoomId: roomNo });
-
-  //     socket.off('join');
-  //     socket.off('admin');
-  //     socket.off('ban');
-  //     socket.off('mute');
-  //     socket.off('leave');
-  //     resetRoomNo();
-  //     console.log('chatRoom unMounted!');
-  //   };
-  // }, []);
-
   useEffect(() => {
     scrollToBottom();
   }, [msgList]);
@@ -122,11 +101,20 @@ export default function ChatRoomPage() {
         return;
       }
       setMsgList((prev) => {
+        if (res.user.username === me.name) {
+          return [
+            ...prev,
+            {
+              username: res.user.username,
+              text: res.message,
+            },
+          ];
+        }
         return [
           ...prev,
           {
             username: res.user.username,
-            text: res.message,
+            text: res.user.username + ' : ' + res.message,
           },
         ];
       });
