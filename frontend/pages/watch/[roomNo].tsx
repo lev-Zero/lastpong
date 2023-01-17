@@ -103,6 +103,8 @@ export default function WatchGamePage() {
     //   return;
     // }
     if (isGameEnd) {
+      if (gameSocket === undefined) return;
+      gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
       onOpen();
     }
     // setIsWin(
@@ -132,7 +134,7 @@ export default function WatchGamePage() {
       console.log('gameSocket is not ready');
       return;
     }
-    gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
+    // gameSocket.emit('exitGameRoom', { gameRoomName: room.gameRoomName });
     onClose();
     router.push('/home');
   }

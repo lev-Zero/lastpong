@@ -40,19 +40,22 @@ export default function WatchPage() {
       gameSocket.off('touchBar');
       router.push(`/watch/${name}`);
       setRoom(res.gameRoom);
-      gameSocket.on('ball', (data) => setGameBall(data.ballPosition));
-      gameSocket.on('touchBar', (data) => {
-        if (room.players.length !== 2) {
-          console.log('players are not 2 people');
-          return;
-        }
 
-        if (room.players[0].user.id === data.player) {
-          setLeftTouchBar(data.touchBar);
-        }
-        if (room.players[1].user.id === data.player) {
-          setRightTouchBar(data.touchBar);
-        }
+      sleep(300).then(() => {
+        gameSocket.on('ball', (data) => setGameBall(data.ballPosition));
+        gameSocket.on('touchBar', (data) => {
+          if (room.players.length !== 2) {
+            console.log('players are not 2 people');
+            return;
+          }
+
+          if (room.players[0].user.id === data.player) {
+            setLeftTouchBar(data.touchBar);
+          }
+          if (room.players[1].user.id === data.player) {
+            setRightTouchBar(data.touchBar);
+          }
+        });
       });
     });
     gameSocket.emit('joinGameRoom', { gameRoomName: name }, ({ error }: any) => {

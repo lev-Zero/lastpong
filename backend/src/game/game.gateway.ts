@@ -201,6 +201,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new WsException(
           `${validBody.gameRoomName}에 해당 플레이어가 없습니다.`,
         );
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       const gameRoom = this.gameService.readyGame(
         validBody.gameRoomName,
@@ -269,6 +270,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       gameRoom.gameStatus = gameStatus.GAMEPLAYING;
 
       let score: number[];
+      await this.userService.updateStatus(user.id, userStatus.INGAME);
 
       if (gameRoom.gameStatus === gameStatus.GAMEPLAYING) {
         const interval = setInterval(async () => {

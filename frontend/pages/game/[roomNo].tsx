@@ -42,6 +42,7 @@ export default function GamePage() {
     rightTouchBar,
     gameMeProps,
     setGameScore,
+    setIsReady,
   } = gameStore();
   const [isWin, setIsWin] = useState<boolean>();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -62,6 +63,9 @@ export default function GamePage() {
   //     setCalledPushRoot(true);
   //   }
   // }, [gameSocket]);
+  useEffect(() => {
+    setIsReady(0);
+  }, []);
 
   useEffect(() => {
     async function fetchTwoUsers() {

@@ -46,8 +46,16 @@ export default function GameOptionsPage() {
   const [rightUser, setRightUser] = useState<UserProps>();
   const [meUser, setMeUser] = useState<GameUserProps>(); // FIXME: 이것도 UserProps로 바꾸고 싶었으나, 의존적으로 활용하는 곳이 너무 많아 아직 리팩토링하지 못했다. 사실 GameUserProps로 저장할 게 아니라 UserProps로 저장해야 한다.
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { socket: gameSocket, room, setRoom, gameMeProps, setGameMeProps } = gameStore();
-  const [isReady, setIsReady] = useState<boolean>(false);
+  const {
+    socket: gameSocket,
+    room,
+    setRoom,
+    gameMeProps,
+    setGameMeProps,
+    isReady,
+    setIsReady,
+  } = gameStore();
+  // const [isReady, setIsReady] = useState<boolean>(false);
   const [isOppLeft, setIsOppLeft] = useState<boolean>(false);
 
   function toggleDarkMode() {
@@ -141,12 +149,12 @@ export default function GameOptionsPage() {
         mode: Number(isFastMode),
       })
     );
-    gameSocket.once('readyGame', (res) => {
-      setRoom(res.gameRoom);
-      sleep(300).then(() => {
-        setIsReady(true);
-      });
-    });
+    // gameSocket.once('readyGame', (res) => {
+    //   setRoom(res.gameRoom);
+    //   sleep(300).then(() => {
+    //     setIsReady(true);
+    //   });
+    // });
   }
 
   useEffect(() => {

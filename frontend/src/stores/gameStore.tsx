@@ -15,6 +15,8 @@ interface GameStoreProps {
 
   isCreated: number;
   setIsCreated: (isCreated: number) => void;
+  isReady: number;
+  setIsReady: (isReady: number) => void;
   gameBall: GameBall;
   setGameBall: (GameBall: GameBall) => void;
   gameMeProps?: GameUserProps;
@@ -37,11 +39,14 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
     set((state) => ({ ...state, socket }));
   },
 
+  isReady: 0,
+  setIsReady: (isReady: number) => {
+    set((state) => ({ ...state, isReady }));
+  },
   isCreated: 0,
   setIsCreated: (isCreated: number) => {
     set((state) => ({ ...state, isCreated }));
   },
-
   gameMeProps: undefined,
   setGameMeProps: (gameMeProps: GameUserProps | undefined) => {
     set((state) => ({ ...state, gameMeProps }));
@@ -152,6 +157,14 @@ export const gameStore = create<GameStoreProps>((set, get) => ({
         get().setRightTouchBar(data.touchBar);
       }
     });
+
+    newSocket.on('readyGame', (res) => {
+      get().setRoom(res.gameRoom);
+      sleep(300).then(() => {
+        get().setIsReady(1);
+      });
+    });
+
     newSocket.on('score', (data) => {
       get().setGameScore(data.score);
     });
