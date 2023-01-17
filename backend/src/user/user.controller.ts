@@ -61,65 +61,65 @@ export class UserController {
 	|								TEST 							 |
 	----------------------------------*/
 
-  //http://localhost:3000/user/test/create/fakeuser
-  @Get('/test/create/fakeuser')
-  async testCreateUser() {
-    this.testDeleteUser();
-    const photoUrl =
-      'https://velog.velcdn.com/images%2Fseeh_h%2Fpost%2F46d59d0b-4a8a-4f5d-a173-045d433919bc%2Fimage.png';
-    let user;
-    user = await this.userService.testCreateFakeUser('fake_U1');
-    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
-      originalname: 'fakePhoto',
-      buffer: null,
-    } as Express.Multer.File);
-    await this.auth42Service.createAuth42(user.id);
-    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
-    user = await this.userService.testCreateFakeUser('fake_U2');
-    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
-      originalname: 'fakePhoto',
-      buffer: null,
-    } as Express.Multer.File);
-    await this.auth42Service.createAuth42(user.id);
-    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
-    user = await this.userService.testCreateFakeUser('fake_U3');
-    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
-      originalname: 'fakePhoto',
-      buffer: null,
-    } as Express.Multer.File);
-    await this.auth42Service.createAuth42(user.id);
-    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
-    user = await this.userService.testCreateFakeUser('fake_U4');
-    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
-      originalname: 'fakePhoto',
-      buffer: null,
-    } as Express.Multer.File);
-    await this.auth42Service.createAuth42(user.id);
-    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
-    user = await this.userService.testCreateFakeUser('fake_U5');
-    await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
-      originalname: 'fakePhoto',
-      buffer: null,
-    } as Express.Multer.File);
-    await this.auth42Service.createAuth42(user.id);
-    await this.userService.updateStatus(user.userId, userStatus.ONLINE);
-  }
+  // //http://localhost:3000/user/test/create/fakeuser
+  // @Get('/test/create/fakeuser')
+  // async testCreateUser() {
+  //   this.testDeleteUser();
+  //   const photoUrl =
+  //     'https://velog.velcdn.com/images%2Fseeh_h%2Fpost%2F46d59d0b-4a8a-4f5d-a173-045d433919bc%2Fimage.png';
+  //   let user;
+  //   user = await this.userService.testCreateFakeUser('fake_U1');
+  //   await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+  //     originalname: 'fakePhoto',
+  //     buffer: null,
+  //   } as Express.Multer.File);
+  //   await this.auth42Service.createAuth42(user.id);
+  //   await this.userService.updateStatus(user.userId, userStatus.ONLINE);
+  //   user = await this.userService.testCreateFakeUser('fake_U2');
+  //   await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+  //     originalname: 'fakePhoto',
+  //     buffer: null,
+  //   } as Express.Multer.File);
+  //   await this.auth42Service.createAuth42(user.id);
+  //   await this.userService.updateStatus(user.userId, userStatus.ONLINE);
+  //   user = await this.userService.testCreateFakeUser('fake_U3');
+  //   await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+  //     originalname: 'fakePhoto',
+  //     buffer: null,
+  //   } as Express.Multer.File);
+  //   await this.auth42Service.createAuth42(user.id);
+  //   await this.userService.updateStatus(user.userId, userStatus.ONLINE);
+  //   user = await this.userService.testCreateFakeUser('fake_U4');
+  //   await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+  //     originalname: 'fakePhoto',
+  //     buffer: null,
+  //   } as Express.Multer.File);
+  //   await this.auth42Service.createAuth42(user.id);
+  //   await this.userService.updateStatus(user.userId, userStatus.ONLINE);
+  //   user = await this.userService.testCreateFakeUser('fake_U5');
+  //   await this.avatarService.updateOrCreateAvatar(user.id, photoUrl, {
+  //     originalname: 'fakePhoto',
+  //     buffer: null,
+  //   } as Express.Multer.File);
+  //   await this.auth42Service.createAuth42(user.id);
+  //   await this.userService.updateStatus(user.userId, userStatus.ONLINE);
+  // }
 
-  //http://localhost:3000/user/test/delete/fakeuser
-  @Get('/test/delete/fakeuser')
-  testDeleteUser() {
-    this.userService.testDeleteFakeUser('fake_U1');
-    this.userService.testDeleteFakeUser('fake_U2');
-    this.userService.testDeleteFakeUser('fake_U3');
-    this.userService.testDeleteFakeUser('fake_U4');
-    this.userService.testDeleteFakeUser('fake_U5');
-  }
-  @Get('/test/read/fakeuser/:name')
-  testFindUser(@Param('name') name: string) {
-    const fakeuser = this.userService.testFindUser(name);
-    const user = fakeuser;
-    return user;
-  }
+  // //http://localhost:3000/user/test/delete/fakeuser
+  // @Get('/test/delete/fakeuser')
+  // testDeleteUser() {
+  //   this.userService.testDeleteFakeUser('fake_U1');
+  //   this.userService.testDeleteFakeUser('fake_U2');
+  //   this.userService.testDeleteFakeUser('fake_U3');
+  //   this.userService.testDeleteFakeUser('fake_U4');
+  //   this.userService.testDeleteFakeUser('fake_U5');
+  // }
+  // @Get('/test/read/fakeuser/:name')
+  // testFindUser(@Param('name') name: string) {
+  //   const fakeuser = this.userService.testFindUser(name);
+  //   const user = fakeuser;
+  //   return user;
+  // }
 
   /*----------------------------------
 	|								user 							 |

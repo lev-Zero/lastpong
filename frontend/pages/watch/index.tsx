@@ -14,7 +14,15 @@ import { ReactElement, useEffect, useState } from 'react';
 
 export default function WatchPage() {
   const [matchInfoList, setMatchInfoList] = useState<MatchInfoProps[]>([]);
-  const { socket: gameSocket, makeSocket, setRoom } = gameStore();
+  const {
+    socket: gameSocket,
+    makeSocket,
+    setRoom,
+    setGameBall,
+    room,
+    setLeftTouchBar,
+    setRightTouchBar,
+  } = gameStore();
   const { setIsInvited } = chatStore();
   const router = useRouter();
 
@@ -27,12 +35,28 @@ export default function WatchPage() {
       console.log('socket is undefined');
       return;
     }
+    gameSocket.once('joinGameRoom', (res) => {
+      gameSocket.off('ball');
+      gameSocket.off('touchBar');
+      router.push(`/watch/${name}`);
+      setRoom(res.gameRoom);
+      gameSocket.on('ball', (data) => setGameBall(data.ballPosition));
+      gameSocket.on('touchBar', (data) => {
+        if (room.players.length !== 2) {
+          console.log('players are not 2 people');
+          return;
+        }
+
+        if (room.players[0].user.id === data.player) {
+          setLeftTouchBar(data.touchBar);
+        }
+        if (room.players[1].user.id === data.player) {
+          setRightTouchBar(data.touchBar);
+        }
+      });
+    });
     gameSocket.emit('joinGameRoom', { gameRoomName: name }, ({ error }: any) => {
       alert(error);
-    });
-    gameSocket.once('joinGameRoom', (res) => {
-      setRoom(res.gameRoom);
-      sleep(300).then(() => router.push(`/watch/${name}`));
     });
   }
 

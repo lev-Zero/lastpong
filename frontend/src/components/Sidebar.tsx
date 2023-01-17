@@ -365,13 +365,13 @@ export default function Sidebar() {
     if (chatSocket === undefined) {
       makeChatSocket();
     }
-  }, []);
+  }, [chatSocket?.connected]);
 
   useEffect(() => {
     if (gameSocket === undefined) {
       makeGameSocket();
     }
-  }, []);
+  }, [gameSocket?.connected]);
 
   useEffect(() => {
     fetchFriends().catch(console.log);
@@ -389,13 +389,13 @@ export default function Sidebar() {
       return;
     }
     chatSocket.on('join', console.log);
-    chatSocket.on('directMessage', ({ user, targetUser, message }) => {
-      addDmMsg(user.username, targetUser.user.username, message);
-    });
+    // chatSocket.on('directMessage', ({ user, targetUser, message }) => {
+    //   addDmMsg(user.username, targetUser.user.username, message);
+    // });
 
     return () => {
       chatSocket.off('join');
-      chatSocket.off('directMessage');
+      // chatSocket.off('directMessage');
     };
   }, [chatSocket?.connected]);
 

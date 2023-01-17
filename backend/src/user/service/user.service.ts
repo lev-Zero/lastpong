@@ -19,45 +19,45 @@ export class UserService {
 	|								TEST 							 |
 	----------------------------------*/
 
-  async testCreateFakeUser(username: string): Promise<User> {
-    const user = await this.userRepository.create({ username });
-    await this.userRepository.save(user);
+  // async testCreateFakeUser(username: string): Promise<User> {
+  //   const user = await this.userRepository.create({ username });
+  //   await this.userRepository.save(user);
 
-    const auth42Status = true;
-    const otpStatus = true;
-    const payload = {
-      id: user.id,
-      username: user.username,
-      auth42Status,
-      otpStatus,
-    };
+  //   const auth42Status = true;
+  //   const otpStatus = true;
+  //   const payload = {
+  //     id: user.id,
+  //     username: user.username,
+  //     auth42Status,
+  //     otpStatus,
+  //   };
 
-    const token = await this.jwtService.sign(payload);
-    this.updateUserToken(user.id, token);
-    return user;
-  }
+  //   const token = await this.jwtService.sign(payload);
+  //   this.updateUserToken(user.id, token);
+  //   return user;
+  // }
 
-  async testFindUser(username: string): Promise<User> {
-    const user = this.userRepository.findOne({
-      where: { username },
-      relations: ['avatar'],
-    });
+  // async testFindUser(username: string): Promise<User> {
+  //   const user = this.userRepository.findOne({
+  //     where: { username },
+  //     relations: ['avatar'],
+  //   });
 
-    return user;
-  }
+  //   return user;
+  // }
 
-  async testDeleteFakeUser(username: string) {
-    try {
-      this.userRepository
-        .createQueryBuilder('user')
-        .delete()
-        .from(User)
-        .where('username = :username', { username: username })
-        .execute();
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
-    }
-  }
+  // async testDeleteFakeUser(username: string) {
+  //   try {
+  //     this.userRepository
+  //       .createQueryBuilder('user')
+  //       .delete()
+  //       .from(User)
+  //       .where('username = :username', { username: username })
+  //       .execute();
+  //   } catch (e) {
+  //     throw new HttpException(e.message, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   /*----------------------------------
 	|								user 							 |

@@ -69,6 +69,10 @@ export const chatStore = create<ChatStoreProps>((set, get) => ({
         get().setInviteData(res);
       }
     });
+    newSocket.on('directMessage', ({ user, targetUser, message }) => {
+      console.log('on directMessage', user.username, targetUser.user.username, message);
+      get().addDmMsg(user.username, targetUser.user.username, message);
+    });
     newSocket.on('inviteGameRoomInfo', (res) => {
       const gameSocket: Socket | undefined = gameStore.getState().socket;
       if (gameSocket === undefined || !gameSocket.connected) {

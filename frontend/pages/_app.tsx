@@ -34,9 +34,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
   const token = getJwtToken();
   // 토큰이없을때 맨 앞 페이지로 연결
-  // useEffect(() => {
-  //   if (token === '') router.replace('/');
-  // }, []);
+  useEffect(() => {
+    if (token === '') router.replace('/');
+  }, []);
   useEffect(() => {
     router.beforePopState((e) => {
       var pos = window.location.href.indexOf('/game/');
