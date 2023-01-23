@@ -59,10 +59,10 @@ export default function LandingPage() {
               START
             </CustomButton>
             <Spacer />
-            {/* <Text fontSize={30}>FAKE LOGIN</Text>
+            <Text fontSize={30}>FAKE LOGIN</Text>
             <CustomButton size="lg" onClick={goToFakeLogin}>
               GO
-            </CustomButton> */}
+            </CustomButton>
           </VStack>
         </>
       )}
