@@ -1,6 +1,6 @@
 # LastPong 🏓
 
-![](https://blog.kakaocdn.net/dn/KSNXx/btqFhkY8CaX/rd9F5KcQvPOekWeTFeRH2k/img.png)
+![]<p align="center"><img src="https://blog.kakaocdn.net/dn/KSNXx/btqFhkY8CaX/rd9F5KcQvPOekWeTFeRH2k/img.png"></p>
 
 <div align="center">
 <b><i>우리들의 마지막 탁구 게임, LastPong</i></b>
