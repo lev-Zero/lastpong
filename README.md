@@ -1,6 +1,6 @@
 # LastPong 🏓
 
-![](https://www.marketplace.org/wp-content/uploads/2020/07/GettyImages-1248502207.jpg?fit=2880%2C1620)
+<p align="center"><img src="https://blog.kakaocdn.net/dn/KSNXx/btqFhkY8CaX/rd9F5KcQvPOekWeTFeRH2k/img.png"></p>
 
 <div align="center">
 <b><i>우리들의 마지막 탁구 게임, LastPong</i></b>
