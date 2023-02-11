@@ -40,19 +40,59 @@ $ docker-compose up -d
 
 ## 🛠 기술 스택
 
-| 파트     | 기술스택       | 선정이유                                                                                                                                                                                                                                                |
-| -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Common   | TypeScript     | Type 안정성을 보장하여 런타임 에러 방지                                                                                                                                                                                                                 |
-|          | Prettier       | 코드 스타일 정형화를 통한 협업 능률 향상                                                                                                                                                                                                                |
-|          | Socket.io      | 실시간 채팅 및 게임 기능 구현을 위해 HTTP 통신이 아닌 소켓 통신 필요                                                                                                                                                                                    |
-| Frontend | Next.js        | ▶ Zero config & Config Customizing : Webpack 설정과 Babel 설정이 포함되어 있음 ▶ Code splitting & bundling : `next build` 시 자동으로 code splitting 하여 자바스크립트로 번들링 ▶ File-system Routing : pages 기반 라우팅으로 디렉토리 구조 직관성 확보 |
-|          | Chakra UI      | 프리메이드 컴포넌트와 유틸리티 → 간략한 코드, 간편한 사용                                                                                                                                                                                               |
-|          | Zustand        | 상태변경시 리렌더링을 제어하기 쉽다. 배우기 쉽고 단순한 구조이다.                                                                                                                                                                                       |
-| Backend  | NestJS         | ▶ DI : 의존관계를 분리하여 수정 및 재사용이 용이함 ▶ IoC : 컴포넌트와 모듈에 집중한 프로그래밍 가능, 유지보수 또는 확장시 편리                                                                                                                          |
-|          | PostgreSQL     | 오픈소스 - 영구 무료, 참고할 자료가 많고 다양함                                                                                                                                                                                                         |
-|          | TypeORM        | RDBMS의 데이터 구조와 객체지향 모델 사이의 간격을 줄여 생산성 증가                                                                                                                                                                                      |
-|          | Passport       | 42 Auth 인증 기능 간편화                                                                                                                                                                                                                                |
-| Infra    | Docker-compose | 컨테이너를 이용한 가상환경 구성 및 빌드 자동화                                                                                                                                                                                                          |
+<table border="1" align="center">
+  <th align="center">파트</th>
+  <th align="center">기술스택</th>
+  <th align="center">선정이유</th>
+  <tr>
+    <td rowspan="3" align="center">Common</td>
+    <td><img src="https://cdn-icons-png.flaticon.com/512/5968/5968381.png" width="15px" alt="typescript_icon" /> TypeScript</td>
+    <td>Type 안정성을 보장하여 런타임 에러 방지</td>
+  </tr>
+  <tr>
+    <td><img src="https://techstack-generator.vercel.app/prettier-icon.svg" width="15px" alt="prettier_icon" /> Prettier</td>
+    <td>코드 스타일 정형화를 통한 협업 능률 향상</td>
+  </tr>
+  <tr>
+    <td><img src="https://images.saasworthy.com/socketio_30421_logo_1619604506_tdxqo.png" width="15px" alt="socket.io_icon" /> Socket.io</td>
+    <td>실시간 채팅 및 게임 기능 구현을 위해 HTTP 통신이 아닌 소켓 통신 필요</td>
+  </tr>
+  <tr>
+    <td rowspan="3" align="center">Frontend</td>
+    <td><img src="https://cdn-icons-png.flaticon.com/512/5968/5968381.png" width="15px" alt="next.js_icon" /> Next.js</td>
+    <td> <code>Zero Config</code> : Webpack 및 Babel 설정 없이 빌트인으로 Code Splitting 및 JS 번들링 <br/> <code>File-system Routing</code> : pages 기반 라우팅으로 디렉토리 구조 직관성 확보</td>
+  </tr>
+  <tr>
+    <td><img src="https://pbs.twimg.com/profile_images/1244925541448286208/rzylUjaf_400x400.jpg" width="15px" alt="chakra-ui_icon" /> Chakra UI</td>
+    <td>프리메이드 컴포넌트와 유틸리티를 이용한 손쉬운 UI 제작</td>
+  </tr>
+  <tr>
+    <td>🐻 Zustand</td>
+    <td>배우기 쉽고 단순한 구조의 상태관리 모듈, 불필요한 리렌더링 방지에 용이함</td>
+  </tr>
+  <tr>
+    <td rowspan="4" align="center">Backend</td>
+    <td><img src="https://docs.nestjs.com/assets/logo-small.svg" width="15px" alt="nestjs_icon" /> NestJS</td>
+    <td> <code>DI</code> : 의존관계를 분리하여 수정 및 재사용이 용이함 <br/> <code>IoC</code> : 컴포넌트와 모듈에 집중한 프로그래밍 가능, 유지보수 또는 확장시 편리</td>
+  </tr>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/46529663/213977435-02cfee1b-ef97-473a-9005-129966a1fe1f.png" width="18px" alt="postgresql_icon" /> PostgreSQL</td>
+    <td>영구 무료인 오픈소스, 참고할 자료가 맣고 다양함</td>
+  </tr>
+  <tr>
+    <td><img src="https://seeklogo.com/images/T/typeorm-logo-F243B34DEE-seeklogo.com.png" width="15px" alt="typeorm_icon" /> TypeORM</td>
+    <td>RDBMS의 데이터 구조와 객체지향 모델 사이의 간격을 줄여 생산성 증가</td>
+  </tr>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/46529663/215252562-a506910d-b351-4592-af18-8d86293c7695.png" width="15px" alt="passport_icon" /> Passport</td>
+    <td>42 Auth 인증 기능 간편화</td>
+  </tr>
+  <tr>
+    <td rowspan="1" align="center">Infra</td>
+    <td><img src="https://techstack-generator.vercel.app/docker-icon.svg" width="15px" alt="docker-compose_icon" /> Docker-compose</td>
+    <td> 컨테이너를 이용한 가상환경 구성 및 빌드 자동화</td>
+  </tr>
+</table>
 
 ## 👋 팀 정보
 
