@@ -15,6 +15,14 @@
 - `42 Auth`를 이용하여 42 유저 대상으로 가입 및 인증 기능 구현
 - 유저 생성, 친구 맺기, 친구 차단 등 CRUD 연습
 
+## 🎨 기획/디자인
+
+![Figma Design](asset/figma.png)
+자세한 디자인 시안은 [해당 링크](https://www.figma.com/community/file/1199421293253949642)에서 볼 수 있습니다.
+
+![컴포넌트 명세서](asset/component.png)
+팀 노션 / 슬랙 등을 활용하여 협업 및 문서화하였습니다.
+
 ## 💡 구현 중점 사항
 
 - 발생할 수 있는 **다양한 경우의 수를 생각하고 대응하기**
@@ -99,6 +107,145 @@ $ docker-compose up -d
     <td> 컨테이너를 이용한 가상환경 구성 및 빌드 자동화</td>
   </tr>
 </table>
+
+## 🏁 튜토리얼
+
+1. LAST PONG (로그인)
+
+![Untitled](asset/Untitled.png)
+
+2-1. 사용자 설정 (닉네임 설정)
+
+![Untitled](asset/Untitled%201.png)
+
+2-2. 사용자 설정 (아바타 설정)
+
+(사진 파일) Front → Back 전송
+
+![Untitled](asset/Untitled%202.png)
+
+3. 메인화면
+
+![Untitled](asset/Untitled%203.png)
+
+3-1. 메인 화면 (기능 설명)
+
+![Untitled](asset/Untitled%204.png)
+
+4-1. 게임 플레이
+
+MATCH 버튼 클릭시 서버 Queue에 등록되고 플레이어가 2명이상 될 경우 설정화면으로 이동
+
+![Untitled](asset/Untitled%205.png)
+
+4-2. 게임 플레이 (설정 화면)
+
+![Untitled](asset/Untitled%206.png)
+
+4-3. 게임 설정 규칙
+
+![Untitled](asset/Untitled%207.png)
+
+4-4. 게임 플레이 화면
+
+일반 모드
+
+![Untitled](asset/Untitled%208.png)
+
+어두운 화면 모드
+
+![Untitled](asset/Untitled%209.png)
+
+4-5. 게임 플레이 (승리)
+
+![Untitled](asset/Untitled%2010.png)
+
+게임 플레이 (패배)
+
+![Untitled](asset/Untitled%2011.png)
+
+5. 사용자 정보 표시
+
+![Untitled](asset/Untitled%2012.png)
+
+5-1. 사용자 친구 초대
+
+친구 초대 버튼시 서버에 등록된 모든 유저 정보를 유저 상태에 따라 표시
+
+![Untitled](asset/Untitled%2013.png)
+
+5-2. 사용자 친구 초대창
+
+친구 초대창에서 일반 유저 선택시 유저 프로필이 표시 된다.
+
+![Untitled](asset/Untitled%2014.png)
+
+- `ADD FRIEND` 버튼 클릭 → 오른 쪽에 있는 친구 창에 친구가 추가된다.
+- `DELETE FRIEND` 버튼 클릭 → 추가된 친구를 삭제한다.
+
+5-3. 사용자 친구 창
+
+![Untitled](asset/Untitled%2015.png)
+
+추가한 친구를 오른쪽 클릭시 다음과 같은 메뉴 화면이 표시된다.
+
+- `VIEW PROFILE` : 친구의 프로필 정보 확인
+- `INVITE TO GAME` : 친구를 핑퐁 게임에 초대한다. - 게임 Queue 와 별도로 동작한다.
+- `DELETE FRIEND` : 친구를 삭제한다.
+
+5-4. 친구 창 DM (Direct Message)
+
+친구 창에 있는 친구를 왼쪽 클릭하면 친구와의 DM 창이 표시된다.
+
+![Untitled](asset/Untitled%2016.png)
+
+친구와 함께 DM을 주고 받을수 있다.
+
+![Untitled](asset/Untitled%2017.png)
+
+친구에게 DM을 받게되면 DM 메시지의 갯수가 따라 친구 창에 표시된다.
+
+![Untitled](asset/Untitled%2018.png)
+
+5-5. 사용자 게임 초대 화면
+
+![Untitled](asset/Untitled%2019.png)
+
+친구에게 INVITE TO GAME 메시지를 사용하면 게임 초대 화면이 표시된다.
+
+초대 받은 친구의 선택에 따라 다음과 같은 행동이 실행된다.
+
+- 초대 수락 : 게임 설정 창으로 이동된다.
+- 초대 거절 : 초대 창이 자동으로 종료된다.
+
+6. 채팅 화면
+
+![Untitled](asset/Untitled%2020.png)
+
+현재 접속된 모든 유저 정보를 출력하고, CREATE 버튼을 클릭하여 채팅방을 생성할 수 있습니다.
+
+비밀번호를 설정할 수 있으며, 비밀번호의 표시를 `*`로 바꿔 출력할 수 있습니다.
+
+6.1 채팅방 입장
+
+![Untitled](asset/Untitled%2021.png)
+
+채팅방에 입장하면 다음과 같은 화면이 표시되며 사용자들과 대화가 가능합니다.
+
+![Untitled](asset/Untitled%2022.png)
+
+방에 입장해서 방장 > 관리자 > 일반 수준으로 권한을 갖는다.
+
+- `MUTE 1 MIN` : 1분간 사용자의 대화를 MUTE 시킵니다.
+- `BAN USER` : 사용자를 강퇴 시키고 1분간 입장을 제한시킵니다.
+- `VIEW PROFILE` : 사용자의 프로필을 볼수 있습니다.
+- `INVITE TO GAME` : 게임에 상대를 초대합니다
+- `ADD FRIEND` : 상대를 친구로 추가합니다
+- `BLOCK` : 상대를 BLOCK 하여 상대방의 메시지를 더이상 보지않습니다.
+
+![Untitled](asset/Untitled%2023.png)
+
+MUTE 된 상태에서 메시지를 입력하려고 하면 다음과 같은 화면이 표시됩니다.
 
 ## 👋 팀 정보
 
