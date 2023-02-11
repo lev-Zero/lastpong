@@ -83,7 +83,7 @@ $ docker-compose up -d
   </tr>
   <tr>
     <td><img src="https://user-images.githubusercontent.com/46529663/213977435-02cfee1b-ef97-473a-9005-129966a1fe1f.png" width="18px" alt="postgresql_icon" /> PostgreSQL</td>
-    <td>영구 무료인 오픈소스, 참고할 자료가 맣고 다양함</td>
+    <td>영구 무료인 오픈소스, 참고할 자료가 많고 다양함</td>
   </tr>
   <tr>
     <td><img src="https://seeklogo.com/images/T/typeorm-logo-F243B34DEE-seeklogo.com.png" width="15px" alt="typeorm_icon" /> TypeORM</td>
