@@ -46,7 +46,7 @@ $ docker-compose up -d
   <th align="center">선정이유</th>
   <tr>
     <td rowspan="3" align="center">Common</td>
-    <td><img src="https://cdn-icons-png.flaticon.com/512/5968/5968381.png" width="15px" alt="typescript_icon" /> TypeScript</td>
+    <td><img src="https://techstack-generator.vercel.app/ts-icon.svg" width="25px" alt="typescript_icon" /> TypeScript</td>
     <td>Type 안정성을 보장하여 런타임 에러 방지</td>
   </tr>
   <tr>
@@ -59,7 +59,7 @@ $ docker-compose up -d
   </tr>
   <tr>
     <td rowspan="3" align="center">Frontend</td>
-    <td><img src="https://cdn-icons-png.flaticon.com/512/5968/5968381.png" width="15px" alt="next.js_icon" /> Next.js</td>
+    <td><img src="https://static-00.iconduck.com/assets.00/next-js-icon-512x512-zuauazrk.png" width="15px" alt="next.js_icon" /> Next.js</td>
     <td> <code>Zero Config</code> : Webpack 및 Babel 설정 없이 빌트인으로 Code Splitting 및 JS 번들링 <br/> <code>File-system Routing</code> : pages 기반 라우팅으로 디렉토리 구조 직관성 확보</td>
   </tr>
   <tr>
