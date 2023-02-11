@@ -1,6 +1,6 @@
 # LastPong 🏓
 
-![](https://www.marketplace.org/wp-content/uploads/2020/07/GettyImages-1248502207.jpg?fit=2880%2C1620)
+![](https://www.museumofplay.org/app/uploads/2021/08/Pong-sq.jpg)
 
 <div align="center">
 <b><i>우리들의 마지막 탁구 게임, LastPong</i></b>
