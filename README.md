@@ -254,4 +254,4 @@ MUTE 된 상태에서 메시지를 입력하려고 하면 다음과 같은 화�
 | 박용준 | <a href="https://github.com/yoopark" target="_blank"><img src="https://img.shields.io/badge/yoopark-181717?style=flat-square&logo=github&logoColor=white"/></a>          | FrontEnd |
 | 문치훈 | <a href="https://github.com/lev-Zero" target="_blank"><img src="https://img.shields.io/badge/levㅡZero-181717?style=flat-square&logo=github&logoColor=white"/></a>       | FrontEnd |
 | 최선빈 | <a href="https://github.com/choi-sunbin" target="_blank"><img src="https://img.shields.io/badge/choiㅡsunbin-181717?style=flat-square&logo=github&logoColor=white"/></a> | FrontEnd |
-| 김정환 | <a href="https://github.com/toy-k" target="_blank"><img src="https://img.shields.io/badge/toyㅡk-181717?style=flat-square&logo=github&logoColor=white"/></a>             | BackEnd  |
+| 정환 | <a href="https://github.com/toy-k" target="_blank"><img src="https://img.shields.io/badge/toyㅡk-181717?style=flat-square&logo=github&logoColor=white"/></a>             | BackEnd  |
