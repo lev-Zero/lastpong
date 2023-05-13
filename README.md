@@ -23,6 +23,9 @@
 ![컴포넌트 명세서](asset/component.png)
 팀 노션 / 슬랙 등을 활용하여 협업 및 문서화하였습니다.
 
+## 🙂API / DB
+[API 문서와 DB 설계 구조](https://secret-jackal-406.notion.site/backend-API-DB-7cde6bb436ff4398807157fbbc1e079c)
+
 ## 💡 구현 중점 사항
 
 - 발생할 수 있는 **다양한 경우의 수를 생각하고 대응하기**
